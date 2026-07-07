@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-IPC-001",
+    "title": "MCP/IPC tool dispatch may lack an explicit allowlist",
+    "severity": "P1",
+    "category": "MCP/IPC",
+    "affected_files": ["server.py:9"],
+    "evidence": "tool dispatch found",
+    "technical_reason": "Tool dispatch should use allowlists.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-mcp-allowlist",
+    "gate_relevant": true
+  }
+]

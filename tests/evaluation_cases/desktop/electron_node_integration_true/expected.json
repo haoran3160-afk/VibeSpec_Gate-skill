@@ -1,0 +1,1 @@
+{"expected_profile":"Desktop/Electron App","expected_gate":"REVIEW","must_find":["Electron renderer enables nodeIntegration"],"codex_must_find":["### First verify for Desktop/Electron"]}

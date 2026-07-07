@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-SEC-001",
+    "title": "Possible hardcoded secret: OpenAI API key",
+    "severity": "P1",
+    "category": "Secrets",
+    "affected_files": ["docs/README.md:1"],
+    "evidence": "docs example contains OPENAI_API_KEY",
+    "technical_reason": "Docs contain a secret-like variable.",
+    "confidence": "suspected",
+    "source_type": "docs",
+    "fingerprint": "review-secret-docs-placeholder",
+    "gate_relevant": true
+  }
+]

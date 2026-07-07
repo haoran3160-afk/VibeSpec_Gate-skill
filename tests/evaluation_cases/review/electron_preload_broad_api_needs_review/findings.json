@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-DESK-003",
+    "title": "Broad preload API exposes file write capability",
+    "severity": "P1",
+    "category": "Desktop/Electron",
+    "affected_files": ["electron/preload.ts:4"],
+    "evidence": "contextBridge exposes writeFile to renderer",
+    "technical_reason": "Preload APIs need narrow schemas and caller/path boundaries.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-electron-preload-broad",
+    "gate_relevant": true
+  }
+]

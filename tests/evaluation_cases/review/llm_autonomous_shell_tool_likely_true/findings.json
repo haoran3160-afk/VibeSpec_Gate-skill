@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-LLM-002",
+    "title": "Agent shell tool executes without user approval",
+    "severity": "P1",
+    "category": "LLM/Agent",
+    "affected_files": ["src/agent.ts:5"],
+    "evidence": "tool_call invokes exec directly",
+    "technical_reason": "Autonomous shell tools need explicit approval boundaries.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-llm-autonomous-shell",
+    "gate_relevant": true
+  }
+]

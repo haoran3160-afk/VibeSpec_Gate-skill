@@ -1,0 +1,1 @@
+{"expected_profile":"Web App","expected_gate":"PASS_WITH_WARNINGS","must_find":[],"must_not_find":["Firebase rules allow broad public read/write"]}

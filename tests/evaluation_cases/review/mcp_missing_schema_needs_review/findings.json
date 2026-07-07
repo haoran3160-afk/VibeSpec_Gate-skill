@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-IPC-001",
+    "title": "MCP/IPC inbound messages may lack schema validation",
+    "severity": "P1",
+    "category": "MCP/IPC",
+    "affected_files": ["server.py:5"],
+    "evidence": "json.loads on inbound message without schema",
+    "technical_reason": "MCP inbound messages need schema validation.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-mcp-missing-schema",
+    "gate_relevant": true
+  }
+]

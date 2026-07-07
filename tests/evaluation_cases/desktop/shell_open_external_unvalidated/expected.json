@@ -1,0 +1,1 @@
+{"expected_profile":"Desktop/Electron App","expected_gate":"REVIEW","must_find":["Electron shell.openExternal may open unvalidated URLs"],"codex_must_find":["### First verify for Desktop/Electron"]}

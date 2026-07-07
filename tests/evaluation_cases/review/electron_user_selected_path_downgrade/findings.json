@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-DESK-001",
+    "title": "Desktop file operation may lack workspace path boundary checks",
+    "severity": "P1",
+    "category": "Desktop/Electron",
+    "affected_files": ["electron/main.ts:6"],
+    "evidence": "Desktop file operation detected",
+    "technical_reason": "Desktop file paths require boundary checks.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-electron-user-path",
+    "gate_relevant": true
+  }
+]

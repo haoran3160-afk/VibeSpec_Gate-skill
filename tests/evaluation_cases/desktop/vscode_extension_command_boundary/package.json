@@ -1,0 +1,1 @@
+{"name":"vscode-extension","engines":{"vscode":"^1.90.0"},"activationEvents":["onCommand:test.run"],"contributes":{"commands":[{"command":"test.run","title":"Run"}]}}

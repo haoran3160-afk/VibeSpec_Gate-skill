@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-DESK-001",
+    "title": "Electron renderer enables nodeIntegration",
+    "severity": "P1",
+    "category": "Desktop/Electron",
+    "affected_files": ["electron/main.ts:5"],
+    "evidence": "nodeIntegration true",
+    "technical_reason": "Renderer nodeIntegration increases desktop compromise impact.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-electron-nodeintegration",
+    "gate_relevant": true
+  }
+]

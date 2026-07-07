@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-LLM-003",
+    "title": "System prompt exposure in agent response",
+    "severity": "P1",
+    "category": "LLM/Agent",
+    "affected_files": ["src/chat.ts:4"],
+    "evidence": "system prompt is returned to the user",
+    "technical_reason": "Runtime code should not expose internal system instructions.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-llm-system-prompt-exposure",
+    "gate_relevant": true
+  }
+]

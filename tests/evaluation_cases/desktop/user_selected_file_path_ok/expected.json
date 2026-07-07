@@ -1,0 +1,1 @@
+{"expected_profile":"Desktop/Electron App","expected_gate":"PASS_WITH_WARNINGS","must_not_find":["Desktop file operation may lack workspace path boundary checks","Agent tools may have excessive authority"]}

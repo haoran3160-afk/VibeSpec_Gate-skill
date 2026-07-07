@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vibesec-gate"
+version = "0.1.0"
+description = "Defensive security launch gate for vibe-coded web and AI projects."
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+vibesec = "vibesec.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-LLM-001",
+    "title": "Agent tools may have excessive authority without approval",
+    "severity": "P1",
+    "category": "LLM",
+    "affected_files": ["src/agent.ts:4"],
+    "evidence": "tool_call can write files",
+    "technical_reason": "LLM-controlled file write needs boundary verification.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-llm-tool-write",
+    "gate_relevant": true
+  }
+]

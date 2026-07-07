@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-SEC-001",
+    "title": "Possible hardcoded secret: OpenAI API key",
+    "severity": "P1",
+    "category": "Secrets",
+    "affected_files": ["src/app.ts:1"],
+    "evidence": "src/app.ts:1 contains secret-like value sk-p...7890",
+    "technical_reason": "Static pattern matching found a provider-shaped key.",
+    "confidence": "confirmed",
+    "source_type": "runtime",
+    "fingerprint": "review-secret-provider-runtime",
+    "gate_relevant": true
+  }
+]

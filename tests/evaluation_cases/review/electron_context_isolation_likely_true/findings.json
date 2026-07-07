@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-DESK-002",
+    "title": "Electron renderer disables contextIsolation",
+    "severity": "P1",
+    "category": "Desktop/Electron",
+    "affected_files": ["electron/main.ts:6"],
+    "evidence": "contextIsolation false",
+    "technical_reason": "Disabled contextIsolation weakens the preload-to-renderer boundary.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-electron-context-isolation",
+    "gate_relevant": true
+  }
+]

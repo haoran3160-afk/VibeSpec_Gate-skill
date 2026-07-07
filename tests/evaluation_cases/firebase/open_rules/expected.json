@@ -1,0 +1,1 @@
+{"expected_profile":"Web App","expected_gate":"BLOCK","must_find":["Firebase rules allow broad public read/write"],"must_not_find":[]}

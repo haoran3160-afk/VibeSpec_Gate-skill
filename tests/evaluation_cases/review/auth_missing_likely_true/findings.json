@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-AUTH-001",
+    "title": "API route may be missing authentication",
+    "severity": "P1",
+    "category": "Auth/Data",
+    "affected_files": ["app/api/items/route.ts:1"],
+    "evidence": "POST route without nearby auth check",
+    "technical_reason": "Mutating API route may accept unauthenticated writes.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-auth-missing",
+    "gate_relevant": true
+  }
+]

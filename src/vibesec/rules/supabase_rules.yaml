@@ -1,0 +1,4 @@
+supabase:
+  required:
+    - "enable row level security"
+    - "auth.uid()"

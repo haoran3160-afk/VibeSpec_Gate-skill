@@ -1,0 +1,1 @@
+{"expected_profile":"MCP / IPC Tool","expected_gate":"REVIEW","must_find":["MCP/IPC inbound messages may lack schema validation"],"codex_must_find":["### First verify for MCP/IPC"]}

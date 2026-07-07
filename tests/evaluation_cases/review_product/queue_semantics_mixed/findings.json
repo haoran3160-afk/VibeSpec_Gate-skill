@@ -1,0 +1,54 @@
+[
+  {
+    "id": "VSG-PROD-FIX-001",
+    "title": "Agent shell tool executes without user approval",
+    "severity": "P1",
+    "category": "LLM/Agent",
+    "affected_files": ["src/agent.ts:4"],
+    "evidence": "tool_call invokes exec directly",
+    "technical_reason": "Autonomous shell tools need explicit approval boundaries.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "product-queue-fix",
+    "gate_relevant": true
+  },
+  {
+    "id": "VSG-PROD-REVIEW-001",
+    "title": "MCP command execution boundary is unclear",
+    "severity": "P1",
+    "category": "MCP/IPC",
+    "affected_files": ["server.py:5"],
+    "evidence": "subprocess executes a client-provided command",
+    "technical_reason": "MCP command tools need schema validation and explicit allowlists.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "product-queue-review",
+    "gate_relevant": true
+  },
+  {
+    "id": "VSG-PROD-DOWN-001",
+    "title": "LLM chat may have excessive agency",
+    "severity": "P1",
+    "category": "LLM/Agent",
+    "affected_files": ["src/chat.ts:3"],
+    "evidence": "plain chat completion without tools",
+    "technical_reason": "Plain chat without tool control should not be P1 excessive agency.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "product-queue-downgrade",
+    "gate_relevant": true
+  },
+  {
+    "id": "VSG-PROD-SUP-001",
+    "title": "Possible hardcoded secret: OpenAI API key",
+    "severity": "P1",
+    "category": "Secrets",
+    "affected_files": ["docs/README.md:3"],
+    "evidence": "docs/README.md contains placeholder sk-proj-secret-value-1234567890",
+    "technical_reason": "Documentation example contains a fake provider-shaped key.",
+    "confidence": "suspected",
+    "source_type": "docs",
+    "fingerprint": "product-queue-suppress",
+    "gate_relevant": true
+  }
+]

@@ -1,0 +1,40 @@
+# Python/runtime caches
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local environments and secrets
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Build/install artifacts
+build/
+dist/
+*.egg-info/
+
+# Default generated scan output
+outputs/
+
+# Large or regenerated review/scan outputs kept out of the baseline.
+test output/phase3_regression/
+test output/phase4_review/
+test output/phase4_5_hardening/
+test output/proposed_changes/
+test output/**/*.json
+test output/**/*.html
+test output/**/*.zip
+
+# Local editor/OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

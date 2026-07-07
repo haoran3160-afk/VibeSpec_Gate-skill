@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-SEC-001",
+    "title": "Possible hardcoded secret: token",
+    "severity": "P1",
+    "category": "Secrets",
+    "affected_files": ["src/app.ts:1"],
+    "evidence": "Generic token assignment",
+    "technical_reason": "Variable name looks secret-like.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-generic-token",
+    "gate_relevant": true
+  }
+]

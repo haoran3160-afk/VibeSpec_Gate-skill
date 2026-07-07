@@ -1,0 +1,3 @@
+firebase:
+  dangerous:
+    - "allow read, write: if true"

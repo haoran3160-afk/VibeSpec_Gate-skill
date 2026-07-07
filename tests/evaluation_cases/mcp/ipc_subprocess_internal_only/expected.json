@@ -1,0 +1,1 @@
+{"expected_profile":"MCP / IPC Tool","expected_gate":"PASS","must_not_find":["MCP/IPC command or file operation may lack execution boundary checks","Agent tools may have excessive authority"]}

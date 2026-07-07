@@ -1,0 +1,1 @@
+[{"fingerprint":"VSG:Secrets:possible-hardcoded-secret-openai-api-key:src/app.ts:1:secrets","reason":"expired fixture","expires":"2000-01-01","reviewed_by":"test"}]

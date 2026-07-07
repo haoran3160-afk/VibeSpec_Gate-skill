@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-AUTH-001",
+    "title": "API route may be missing authentication",
+    "severity": "P1",
+    "category": "Auth/Data",
+    "affected_files": ["app/api/items/route.ts:2"],
+    "evidence": "Route auth was not proven by scanner",
+    "technical_reason": "Middleware may protect this route.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-auth-middleware",
+    "gate_relevant": true
+  }
+]

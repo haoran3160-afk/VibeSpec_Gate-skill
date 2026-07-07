@@ -1,0 +1,8 @@
+llm_agent:
+  high_risk_tools:
+    - shell
+    - filesystem
+    - database
+    - external_api
+    - email
+    - payment

@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-IPC-002",
+    "title": "MCP command execution boundary is unclear",
+    "severity": "P1",
+    "category": "MCP/IPC",
+    "affected_files": ["server.py:5"],
+    "evidence": "subprocess executes a client-provided command",
+    "technical_reason": "MCP command tools need schema validation and explicit allowlists.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-mcp-command-boundary",
+    "gate_relevant": true
+  }
+]

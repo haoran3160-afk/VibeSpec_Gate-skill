@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-IPC-003",
+    "title": "MCP local-only status endpoint flagged as remote IPC",
+    "severity": "P1",
+    "category": "MCP/IPC",
+    "affected_files": ["server.py:4"],
+    "evidence": "localhost endpoint is same-user and local-only",
+    "technical_reason": "Local status endpoints with process/user boundary should not be P1 by default.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-mcp-local-process-boundary",
+    "gate_relevant": true
+  }
+]

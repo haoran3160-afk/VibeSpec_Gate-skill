@@ -1,0 +1,1 @@
+{"expected_profile":"Desktop/Electron App","expected_gate":"PASS_WITH_WARNINGS","must_not_find":["Electron preload may expose broad privileged APIs"]}

@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-LLM-001",
+    "title": "Agent tools may have excessive authority without approval",
+    "severity": "P1",
+    "category": "LLM",
+    "affected_files": ["src/chat.ts:3"],
+    "evidence": "LLM code found",
+    "technical_reason": "LLM chat was detected but tool use is not proven.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-llm-chat-no-tools",
+    "gate_relevant": true
+  }
+]

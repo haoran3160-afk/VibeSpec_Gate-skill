@@ -1,0 +1,1 @@
+{"expected_profile":"Static Site","expected_gate":"PASS","must_find":[],"must_not_find":["Possible hardcoded secret"],"must_suppress":["Possible hardcoded secret"]}

@@ -1,0 +1,4 @@
+python:
+  manifests:
+    - requirements.txt
+    - pyproject.toml
