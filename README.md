@@ -1,136 +1,151 @@
 # VibeSec Gate
 
-VibeSec Gate is a defensive security launch gate for vibe-coded web apps, SaaS projects, and AI Agent prototypes. It reads a local project, runs non-destructive static checks, and generates beginner-friendly reports, developer repair notes, Codex fix tasks, and a launch gate decision.
+VibeSec Gate is an **LLM-native security review Skill for vibe-coded products**.
 
-It is not a penetration testing tool, compliance certificate, legal opinion, or guarantee of absolute security.
+Use it when you built a product with AI and need a practical launch answer:
 
-## Who It Is For
+> Can this app leak secrets, expose user data, ship broken auth, or give an Agent/tool too much authority?
 
-- AI builders and vibe-coding users preparing to launch a web app.
-- Indie developers who want a basic pre-launch security gate.
-- Teams that need Codex-ready repair prompts for common issues.
+VibeSec Gate reviews the project evidence, identifies launch-impacting security and data-safety risks, explains them in plain language, and produces bounded fix tasks that a coding Agent can handle after human confirmation.
 
-## Who It Is Not For
+## Default Lite Package
 
-- Unauthorized scanning of third-party systems.
-- Offensive exploit development.
-- Formal compliance, legal, or professional penetration-testing replacement.
+The default Lite package is prompt-only and Agent-native. It does not require the Python CLI, repository tests, scorer, calibration data, or release verifier.
 
-## What It Checks
+Use it like this:
 
-- Secret exposure in code, env files, docs, logs, and frontend-like paths.
-- Dependency hygiene and selected known risky versions.
-- Debug/source-map/logging risks.
-- Missing API authentication and possible IDOR/BOLA patterns.
-- Supabase RLS and Firebase broad rule risks.
-- CORS, cookie flags, and basic security headers.
-- LLM/Agent risks such as exposed system prompts, excessive tool authority, sensitive prompt logging, and missing resource limits.
+1. Install or copy the Lite package into your Agent environment.
+2. Ask the Agent to review your project with `examples/lite_review_prompt.md`.
+3. Read the four-file review shape the Agent produces.
 
-## What It Cannot Guarantee
+Use this starter prompt:
 
-- It cannot prove a project is fully secure.
-- It cannot prove ASVS, OWASP, NIST, or legal compliance.
-- It cannot fully understand custom framework middleware or production infrastructure.
-- It does not scan running websites by default.
+```text
+Review this project for launch-blocking security risks.
 
-## Safety Boundary
+Tell me whether it can safely launch, explain the top security and data-safety risks,
+produce bounded coding-Agent fix tasks after human confirmation, and produce a retest checklist.
+```
 
-Only scan projects you own or are explicitly authorized to review. VibeSec Gate is read-only by default. It does not generate exploit payloads, bypass login, brute force accounts, mutate production databases, rotate keys, or upload code to unknown third parties. Secret evidence is masked.
+Expected output shape:
 
-## Install
+```text
+lite_review/
+  launch_decision.md
+  top_security_risks.md
+  agent_fix_plan.md
+  retest_checklist.md
+  evidence/
+```
+
+The Lite bundle keeps machine-readable evidence under `evidence/`, but first-time users do not need to understand fixtures, scoring matrices, calibration ledgers, or release verification to get a launch decision.
+
+## Optional Core-Powered Path
+
+The full repository also provides a runnable CLI overlay. Use it when you cloned the source repository and want deterministic local evidence generation:
+
+```powershell
+$env:PYTHONPATH = "src"
+py -3 -m vibesec.cli lite-review .\my-project --output .\lite_review --no-adapters
+```
+
+The CLI is optional repository infrastructure, not a requirement for the default prompt-only Lite package.
+
+## Decision Meanings
+
+- `BLOCK`: do not launch yet; one or more findings currently block launch.
+- `REVIEW`: do not treat as launch-ready yet; human confirmation or missing evidence remains.
+- `PASS_WITH_WARNINGS`: no launch-blocking finding is present, but warnings or downgrade/suppression candidates need review.
+- `PASS`: no material launch risk was found in the reviewed evidence.
+
+## Safe Agent Fix Boundary
+
+`agent_fix_plan.md` is a bounded repair plan, not permission for blind edits.
+
+- Confirm the evidence before asking a coding Agent to change the project.
+- Do not auto-write suppressions.
+- Do not broaden permissions, remove validation, add bypasses, or mutate production systems while fixing.
+- Retest with `retest_checklist.md` after fixes.
+
+VibeSec Gate is not a professional security certification, penetration test, legal review, or compliance attestation.
+
+## When To Use It
+
+VibeSec Gate is useful for:
+
+- AI-built web apps, SaaS products, local tools, and prototypes before sharing or launch;
+- projects with authentication, user data, uploads, logs, payments, or deployment secrets;
+- Supabase, Firebase, database-rule, object-ownership, and server-side authorization checks;
+- AI Agent, MCP/IPC, Electron, desktop, local file, shell, email, database, or payment tool surfaces;
+- teams using Codex, Claude, Cursor, Gemini CLI, or similar coding Agents to review and fix generated code.
+
+It focuses on launch-impacting issues such as exposed keys, missing auth, broken authorization, unsafe database rules, risky CORS/cookie/session/header/upload config, prompt or prompt-log exposure, excessive Agent authority, MCP/IPC boundary mistakes, and Electron/Desktop permission issues.
+
+## Powered By The Core Engine
+
+The Lite path is the user-facing surface over a heavier review system. The repository still contains the core engine, schemas, fixtures, tests, quality scoring, calibration workflows, and release verifier used by maintainers to keep reviews repeatable.
+
+Maintainer review outputs include `llm_review_packet.json`, which carries product context and evidence for deeper LLM-native review workflows.
+
+Those internals support quality, but they are not the first user workflow.
+
+## Source Checkout Commands
+
+Install for local development:
 
 ```bash
 python -m pip install -e .
 ```
 
-If an offline or proxied Python environment cannot create the editable install, run without installation:
+Run the Lite path without installation:
 
 ```powershell
 $env:PYTHONPATH = "src"
-py -3 -m vibesec scan .\tests\fixtures\vulnerable_next_supabase_app --output .\outputs\example-next
+py -3 -m vibesec.cli lite-review .\my-project --output .\lite_review --no-adapters
 ```
 
-## Quick Start
+Use the lower-level CLI when maintaining or debugging the engine:
 
 ```bash
 vibesec scan ./my-project --output ./outputs
-vibesec gate ./outputs/findings.json
-```
-
-For an AI Agent app:
-
-```bash
-vibesec scan ./my-agent --mode ai-agent --output ./outputs-agent
-```
-
-## Example Reports
-
-Each scan writes:
-
-```text
-outputs/
-  vibesec_report_user.md
-  vibesec_report_developer.md
-  codex_fix_tasks.md
-  gate_summary.json
-  findings.json
-  loop_review.md
-```
-
-## External Tools
-
-VibeSec Gate can coexist with mature scanners:
-
-- Gitleaks: deeper secret scanning and git history checks.
-- Trivy: dependency, filesystem, container, and IaC checks.
-- Semgrep: static code rules.
-- OWASP ZAP: dynamic scanning only when explicitly authorized against your own local or staging target.
-
-The MVP does not require these tools. If missing, adapters emit informational status and the built-in scanners still run.
-
-## Codex Repair Flow
-
-1. Run `vibesec scan`.
-2. Open `outputs/codex_fix_tasks.md`.
-3. Give one task at a time to Codex.
-4. After fixes, run:
-
-```bash
-vibesec loop ./my-project --previous ./outputs/findings.json --output ./outputs-retest
-```
-
-## Agent-Native Review Flow
-
-Use `vibesec review` when scan output needs a second offline triage pass before an agent prepares repairs:
-
-```bash
 vibesec review ./outputs/findings.json --project ./my-project --output ./outputs-review --include-p2 --offline --reviewer-rule-based --model-provider none
 vibesec review-validate ./outputs-review
 ```
 
-The review command is deterministic and offline. It writes:
+Before a release candidate from the full repository:
 
-```text
-outputs-review/
-  review_packets.json
-  ai_review.json
-  ai_review_summary.md
-  human_review_queue.md
-  agent_review_decisions.md
-  suppression_candidates.json
+```powershell
+py -3 scripts\verify_release.py
 ```
 
-`human_review_queue.md` contains only high-value items that need human confirmation before an agent prepares a fix: `needs_human_review`, `confirmed`, or `likely_true` P0/P1 fix items. Downgrades, suppressions, and false positives are kept out of the human queue and recorded in `agent_review_decisions.md`.
+Check the Lite package boundary:
 
-Every AI review verdict includes `agent_next_step`, files to inspect, prohibited changes, verification suggestions, and `safe_to_auto_suppress=false`.
+```powershell
+py -3 scripts\verify_lite_package.py
+```
 
-## Common False Positives
+## Documentation
 
-- Auth may be enforced in global middleware the scanner cannot see.
-- RLS may be enabled in a different migration file.
-- Security headers may be set by a reverse proxy or hosting platform.
-- Test fixtures may contain fake keys. Real-looking secrets should still be reviewed and rotated if they may have been exposed.
+User path:
 
-## Disclaimer
+- `docs/usage/lite_quickstart.md`
+- `examples/lite_review_prompt.md`
+- `docs/usage/agent_review_cookbook.md`
 
-VibeSec Gate is a basic pre-launch security gate and remediation assistant. It does not replace professional security review, formal penetration testing, compliance certification, or legal advice.
+Package boundary:
+
+- `docs/design/lite_skill_package_manifest.md`
+- `docs/maintainers/lite_package_verification.md`
+
+Maintainer path:
+
+- `docs/usage/quickstart.md`
+- `docs/usage/examples.md`
+- `docs/usage/verification.md`
+- `docs/usage/llm_review_contract.md`
+- `docs/maintainers/release_verification.md`
+- `docs/maintainers/llm_quality_scoring.md`
+- `docs/maintainers/host_agent_calibration.md`
+- `docs/maintainers/fixture_authoring.md`
+- `docs/maintainers/release_boundary_cleanup.md`
+- `docs/design/model_invocation_strategy.md`

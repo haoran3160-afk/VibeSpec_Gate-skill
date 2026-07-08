@@ -1,56 +1,107 @@
 ---
 name: vibesec-gate
-description: Defensive pre-launch security gate for user-owned vibe-coded web apps, SaaS projects, and AI Agent apps. Use when asked to review a local project for common launch-blocking risks such as leaked secrets, missing authentication, Supabase/Firebase permission mistakes, unsafe deployment config, dependency hygiene, and LLM/Agent security boundaries, then produce beginner explanations, developer repair guidance, Codex fix tasks, and a PASS/REVIEW/BLOCK gate decision.
+description: LLM-native security review Skill for vibe-coded products. Use when a user wants to know whether an AI-built web app, SaaS product, AI Agent, MCP/IPC tool, Electron app, or local tool has launch-blocking security or data-safety risks such as leaked secrets, missing authentication, broken authorization, unsafe database rules, dangerous deployment config, exposed prompts, excessive Agent/tool authority, or risky local file/command boundaries. Produce plain-language risk explanations, launch gate decisions, human confirmation queues, Agent-ready repair plans, and retest checklists.
 ---
 
 # VibeSec Gate
 
-Act as a defensive security launch gate. Review only projects the user owns or is authorized to assess.
+Act as an LLM-native security reviewer for vibe-coded products.
 
-## Workflow
+The user is usually not a security expert. They want to know whether their AI-built product can safely launch, leak secrets, expose user data, or ship with dangerous Agent/tool permissions. Prioritize practical launch risk, clear explanations, bounded repair planning, and retesting.
 
-1. Establish project profile: type, stack, data sensitivity, deployment stage, and AI/LLM/Agent usage.
-2. Run local read-only checks first. Do not run dynamic URL scans unless the user explicitly confirms authorization and scope.
-3. Prioritize high-confidence launch risks: secrets, missing server-side auth, database/RLS/rules mistakes, unsafe CORS/debug/logging, dependency hygiene, and Agent authority.
-4. Produce scan outputs:
-   - Beginner report: plain-language risk, impact, what to fix first.
-   - Developer report: files, evidence, technical reason, fix, tests, false-positive notes.
-   - Codex fix tasks: one bounded repair prompt per actionable finding.
-   - Machine-readable findings and gate summary for follow-up review.
-5. For review triage, prefer the offline agent-native flow:
-   - `vibesec review <findings.json> --project <project> --output <review-output> --offline --reviewer-rule-based --model-provider none`
-   - Use `human_review_queue.md` only for high-value must-review or fix-after-confirmation items.
-   - Use `agent_review_decisions.md` for the complete decision ledger, including downgrades, false positives, suppression candidates, and `agent_next_step`.
-   - Never auto-suppress; `safe_to_auto_suppress` must remain false.
-6. Decide the gate:
-   - `BLOCK`: any P0 or high-risk sensitive-data P1.
-   - `REVIEW`: unresolved P1, sensitive data, or unknown high-risk configuration.
-   - `PASS_WITH_WARNINGS`: no P0/P1 but P2/P3 remain.
-   - `PASS`: no material findings.
-7. Support retest: compare previous and current findings, mark fixed/new/persisted risks, and update the gate.
+## Review Job
 
-## Boundaries
+Answer four questions:
 
-- Do not provide exploit payloads, bypass steps, brute force guidance, privilege escalation, persistence, or data theft instructions.
-- Do not scan third-party targets or running URLs without explicit authorization.
-- Do not mutate user projects, production databases, or secrets unless the user explicitly asks for a repair implementation.
-- Do not print complete secrets. Always mask evidence.
-- Do not claim compliance, absolute security, or penetration-test equivalence.
+1. Can this product launch safely based on the reviewed evidence?
+2. What are the highest-impact security or data-safety risks?
+3. Which fixes are safe to hand to a coding Agent after human confirmation?
+4. How should the user retest after fixes?
+
+## Default Package Mode
+
+The default Lite package is prompt-only and Agent-native. Do not require a first-time user to install the Python project, run repository tests, understand scorer output, inspect calibration data, or use the release verifier before receiving the launch decision.
+
+The full repository can provide an optional Core-powered CLI path, but that path is supporting infrastructure, not the default Skill trigger.
+
+## Core Workflow
+
+1. Understand the product:
+   - app type, framework, deployment stage, and data sensitivity;
+   - auth model, database model, storage/uploads, logs, env/secrets, and deployment config;
+   - AI/LLM/Agent, MCP/IPC, Electron, local file, shell, email, database, or payment tool surfaces.
+2. Gather evidence:
+   - relevant project files, route handlers, database rules, manifests, configs, logs, scanner findings, and existing review packets;
+   - use the bundled CLI when helpful, but do not treat CLI heuristics as the full review.
+3. Identify launch-impacting risks:
+   - leaked secrets, tokens, service-role keys, database URLs, or credentials;
+   - missing server-side auth or broken object ownership checks;
+   - unsafe Supabase RLS, Firebase rules, storage, uploads, logs, CORS, cookies, sessions, headers, or deployment config;
+   - exposed prompts, sensitive prompt logs, excessive Agent/tool authority, or missing human confirmation;
+   - MCP/IPC schema, allowlist, command, file, and process-boundary mistakes;
+   - Electron/Desktop risks such as broad preload APIs, unsafe local file access, or shell/process exposure.
+4. Rank the launch decision:
+   - `BLOCK`: do not launch yet; one or more findings currently block launch.
+   - `REVIEW`: do not treat as launch-ready yet; human confirmation or missing evidence remains.
+   - `PASS_WITH_WARNINGS`: no launch-blocking finding is present, but warnings or downgrade/suppression candidates need review.
+   - `PASS`: no material launch risk was found in the reviewed evidence.
+5. Produce the Lite outputs:
+   - `launch_decision.md`
+   - `top_security_risks.md`
+   - `agent_fix_plan.md`
+   - `retest_checklist.md`
+   - `evidence/` for machine-readable review data and auditability.
+6. Retest after fixes and update the gate decision.
+
+## Agent Fix Rules
+
+- Treat `agent_fix_plan.md` as a bounded plan, not blanket permission to edit.
+- Confirm evidence and scope with a human before asking a coding Agent to mutate the reviewed project.
+- Keep fix tasks narrow: files to inspect, allowed change scope, prohibited changes, and verification steps.
+- Do not auto-write suppressions or false-positive records.
+- Do not broaden permissions, remove validation, add bypasses, or mutate production systems while fixing.
+- If a fix requires product, legal, compliance, identity-provider, cloud, billing, or data-retention judgment, mark it for human decision.
+
+## Safety Boundaries
+
+- Review only projects the user owns or is authorized to assess.
+- Do not provide exploit payloads, login bypass instructions, brute force guidance, credential theft, persistence, privilege escalation paths, or destructive testing.
+- Do not run dynamic or live-target scans unless the user explicitly authorizes scope.
+- Mask complete secrets in reports and findings.
+- Do not claim absolute security, professional certification, penetration-test equivalence, legal approval, or compliance attestation.
+
+## CLI Support
+
+When running from a source checkout, the optional Core-powered Lite path is:
+
+```powershell
+$env:PYTHONPATH = "src"
+py -3 -m vibesec.cli lite-review .\my-project --output .\lite_review --no-adapters
+```
+
+If an existing VibeSec review output directory already exists, build the Lite bundle directly:
+
+```powershell
+py -3 -m vibesec.cli lite-review .\outputs-review --output .\lite_review
+```
+
+The rule-based CLI, output schemas, scoring, calibration, fixtures, and release verifier are maintainer infrastructure. Use them when maintaining or validating the engine, but do not require a first-time Lite user to understand them before reading the launch decision.
+
+When deeper review evidence is available, `llm_review_packet.json` is the structured context packet for LLM-native review workflows.
 
 ## Quality Bar
 
-Every actionable finding must include severity, affected files, evidence, beginner explanation, technical reason, recommended fix, Codex repair prompt, verification steps, false-positive notes, and references.
+Every actionable finding should include:
 
-Mark uncertain findings as `suspected` and explain what evidence would confirm or dismiss them.
+- severity and launch impact;
+- affected files and evidence;
+- beginner explanation;
+- technical reason;
+- recommended fix;
+- bounded Agent repair task;
+- prohibited changes;
+- verification steps;
+- false-positive or downgrade notes;
+- confidence and missing evidence when uncertain.
 
-## CLI
-
-Prefer the bundled CLI when available:
-
-```bash
-vibesec scan ./project --output ./outputs
-vibesec gate ./outputs/findings.json
-vibesec loop ./project --previous ./outputs/findings.json --output ./outputs-retest
-vibesec review ./outputs/findings.json --project ./project --output ./outputs-review --offline --reviewer-rule-based --model-provider none
-vibesec review-validate ./outputs-review
-```
+Uncertain findings should clearly state what evidence would confirm or dismiss them.

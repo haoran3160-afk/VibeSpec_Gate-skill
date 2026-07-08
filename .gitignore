@@ -25,11 +25,14 @@ dist/
 outputs/
 
 # Large or regenerated review/scan outputs kept out of the baseline.
+test output/
 test output/phase3_regression/
 test output/phase4_review/
 test output/phase4_5_hardening/
 test output/proposed_changes/
 test output/**/*.json
+!test output/phase7_release_hardening/evaluation_matrix.json
+!test output/phase9_real_llm_review_evaluation/llm_quality_matrix.json
 test output/**/*.html
 test output/**/*.zip
 
@@ -38,3 +41,7 @@ test output/**/*.zip
 Thumbs.db
 .vscode/
 .idea/
+
+# Local Codex/session context
+context.md
+goal.md.txt
