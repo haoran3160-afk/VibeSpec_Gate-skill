@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 
 from .core.gate_decision import decide_gate
+from .core.llm_output_schema import validate_llm_review_outputs
+from .core.lite_review_bundle import build_lite_review_bundle
 from .core.loop_runner import run_loop
 from .core.project_intake import detect_profile
 from .core.report_builder import load_findings, write_reports
@@ -65,6 +67,18 @@ def build_parser() -> argparse.ArgumentParser:
 
     review_validate = sub.add_parser("review-validate", help="Validate VibeSec review output JSON files.")
     review_validate.add_argument("review_output_dir")
+
+    llm_output_validate = sub.add_parser("llm-output-validate", help="Validate LLM-native review output files.")
+    llm_output_validate.add_argument("workspace_or_output_dir")
+
+    lite_review = sub.add_parser("lite-review", help="Build a Lite launch-review bundle from a project or existing review output.")
+    lite_review.add_argument("target", help="Project directory, or an existing review output directory.")
+    lite_review.add_argument("--output", default=None, help="Bundle directory. Defaults to outputs-lite for projects or <review_output>/lite_review.")
+    lite_review.add_argument("--mode", choices=mode_choices, default=None)
+    lite_review.add_argument("--no-adapters", action="store_true", help="Skip external tool adapter status checks during project scans.")
+    lite_review.add_argument("--suppressions", default=None, help="Path to vibesec.suppressions.json for project scans.")
+    lite_review.add_argument("--max-snippet-lines", type=int, default=80)
+    lite_review.add_argument("--p1-only", action="store_true", help="Only include P0/P1 findings in the internal review step.")
     return parser
 
 
@@ -125,6 +139,52 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps({"valid": False, "error": str(exc)}, ensure_ascii=False, indent=2))
             return 1
         print(json.dumps({"valid": True, **result}, ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "llm-output-validate":
+        try:
+            result = validate_llm_review_outputs(args.workspace_or_output_dir)
+        except SchemaValidationError as exc:
+            print(json.dumps({"valid": False, "error": str(exc)}, ensure_ascii=False, indent=2))
+            return 1
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+    if args.command == "lite-review":
+        try:
+            target = Path(args.target)
+            if (target / "agent_review_decisions.json").exists():
+                result = build_lite_review_bundle(
+                    target,
+                    Path(args.output) if args.output else None,
+                )
+            else:
+                bundle_dir = Path(args.output or "outputs-lite")
+                scan_output = bundle_dir / "evidence" / "scan"
+                review_output = bundle_dir / "evidence" / "review_output"
+                scan_summary = run_scan(
+                    str(target),
+                    str(scan_output),
+                    args.mode,
+                    include_adapters=not args.no_adapters,
+                    suppression_file=args.suppressions,
+                )
+                review_summary = run_review(
+                    str(scan_output / "findings.json"),
+                    str(target),
+                    str(review_output),
+                    max_snippet_lines=args.max_snippet_lines,
+                    include_p2=not args.p1_only,
+                    offline=True,
+                    reviewer_rule_based=True,
+                )
+                result = {
+                    "scan": scan_summary,
+                    "review": review_summary,
+                    "lite": build_lite_review_bundle(review_output, bundle_dir),
+                }
+        except Exception as exc:  # noqa: BLE001 - CLI should report validation/shape failures directly.
+            print(json.dumps({"error": str(exc)}, ensure_ascii=False, indent=2))
+            return 1
+        print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
     return 2
 

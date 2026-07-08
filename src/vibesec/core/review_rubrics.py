@@ -126,6 +126,29 @@ def _review_secret(packet: dict[str, Any]) -> dict[str, Any]:
 
 def _review_auth(packet: dict[str, Any]) -> dict[str, Any]:
     text = packet_text(packet)
+    if any(
+        word in text
+        for word in (
+            "ownerid",
+            "owner_id",
+            "userid ==",
+            "user_id ==",
+            "where user_id",
+            "where owner_id",
+            "where: { user_id",
+            "where: { owner_id",
+            "auth.uid()",
+        )
+    ):
+        return _verdict(
+            packet,
+            "should_downgrade",
+            "medium",
+            "P2",
+            True,
+            "downgrade",
+            "Ownership or user-scoped access check is present near the reported auth boundary.",
+        )
     if any(word in text for word in ("middleware", "auth(", "getserversession", "requireauth", "session")):
         return _verdict(
             packet,
@@ -135,10 +158,21 @@ def _review_auth(packet: dict[str, Any]) -> dict[str, Any]:
             True,
             "manual_review",
             "Auth evidence may exist in middleware or local guards and needs confirmation.",
-            questions=["Does route-level or global middleware enforce authentication before this handler?", "Does the guard also enforce object ownership or authorization?"],
+            questions=[
+                "Does route-level or global middleware enforce authentication before this handler?",
+                "Does the guard also enforce object ownership, RLS, Firebase rules, or equivalent authorization?",
+            ],
         )
     if any(word in text for word in ("post(", "put(", "patch(", "delete(", "export async function post", "mutation", "insert", "update")):
-        return _verdict(packet, "likely_true", "medium", "P1", True, "fix", "Runtime mutating route or data access lacks nearby auth evidence.")
+        return _verdict(
+            packet,
+            "likely_true",
+            "medium",
+            "P1",
+            True,
+            "fix",
+            "Runtime mutating route or data access lacks nearby auth, ownership, RLS, or Firebase rule evidence.",
+        )
     return _verdict(
         packet,
         "needs_human_review",
@@ -147,7 +181,11 @@ def _review_auth(packet: dict[str, Any]) -> dict[str, Any]:
         True,
         "manual_review",
         "Auth/data finding needs route and middleware context.",
-        questions=["Which HTTP route or RPC method reaches this code?", "Where is authentication and authorization enforced for that route?"],
+        questions=[
+            "Which HTTP route or RPC method reaches this code?",
+            "Where is authentication enforced for that route?",
+            "Where is ownership, RLS, Firebase rule, or object-level authorization enforced?",
+        ],
     )
 
 
@@ -212,6 +250,7 @@ def _review_mcp(packet: dict[str, Any]) -> dict[str, Any]:
     has_allowlist = any(word in text for word in ("allowed_tools", "allowedtools", "allowlist", "if tool_name in", "match tool_name"))
     has_process_boundary = any(word in text for word in ("localhost", "127.0.0.1", "process owner", "same-user", "local-only"))
     risky_op = any(word in text for word in ("subprocess", "exec(", "writefile", "unlink", "delete", "open("))
+    dynamic_dispatch = any(word in text for word in ("tools[tool_name]", "getattr(", "globals()[", "dispatch[tool_name]"))
     if risky_op:
         return _verdict(
             packet,
@@ -223,10 +262,49 @@ def _review_mcp(packet: dict[str, Any]) -> dict[str, Any]:
             "MCP/IPC command or file operation needs explicit schema, allowlist, and caller boundary confirmation.",
             questions=["Which clients can call this MCP/IPC method?", "Is every risky argument schema-validated and constrained before command/file execution?"],
         )
-    if has_schema and has_allowlist:
-        return _verdict(packet, "should_downgrade", "medium", "P2", True, "downgrade", "MCP/IPC code shows both schema validation and explicit allowlist signals.")
-    if has_process_boundary:
-        return _verdict(packet, "should_downgrade", "medium", "P2", True, "downgrade", "Endpoint appears local-only with a process/user boundary and no high-risk operation in evidence.")
+    if dynamic_dispatch and not has_allowlist:
+        return _verdict(
+            packet,
+            "needs_human_review",
+            "medium",
+            "P1",
+            True,
+            "manual_review",
+            "Dynamic MCP/IPC tool dispatch lacks an explicit allowlist boundary.",
+            questions=["Can clients choose arbitrary tool names?", "Where is the tool allowlist enforced before dispatch?"],
+        )
+    if has_schema and has_allowlist and has_process_boundary:
+        return _verdict(
+            packet,
+            "should_downgrade",
+            "medium",
+            "P2",
+            True,
+            "downgrade",
+            "MCP/IPC code shows schema validation, explicit allowlist, and local process/user boundary signals.",
+        )
+    if has_schema and not has_allowlist:
+        return _verdict(
+            packet,
+            "needs_human_review",
+            "medium",
+            "P1",
+            True,
+            "manual_review",
+            "MCP/IPC code has schema validation but no explicit tool/client allowlist evidence.",
+            questions=["Which tool names or clients are allowed?", "Is dispatch blocked before any command or file capability is reached?"],
+        )
+    if has_allowlist and not has_schema:
+        return _verdict(
+            packet,
+            "needs_human_review",
+            "medium",
+            "P1",
+            True,
+            "manual_review",
+            "MCP/IPC code has allowlist evidence but lacks argument schema validation evidence.",
+            questions=["Are all inbound arguments schema-validated before dispatch?", "Can malformed payloads reach file, command, or tool operations?"],
+        )
     if any(word in title for word in ("schema", "allowed-client", "allowlist", "execution boundary")) or not has_schema:
         return _verdict(
             packet,
@@ -260,6 +338,8 @@ def _review_llm(packet: dict[str, Any]) -> dict[str, Any]:
             "approval is required",
             "human approval is required",
             "requires approval",
+            "requires user approval",
+            "await requireapproval",
             "user confirmation",
             "confirm(",
             "await confirm",

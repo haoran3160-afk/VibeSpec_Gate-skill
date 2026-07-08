@@ -15,5 +15,8 @@ vibesec = "vibesec.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+vibesec = ["templates/**/*.md", "templates/**/*.json"]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]

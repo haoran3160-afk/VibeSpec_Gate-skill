@@ -100,6 +100,55 @@ def agent_review_decisions_markdown(
     return "\n".join(lines)
 
 
+def agent_review_decision_items(packets: list[dict[str, Any]], verdicts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    decisions = []
+    for packet, verdict in zip(packets, verdicts):
+        finding = packet["finding"]
+        must_review = _is_human_queue_item(verdict)
+        decision_type = _decision_type(verdict, must_review)
+        decisions.append(
+            {
+                "decision_id": f"{finding['id']}:{verdict['fingerprint']}",
+                "source_output": "ai_review.json",
+                "finding_id": finding["id"],
+                "fingerprint": verdict["fingerprint"],
+                "title": finding["title"],
+                "rubric": verdict["rubric"],
+                "verdict": verdict["verdict"],
+                "recommended_action": verdict["recommended_action"],
+                "recommended_final_severity": verdict["recommended_final_severity"],
+                "agent_next_step": verdict["agent_next_step"],
+                "must_review": must_review,
+                "decision_type": decision_type,
+                "blocks_launch": must_review and verdict["recommended_final_severity"] in {"P0", "P1"},
+                "safe_for_agent_fix": decision_type == "fix_after_confirmation",
+                "inspect_files": verdict["inspect_files"],
+                "prohibited_changes": verdict["prohibited_changes"],
+                "verification_commands": verdict["verification_commands"],
+                "safe_to_auto_suppress": verdict["safe_to_auto_suppress"],
+                "reason": verdict["reason"],
+            }
+        )
+    return decisions
+
+
+def agent_review_decisions_json(summary_data: dict[str, object], decisions: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "schema_version": "1.0",
+        "reviewer": "rule-based",
+        "generated_by": "vibesec review",
+        "summary": {
+            "project_type": summary_data["project_type"],
+            "reviewed_findings": summary_data["reviewed_findings"],
+            "must_review_count": summary_data["must_review_count"],
+            "agent_decision_count": summary_data["agent_decision_count"],
+            "downgrade_candidate_count": summary_data["downgrade_candidate_count"],
+            "suppression_candidate_count": summary_data["suppression_candidate_count"],
+        },
+        "decisions": decisions,
+    }
+
+
 def summary(
     profile: ProjectProfile,
     findings: list[Finding],
@@ -129,7 +178,6 @@ def summary(
         "recommended_action_counts": dict(action_counts),
         "agent_next_step_counts": dict(next_step_counts),
         "human_queue_count": len(queue),
-        "suppression_candidate_count": len(candidates),
         "gate_impact_summary": gate_impact(verdicts),
         "top_reasons": dict(top_reasons.most_common(8)),
     }
@@ -224,6 +272,20 @@ def _other_decision_items(packets: list[dict[str, Any]], verdicts: list[dict[str
         for packet, verdict in zip(packets, verdicts)
         if (packet["finding"]["id"], verdict["fingerprint"]) not in known
     ]
+
+
+def _decision_type(verdict: dict[str, Any], must_review: bool) -> str:
+    if verdict["verdict"] == "needs_human_review":
+        return "must_confirm_before_fix"
+    if must_review and verdict["recommended_action"] == "fix":
+        return "fix_after_confirmation"
+    if verdict["verdict"] == "false_positive":
+        return "false_positive_candidate"
+    if verdict["recommended_action"] == "suppress":
+        return "suppression_candidate"
+    if verdict["recommended_action"] == "downgrade":
+        return "downgrade_candidate"
+    return "informational_decision"
 
 
 def _queue_item_lines(profile: ProjectProfile, idx: int, packet: dict[str, Any], verdict: dict[str, Any]) -> list[str]:

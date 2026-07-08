@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "stub_status": "{{STUB_STATUS}}",
+  "launch_decision": "{{LAUNCH_DECISION: BLOCK|REVIEW|PASS_WITH_WARNINGS|PASS}}",
+  "findings": [
+    {
+      "finding_id": "{{FINDING_ID_OR_NEW_LLM_FINDING_ID}}",
+      "new_llm_finding": false,
+      "title": "{{TITLE}}",
+      "severity": "{{SEVERITY: P0|P1|P2|P3|Info}}",
+      "confidence": "{{CONFIDENCE: high|medium|low}}",
+      "launch_impact": "{{LAUNCH_IMPACT: block|review|warning|none}}",
+      "evidence_files": ["{{EVIDENCE_FILE}}"],
+      "reasoning_summary": "{{REASONING_SUMMARY}}",
+      "missing_evidence": ["{{MISSING_EVIDENCE}}"],
+      "recommended_action": "{{ACTION: fix|verify_before_fix|downgrade|suppress_candidate|keep}}",
+      "human_confirmation_required": true,
+      "safe_to_auto_suppress": false
+    }
+  ]
+}
+

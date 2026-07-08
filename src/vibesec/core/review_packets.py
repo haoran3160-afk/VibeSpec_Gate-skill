@@ -65,7 +65,7 @@ def build_review_packet(
 ) -> dict[str, Any]:
     primary = finding.affected_files[0] if finding.affected_files else ""
     context = evidence_context(root, primary, finding.source_type, max_snippet_lines)
-    return {
+    packet = {
         "project_profile": {
             "project_type": profile.project_type,
             "technologies": profile.technologies,
@@ -88,6 +88,7 @@ def build_review_packet(
         "evidence_context": context,
         "rubric": rubric_for(finding),
     }
+    return redact_value(packet)
 
 
 def evidence_context(root: Path, location: str, source_type: str, max_snippet_lines: int) -> dict[str, Any]:
@@ -202,6 +203,16 @@ def split_location(location: str) -> tuple[str, int | None]:
 def redact_text(text: str) -> str:
     redacted = PROVIDER_SECRET_RE.sub(_mask_match, text)
     return GENERIC_SECRET_RE.sub(lambda m: f"{m.group(1)}=***REDACTED***", redacted)
+
+
+def redact_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return redact_text(value)
+    if isinstance(value, list):
+        return [redact_value(item) for item in value]
+    if isinstance(value, dict):
+        return {key: redact_value(item) for key, item in value.items()}
+    return value
 
 
 def _mask_match(match: re.Match[str]) -> str:
