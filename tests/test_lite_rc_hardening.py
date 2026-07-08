@@ -12,8 +12,10 @@ from scripts.run_lite_rc_hardening import (
     write_actionability_review,
     write_external_session_template,
     write_package_file_list,
+    write_pilot_session_materials,
     write_pilot_usability_notes,
     write_release_decision,
+    write_simulated_subagent_sessions,
     write_validation_matrix,
 )
 from scripts.verify_lite_package import check_package
@@ -123,6 +125,33 @@ def test_rc_external_session_template_and_json_sessions_can_pass_threshold(tmp_p
     assert all(result["profile_coverage"].values())
 
 
+def test_rc_simulated_subagent_sessions_generate_evidence_and_pass_threshold(tmp_path):
+    sessions = write_simulated_subagent_sessions(tmp_path)
+
+    result = write_pilot_usability_notes(tmp_path, sessions)
+
+    assert result["passed"] is True
+    assert result["simulated_sessions"] == 4
+    assert all(result["profile_coverage"].values())
+    assert (tmp_path / "simulated_subagent_sessions" / "simulation_summary.md").exists()
+    assert (tmp_path / "simulated_subagent_sessions" / "subagent_1_non_security_builder_prompt.md").exists()
+    notes = (tmp_path / "pilot_usability_notes.md").read_text(encoding="utf-8")
+    assert "source=simulated_subagent" in notes
+    assert "not real blind user evidence" in notes
+
+
+def test_rc_pilot_session_materials_are_generated_outside_candidate_package(tmp_path):
+    candidate = stage_candidate_package(tmp_path)
+    write_pilot_session_materials(tmp_path)
+
+    materials = tmp_path / "pilot_session_materials"
+    assert (materials / "participant_brief.md").exists()
+    assert (materials / "observer_scorecard.md").exists()
+    assert (materials / "pilot_sessions.example.json").exists()
+    assert not (candidate / "pilot_session_materials").exists()
+    assert "certification" in (materials / "participant_brief.md").read_text(encoding="utf-8")
+
+
 def test_rc_release_decision_can_promote_after_real_session_threshold(tmp_path):
     candidate = stage_candidate_package(tmp_path)
     write_package_file_list(candidate, tmp_path)
@@ -149,6 +178,26 @@ def test_rc_release_decision_can_promote_after_real_session_threshold(tmp_path):
     decision = (tmp_path / "release_decision.md").read_text(encoding="utf-8")
     assert "Decision: READY_FOR_CONTROLLED_EXTERNAL_PILOT" in decision
     assert "PASS: External blind usability passes threshold" in decision
+
+
+def test_rc_release_decision_labels_simulated_subagent_threshold(tmp_path):
+    candidate = stage_candidate_package(tmp_path)
+    write_package_file_list(candidate, tmp_path)
+    write_validation_matrix(tmp_path)
+    matrix = evaluate_matrix(tmp_path)
+    actionability = write_actionability_review(tmp_path)
+    external = write_pilot_usability_notes(tmp_path, write_simulated_subagent_sessions(tmp_path))
+    command_results = {
+        "verifier_source": {"returncode": 0},
+        "verifier_candidate": {"returncode": 0},
+        "focused_tests": {"returncode": 0},
+    }
+
+    write_release_decision(tmp_path, command_results, matrix, actionability, external)
+
+    decision = (tmp_path / "release_decision.md").read_text(encoding="utf-8")
+    assert "Decision: READY_FOR_CONTROLLED_EXTERNAL_PILOT_SIMULATED" in decision
+    assert "structured sub-agent sessions are not real external blind user evidence" in decision
 
 
 def test_rc_real_project_validation_is_read_only_and_writes_evidence_outside_project(tmp_path):

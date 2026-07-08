@@ -5,9 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "vibesec-gate"
 version = "0.1.0"
-description = "Defensive security launch gate for vibe-coded web and AI projects."
+description = "LLM-native security review Skill for vibe-coded products."
+readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/haoran3160-afk/VibeSpec_Gate-skill"
+Repository = "https://github.com/haoran3160-afk/VibeSpec_Gate-skill"
+Issues = "https://github.com/haoran3160-afk/VibeSpec_Gate-skill/issues"
+Documentation = "https://github.com/haoran3160-afk/VibeSpec_Gate-skill/tree/master/docs"
 
 [project.scripts]
 vibesec = "vibesec.cli:main"

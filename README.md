@@ -1,24 +1,42 @@
 # VibeSec Gate
 
+[![CI](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
+[![Package mode](https://img.shields.io/badge/package-prompt--only%20Skill-green)](#default-lite-package)
+[![Security boundary](https://img.shields.io/badge/security-not%20a%20certification-orange)](#safety-boundary)
+
 VibeSec Gate is an **LLM-native security review Skill for vibe-coded products**.
 
 Use it when you built a product with AI and need a practical launch answer:
 
 > Can this app leak secrets, expose user data, ship broken auth, or give an Agent/tool too much authority?
 
-VibeSec Gate reviews the project evidence, identifies launch-impacting security and data-safety risks, explains them in plain language, and produces bounded fix tasks that a coding Agent can handle after human confirmation.
+It turns project evidence into a launch decision, top risks, bounded coding-Agent fix tasks, and a retest checklist.
+
+## Status
+
+Current maturity:
+
+```text
+Core capability: present
+Lite package boundary: verified
+RC hardening: simulated controlled-pilot readiness
+Public GA readiness: not claimed
+```
+
+The latest RC hardening status is `READY_FOR_CONTROLLED_EXTERNAL_PILOT_SIMULATED`. Simulated sub-agent sessions are useful maintainer evidence, but they are not the same as real external blind user validation.
 
 ## Default Lite Package
 
-The default Lite package is prompt-only and Agent-native. It does not require the Python CLI, repository tests, scorer, calibration data, or release verifier.
+The default Lite package is **prompt-only and Agent-native**. It does not require users to install the Python CLI, run tests, inspect scorer output, read calibration data, or use the release verifier.
 
 Use it like this:
 
 1. Install or copy the Lite package into your Agent environment.
 2. Ask the Agent to review your project with `examples/lite_review_prompt.md`.
-3. Read the four-file review shape the Agent produces.
+3. Read the four-file review shape.
 
-Use this starter prompt:
+Starter prompt:
 
 ```text
 Review this project for launch-blocking security risks.
@@ -27,7 +45,7 @@ Tell me whether it can safely launch, explain the top security and data-safety r
 produce bounded coding-Agent fix tasks after human confirmation, and produce a retest checklist.
 ```
 
-Expected output shape:
+Expected output:
 
 ```text
 lite_review/
@@ -38,84 +56,51 @@ lite_review/
   evidence/
 ```
 
-The Lite bundle keeps machine-readable evidence under `evidence/`, but first-time users do not need to understand fixtures, scoring matrices, calibration ledgers, or release verification to get a launch decision.
-
 ## Optional Core-Powered Path
 
-The full repository also provides a runnable CLI overlay. Use it when you cloned the source repository and want deterministic local evidence generation:
+The full repository provides a runnable CLI overlay for deterministic local evidence generation:
 
 ```powershell
 $env:PYTHONPATH = "src"
 py -3 -m vibesec.cli lite-review .\my-project --output .\lite_review --no-adapters
 ```
 
-The CLI is optional repository infrastructure, not a requirement for the default prompt-only Lite package.
+The CLI is repository infrastructure. It is not required for the default prompt-only Skill package.
 
-## Decision Meanings
+## Launch Decisions
 
 - `BLOCK`: do not launch yet; one or more findings currently block launch.
 - `REVIEW`: do not treat as launch-ready yet; human confirmation or missing evidence remains.
-- `PASS_WITH_WARNINGS`: no launch-blocking finding is present, but warnings or downgrade/suppression candidates need review.
+- `PASS_WITH_WARNINGS`: no launch blocker is present, but warnings remain.
 - `PASS`: no material launch risk was found in the reviewed evidence.
 
-## Safe Agent Fix Boundary
+## Safety Boundary
 
 `agent_fix_plan.md` is a bounded repair plan, not permission for blind edits.
 
-- Confirm the evidence before asking a coding Agent to change the project.
+- Confirm evidence before asking a coding Agent to change the project.
 - Do not auto-write suppressions.
 - Do not broaden permissions, remove validation, add bypasses, or mutate production systems while fixing.
 - Retest with `retest_checklist.md` after fixes.
+- Do not treat VibeSec Gate as a professional security certification, penetration test, legal review, or compliance attestation.
 
-VibeSec Gate is not a professional security certification, penetration test, legal review, or compliance attestation.
+## What It Reviews
 
-## When To Use It
+VibeSec Gate focuses on launch-impacting issues:
 
-VibeSec Gate is useful for:
+- exposed API keys, service-role keys, database URLs, and credentials;
+- missing auth, broken object ownership checks, and unsafe database rules;
+- risky CORS, cookie, session, header, upload, logging, and deployment config;
+- prompt or prompt-log exposure;
+- excessive Agent, MCP/IPC, Electron, shell, file, email, database, or payment tool authority;
+- uncertainty that needs human confirmation before launch.
 
-- AI-built web apps, SaaS products, local tools, and prototypes before sharing or launch;
-- projects with authentication, user data, uploads, logs, payments, or deployment secrets;
-- Supabase, Firebase, database-rule, object-ownership, and server-side authorization checks;
-- AI Agent, MCP/IPC, Electron, desktop, local file, shell, email, database, or payment tool surfaces;
-- teams using Codex, Claude, Cursor, Gemini CLI, or similar coding Agents to review and fix generated code.
-
-It focuses on launch-impacting issues such as exposed keys, missing auth, broken authorization, unsafe database rules, risky CORS/cookie/session/header/upload config, prompt or prompt-log exposure, excessive Agent authority, MCP/IPC boundary mistakes, and Electron/Desktop permission issues.
-
-## Powered By The Core Engine
-
-The Lite path is the user-facing surface over a heavier review system. The repository still contains the core engine, schemas, fixtures, tests, quality scoring, calibration workflows, and release verifier used by maintainers to keep reviews repeatable.
-
-Maintainer review outputs include `llm_review_packet.json`, which carries product context and evidence for deeper LLM-native review workflows.
-
-Those internals support quality, but they are not the first user workflow.
-
-## Source Checkout Commands
+## Verify Locally
 
 Install for local development:
 
 ```bash
 python -m pip install -e .
-```
-
-Run the Lite path without installation:
-
-```powershell
-$env:PYTHONPATH = "src"
-py -3 -m vibesec.cli lite-review .\my-project --output .\lite_review --no-adapters
-```
-
-Use the lower-level CLI when maintaining or debugging the engine:
-
-```bash
-vibesec scan ./my-project --output ./outputs
-vibesec review ./outputs/findings.json --project ./my-project --output ./outputs-review --include-p2 --offline --reviewer-rule-based --model-provider none
-vibesec review-validate ./outputs-review
-```
-
-Before a release candidate from the full repository:
-
-```powershell
-py -3 scripts\verify_release.py
 ```
 
 Check the Lite package boundary:
@@ -124,28 +109,61 @@ Check the Lite package boundary:
 py -3 scripts\verify_lite_package.py
 ```
 
+Run the focused Lite validation suite:
+
+```powershell
+py -3 -m pytest tests/test_lite_package_verifier.py tests/test_lite_release_validation.py tests/test_lite_review_bundle.py tests/test_lite_rc_hardening.py
+```
+
+Run the broader release verifier:
+
+```powershell
+py -3 scripts\verify_release.py
+```
+
+## Repository Layout
+
+```text
+.
+├── SKILL.md                         # Root Skill behavior contract
+├── README.md                        # GitHub entry point
+├── examples/                        # User-facing prompt examples
+├── skill/                           # Installable Skill resources
+├── src/vibesec/                     # Core CLI and review engine
+├── scripts/                         # Maintainer validation and release tools
+├── tests/                           # Regression and release-hardening tests
+├── docs/usage/                      # User and operator guides
+├── docs/design/                     # Architecture and productization plans
+├── docs/maintainers/                # Maintainer workflows and release evidence process
+└── .github/                         # CI, issue templates, and PR governance
+```
+
+Generated folders such as `outputs/` and `test output/` are intentionally ignored by Git.
+
 ## Documentation
 
-User path:
+Start here:
 
-- `docs/usage/lite_quickstart.md`
-- `examples/lite_review_prompt.md`
-- `docs/usage/agent_review_cookbook.md`
+- [Lite quickstart](docs/usage/lite_quickstart.md)
+- [Lite review prompt](examples/lite_review_prompt.md)
+- [Agent review cookbook](docs/usage/agent_review_cookbook.md)
+- [Documentation index](docs/README.md)
 
-Package boundary:
+Maintainers:
 
-- `docs/design/lite_skill_package_manifest.md`
-- `docs/maintainers/lite_package_verification.md`
+- [Lite package manifest](docs/design/lite_skill_package_manifest.md)
+- [Lite package verification](docs/maintainers/lite_package_verification.md)
+- [External pilot protocol](docs/maintainers/lite_external_pilot_protocol.md)
+- [Release verification](docs/maintainers/release_verification.md)
 
-Maintainer path:
+## Governance
 
-- `docs/usage/quickstart.md`
-- `docs/usage/examples.md`
-- `docs/usage/verification.md`
-- `docs/usage/llm_review_contract.md`
-- `docs/maintainers/release_verification.md`
-- `docs/maintainers/llm_quality_scoring.md`
-- `docs/maintainers/host_agent_calibration.md`
-- `docs/maintainers/fixture_authoring.md`
-- `docs/maintainers/release_boundary_cleanup.md`
-- `docs/design/model_invocation_strategy.md`
+- [Contributing guide](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
+- [Roadmap](ROADMAP.md)
+- [Changelog](CHANGELOG.md)
+
+## License
+
+No open-source license has been selected yet. Until a `LICENSE` file is added, do not assume reuse, redistribution, or relicensing rights.
+

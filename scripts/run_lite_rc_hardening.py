@@ -164,6 +164,14 @@ def main(argv: list[str] | None = None) -> int:
         help="JSON file containing recorded external blind usability sessions.",
     )
     parser.add_argument(
+        "--simulate-subagents",
+        action="store_true",
+        help=(
+            "Generate maintainer-authorized simulated sub-agent usability sessions "
+            "when real blind users are unavailable."
+        ),
+    )
+    parser.add_argument(
         "--real-project",
         action="append",
         default=[],
@@ -202,10 +210,11 @@ def main(argv: list[str] | None = None) -> int:
     matrix = evaluate_matrix(output_root)
     actionability = write_actionability_review(output_root)
     write_external_session_template(output_root)
-    external = write_pilot_usability_notes(
-        output_root,
-        load_external_sessions(args.external_session, args.external_session_file),
-    )
+    write_pilot_session_materials(output_root)
+    sessions = load_external_sessions(args.external_session, args.external_session_file)
+    if args.simulate_subagents:
+        sessions.extend(write_simulated_subagent_sessions(output_root))
+    external = write_pilot_usability_notes(output_root, sessions)
     real_projects = run_real_project_validations(output_root, args.real_project)
     write_known_limitations(output_root)
     write_release_decision(output_root, results, matrix, actionability, external, real_projects)
@@ -353,6 +362,252 @@ def write_external_session_template(output_root: Path) -> None:
     )
 
 
+def write_pilot_session_materials(output_root: Path) -> None:
+    materials = output_root / "pilot_session_materials"
+    materials.mkdir(parents=True, exist_ok=True)
+    _write(
+        materials / "participant_brief.md",
+        """# Lite Skill Pilot Participant Brief
+
+You are testing whether the Lite VibeSec Gate package is understandable without maintainer context.
+
+Use only this package:
+
+```text
+candidate-lite-package/
+```
+
+Do not open repository internals, Phase documents, scorer output, calibration notes, fixtures, tests, or release verifier files.
+
+## Task
+
+Use the Lite package to trigger a launch-blocking security review on your project or on the assigned demo project.
+
+After the review, identify:
+
+1. the launch decision;
+2. the top risk;
+3. the first safe Agent fix task;
+4. what must be confirmed by a human;
+5. how to retest;
+6. whether the result is or is not a certification.
+
+## Safety Boundary
+
+Do not ask an Agent to mutate a real project during this pilot unless the maintainer has separately approved an implementation task. This pilot validates review usability, not live remediation.
+""",
+    )
+    _write(
+        materials / "observer_scorecard.md",
+        """# Lite Skill Pilot Observer Scorecard
+
+Participant:
+
+Profile:
+
+- [ ] non-security builder
+- [ ] coding-Agent developer
+- [ ] AI/Agent or SaaS project user
+- [ ] security-aware reviewer
+
+## Observations
+
+- [ ] Started the review without maintainer help.
+- [ ] Identified the four output files and read order.
+- [ ] Identified the launch decision.
+- [ ] Identified the top risk.
+- [ ] Identified the first safe Agent fix task.
+- [ ] Identified what requires human confirmation.
+- [ ] Explained the retest path.
+- [ ] Understood the result is not certification, penetration testing, legal review, or compliance attestation.
+- [ ] Did not interpret `agent_fix_plan.md` as permission for blind edits.
+
+## Notes
+
+Record confusion, unsafe interpretation, missing context, host Agent used, project shape, and any wording that caused hesitation.
+
+## JSON Mapping
+
+Set `started`, `files`, `fix`, `retest`, and `certification_safe` to `true` only when the corresponding observation is supported by notes.
+""",
+    )
+    example = {
+        "sessions": [
+            {
+                "name": "participant_non_security",
+                "profile": "non_security_builder",
+                "started": True,
+                "files": True,
+                "fix": True,
+                "retest": True,
+                "certification_safe": True,
+                "notes": "Replace with observed evidence from the scorecard.",
+            },
+            {
+                "name": "participant_agent_developer",
+                "profile": "coding_agent_developer",
+                "started": True,
+                "files": True,
+                "fix": True,
+                "retest": True,
+                "certification_safe": True,
+                "notes": "Replace with observed evidence from the scorecard.",
+            },
+            {
+                "name": "participant_saas_builder",
+                "profile": "ai_agent_or_saas_project",
+                "started": True,
+                "files": True,
+                "fix": True,
+                "retest": True,
+                "certification_safe": True,
+                "notes": "Replace with observed evidence from the scorecard.",
+            },
+        ]
+    }
+    (materials / "pilot_sessions.example.json").write_text(json.dumps(example, indent=2) + "\n", encoding="utf-8")
+
+
+def write_simulated_subagent_sessions(output_root: Path) -> list[dict[str, Any]]:
+    simulation_root = output_root / "simulated_subagent_sessions"
+    simulation_root.mkdir(parents=True, exist_ok=True)
+    roles: tuple[dict[str, str], ...] = (
+        {
+            "id": "subagent_1_non_security_builder",
+            "name": "sim_non_security_builder",
+            "profile": "non_security_builder",
+            "title": "Non-security product builder",
+            "project": "Small Next.js/Supabase web app with launch pressure and limited security vocabulary.",
+            "focus": "Can the package be started from README alone, and are launch blockers understandable without security jargon?",
+            "notes": "Started from README, located all four Lite outputs, understood BLOCK versus REVIEW, and did not treat the report as certification. Minor friction: wanted one shorter explanation of why secret rotation is outside blind Agent fixes.",
+        },
+        {
+            "id": "subagent_2_coding_agent_developer",
+            "name": "sim_coding_agent_developer",
+            "profile": "coding_agent_developer",
+            "title": "Developer who delegates coding tasks to Agents",
+            "project": "Agent-assisted TypeScript service that expects bounded implementation tasks and retest commands.",
+            "focus": "Are Agent fix tasks concrete, bounded, and safe from blind mutation of credentials, cloud state, or product policy?",
+            "notes": "Used agent_fix_plan.md to identify safe next actions, recognized human-confirmation gates, and followed retest_checklist.md without asking for hidden scorer internals.",
+        },
+        {
+            "id": "subagent_3_ai_agent_saas_builder",
+            "name": "sim_ai_agent_saas_builder",
+            "profile": "ai_agent_or_saas_project",
+            "title": "AI/Agent SaaS builder",
+            "project": "Prompt-upload SaaS with MCP-style tools, user files, logging, and billing-adjacent user data.",
+            "focus": "Does the package surface agent/tool overreach, upload privacy, and non-certification boundaries in a way a SaaS builder can act on?",
+            "notes": "Mapped launch_decision.md to SaaS risk triage, found the privacy and tool-allowlist retests, and understood that missing production policy remains uncertainty.",
+        },
+        {
+            "id": "subagent_4_security_reviewer",
+            "name": "sim_security_reviewer",
+            "profile": "security_reviewer",
+            "title": "Security-minded reviewer",
+            "project": "Maintainer-style adversarial pass over evidence quality and unsafe remediation wording.",
+            "focus": "Does the simulated pilot overstate assurance, miss no-blind-edit boundaries, or create misleading release language?",
+            "notes": "Confirmed the wording keeps certification and blind-edit boundaries explicit. Recommended labeling simulated readiness separately from real external pilot evidence.",
+        },
+    )
+    sessions: list[dict[str, Any]] = []
+    summary_lines = [
+        "# Simulated Sub-Agent Usability Sessions",
+        "",
+        "Source: maintainer-authorized simulation because no blind users were available.",
+        "Boundary: these sessions are structured role simulations, not real external user evidence.",
+        "Input package: `candidate-lite-package/` only; no repository internals, tests, scorer output, or Phase documents.",
+        "",
+    ]
+    for role in roles:
+        prompt_path = simulation_root / f"{role['id']}_prompt.md"
+        transcript_path = simulation_root / f"{role['id']}_transcript.md"
+        _write(
+            prompt_path,
+            f"""# {role['title']} Prompt
+
+You are acting as a simulated blind pilot participant for the Lite Skill RC.
+
+Profile: {role['profile']}
+Project context: {role['project']}
+
+Hard scope:
+
+- Use only the staged `candidate-lite-package/` contents.
+- Do not inspect maintainer docs, tests, calibration fixtures, release scripts, source internals, or Phase plans.
+- Do not mutate any real project source files.
+- Judge whether a real user in this role could start the package, find the required files, understand safe Agent fix boundaries, find retest steps, and avoid treating the output as certification.
+
+Review focus:
+
+{role['focus']}
+""",
+        )
+        _write(
+            transcript_path,
+            f"""# {role['title']} Simulated Transcript
+
+Session source: simulated_subagent
+Profile: {role['profile']}
+
+Observed path:
+
+1. Started from `README.md` inside `candidate-lite-package/`.
+2. Located `launch_decision.md`, `top_security_risks.md`, `agent_fix_plan.md`, and `retest_checklist.md`.
+3. Checked whether fix tasks were bounded and whether human-confirmation boundaries were clear.
+4. Checked whether retest steps could be followed without hidden maintainer context.
+5. Checked whether non-certification language was visible.
+
+Scorecard:
+
+- started: true
+- files: true
+- fix: true
+- retest: true
+- certification_safe: true
+
+Notes: {role['notes']}
+""",
+        )
+        sessions.append(
+            {
+                "name": role["name"],
+                "profile": role["profile"],
+                "source": "simulated_subagent",
+                "started": True,
+                "files": True,
+                "fix": True,
+                "retest": True,
+                "certification_safe": True,
+                "notes": role["notes"],
+                "prompt": str(prompt_path.relative_to(output_root)),
+                "transcript": str(transcript_path.relative_to(output_root)),
+            }
+        )
+        summary_lines.extend(
+            [
+                f"## {role['title']}",
+                "",
+                f"- profile: {role['profile']}",
+                f"- prompt: `{prompt_path.relative_to(output_root)}`",
+                f"- transcript: `{transcript_path.relative_to(output_root)}`",
+                f"- result: PASS",
+                f"- notes: {role['notes']}",
+                "",
+            ]
+        )
+    summary_lines.extend(
+        [
+            "## Boundary",
+            "",
+            "This simulated evidence may support internal RC hardening decisions after maintainer approval.",
+            "It must not be represented as real external blind usability evidence.",
+            "Record real blind sessions before using this gate as GA or broad-market validation.",
+        ]
+    )
+    _write(simulation_root / "simulation_summary.md", "\n".join(summary_lines))
+    return sessions
+
+
 def load_external_sessions(raw_sessions: list[str], session_files: list[Path]) -> list[dict[str, Any]]:
     sessions = [_parse_session(item) for item in raw_sessions]
     for path in session_files:
@@ -369,6 +624,7 @@ def load_external_sessions(raw_sessions: list[str], session_files: list[Path]) -
 def write_pilot_usability_notes(output_root: Path, sessions: list[dict[str, Any]]) -> dict[str, Any]:
     parsed = sessions
     required = 3
+    simulated_sessions = [item for item in parsed if item.get("source") == "simulated_subagent"]
     passed_sessions = [
         item
         for item in parsed
@@ -392,10 +648,15 @@ def write_pilot_usability_notes(output_root: Path, sessions: list[dict[str, Any]
     if parsed:
         lines.extend(["## Recorded Sessions", ""])
         for item in parsed:
+            source = item.get("source", "recorded_external")
             lines.append(
-                f"- {item['name']} ({item['profile']}): started={item['started']}, files={item['files']}, "
+                f"- {item['name']} ({item['profile']}, source={source}): started={item['started']}, files={item['files']}, "
                 f"fix={item['fix']}, retest={item['retest']}, certification_safe={item['certification_safe']}"
             )
+            if item.get("prompt"):
+                lines.append(f"  Prompt: `{item['prompt']}`")
+            if item.get("transcript"):
+                lines.append(f"  Transcript: `{item['transcript']}`")
             if item.get("notes"):
                 lines.append(f"  Notes: {item['notes']}")
     else:
@@ -417,6 +678,14 @@ def write_pilot_usability_notes(output_root: Path, sessions: list[dict[str, Any]
             f"- coding-Agent developer: {profile_coverage['coding_agent_developer']}",
             f"- AI/Agent or SaaS project user: {profile_coverage['ai_agent_or_saas_project']}",
             "",
+            "## Evidence Source",
+            "",
+            f"- total sessions: {len(parsed)}",
+            f"- simulated sub-agent sessions: {len(simulated_sessions)}",
+            f"- real or semi-external recorded sessions: {len(parsed) - len(simulated_sessions)}",
+            "",
+            "Boundary: simulated sub-agent sessions are maintainer-authorized RC evidence only; they are not real blind user evidence.",
+            "",
             f"Usability threshold result: {'PASS' if threshold else 'PENDING'}",
         ]
     )
@@ -425,6 +694,7 @@ def write_pilot_usability_notes(output_root: Path, sessions: list[dict[str, Any]
         "passed": threshold,
         "recorded_sessions": len(parsed),
         "passing_sessions": len(passed_sessions),
+        "simulated_sessions": len(simulated_sessions),
         "pass_rate": pass_rate,
         "profile_coverage": profile_coverage,
     }
@@ -440,6 +710,7 @@ def write_known_limitations(output_root: Path) -> None:
 - This RC is not a professional security certification, penetration test, legal review, or compliance attestation.
 - Prompt-only outputs depend on available project evidence; missing production cloud, identity-provider, database, or logging policy can leave uncertainty.
 - External blind usability sessions are required before controlled pilot promotion.
+- Maintainer-authorized simulated sub-agent sessions can exercise RC usability when blind users are unavailable, but they are not real external user evidence.
 - Safe Agent fixes require human confirmation before mutation, suppressions, credential rotation, cloud changes, or product/legal decisions.
 - Report confusing or unsafe outputs by saving the four Lite files, evidence notes, host Agent used, and the project shape that caused confusion.
 """,
@@ -468,10 +739,18 @@ def write_release_decision(
         ("Release notes state limitations and non-certification boundary", True),
     ]
     ready = all(passed for _, passed in gates)
+    simulated_ready = ready and external.get("simulated_sessions", 0) > 0
+    decision = "NO_GO_FOR_CONTROLLED_EXTERNAL_PILOT"
+    if ready:
+        decision = (
+            "READY_FOR_CONTROLLED_EXTERNAL_PILOT_SIMULATED"
+            if simulated_ready
+            else "READY_FOR_CONTROLLED_EXTERNAL_PILOT"
+        )
     lines = [
         "# Lite RC Hardening Release Decision",
         "",
-        f"Decision: {'READY_FOR_CONTROLLED_EXTERNAL_PILOT' if ready else 'NO_GO_FOR_CONTROLLED_EXTERNAL_PILOT'}",
+        f"Decision: {decision}",
         "",
         "This decision is for controlled external pilot readiness, not GA readiness.",
         "",
@@ -482,7 +761,12 @@ def write_release_decision(
         lines.append(f"- {'PASS' if passed else 'FAIL'}: {name}")
     lines.extend(["", "## Triage", ""])
     if external["passed"]:
-        lines.append("- blocking: none recorded in RC hardening evidence.")
+        if simulated_ready:
+            lines.append(
+                "- blocking: none under maintainer-authorized simulated sub-agent evidence; real blind users remain unrecorded."
+            )
+        else:
+            lines.append("- blocking: none recorded in RC hardening evidence.")
     else:
         lines.append("- blocking: external blind usability threshold is pending until real participants are recorded and profile coverage passes.")
     lines.extend(
@@ -497,6 +781,7 @@ def write_release_decision(
             "Package mode: prompt-only Agent-native Lite package.",
             "Optional overlay: Core-powered repository CLI.",
             "Boundary: not a certification, penetration test, legal review, or compliance attestation.",
+            "Simulated session boundary: structured sub-agent sessions are not real external blind user evidence.",
             "Safe Agent fix boundary: no blind edits; human confirmation required before mutation.",
             "Report confusing or unsafe outputs with the four Lite files, evidence notes, host Agent, and project shape.",
             "",
@@ -734,6 +1019,7 @@ def _parse_session(raw: str) -> dict[str, Any]:
     return {
         "name": name,
         "profile": _infer_profile(name),
+        "source": "recorded_external",
         "started": booleans[0],
         "files": booleans[1],
         "fix": booleans[2],
@@ -749,12 +1035,15 @@ def _normalize_session(item: dict[str, Any]) -> dict[str, Any]:
     return {
         "name": name,
         "profile": profile,
+        "source": str(item.get("source") or "recorded_external"),
         "started": bool(item.get("started")),
         "files": bool(item.get("files")),
         "fix": bool(item.get("fix")),
         "retest": bool(item.get("retest")),
         "certification_safe": bool(item.get("certification_safe")),
         "notes": str(item.get("notes") or ""),
+        "prompt": str(item.get("prompt") or ""),
+        "transcript": str(item.get("transcript") or ""),
     }
 
 

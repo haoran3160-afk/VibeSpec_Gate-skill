@@ -1,0 +1,46 @@
+name: Security review feedback
+description: Report confusing, unsafe, over-blocking, or under-blocking review output.
+title: "[Review feedback]: "
+labels: ["review-feedback"]
+body:
+  - type: textarea
+    id: project_shape
+    attributes:
+      label: Project shape
+      description: Framework, auth model, database, Agent/tool surfaces, and deployment context.
+    validations:
+      required: true
+  - type: dropdown
+    id: decision
+    attributes:
+      label: Launch decision produced
+      options:
+        - BLOCK
+        - REVIEW
+        - PASS_WITH_WARNINGS
+        - PASS
+        - No decision produced
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What seems wrong or confusing?
+      description: Explain whether the output was unsafe, too vague, over-blocking, or too optimistic.
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Lite files reviewed
+      description: Summarize relevant parts of launch_decision.md, top_security_risks.md, agent_fix_plan.md, and retest_checklist.md. Mask secrets.
+  - type: checkboxes
+    id: boundary
+    attributes:
+      label: Boundary
+      options:
+        - label: I have masked secrets and private data.
+          required: true
+        - label: I understand this is not a certification or penetration test.
+          required: true
+

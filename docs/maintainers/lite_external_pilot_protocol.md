@@ -9,6 +9,7 @@ test output/lite_rc_hardening/2026-07-08/release_decision.md
 ```
 
 Do not promote to controlled external pilot while that file says `NO_GO_FOR_CONTROLLED_EXTERNAL_PILOT`.
+If blind users are unavailable and the maintainer explicitly accepts simulation, the runner may produce `READY_FOR_CONTROLLED_EXTERNAL_PILOT_SIMULATED`; treat that as internal RC hardening evidence, not as real external user validation.
 
 ## Participant Requirements
 
@@ -43,6 +44,17 @@ Do not explain:
 
 Ask them to trigger a launch-blocking review on their project or on an agreed demo project.
 
+The RC runner generates supporting pilot materials for the maintainer:
+
+```text
+test output/lite_rc_hardening/2026-07-08/pilot_session_materials/
+  participant_brief.md
+  observer_scorecard.md
+  pilot_sessions.example.json
+```
+
+Use `participant_brief.md` as the participant-facing task sheet. Use `observer_scorecard.md` to record what happened. Do not include these materials in the Lite package itself unless a future manifest update explicitly allows them.
+
 ## Questions To Answer
 
 Record whether the participant can identify:
@@ -64,6 +76,37 @@ The external blind usability gate passes only when:
 - no participant interprets the result as certification;
 - no participant believes `agent_fix_plan.md` permits blind edits;
 - at least 80% can explain the retest path.
+
+## Simulated Sub-Agent Fallback
+
+When no blind users are available, maintainers may run a structured simulation to exercise the same usability gate:
+
+```powershell
+py -3 scripts\run_lite_rc_hardening.py --simulate-subagents
+```
+
+The runner generates:
+
+```text
+test output/lite_rc_hardening/2026-07-08/simulated_subagent_sessions/
+  simulation_summary.md
+  *_prompt.md
+  *_transcript.md
+```
+
+Simulation roles cover:
+
+- non-security product builder;
+- developer who uses coding Agents;
+- AI/Agent or SaaS builder;
+- security-minded reviewer.
+
+Boundary:
+
+- simulated sessions must be marked `source=simulated_subagent`;
+- simulated sessions may unblock maintainer-approved RC hardening when blind users are unavailable;
+- simulated sessions are not real external blind user evidence;
+- record real blind sessions before treating the gate as GA or broad-market validation.
 
 ## Recording Format
 
@@ -146,6 +189,8 @@ Do not promote if:
 - any user believes Agent fix tasks allow blind edits;
 - two or more participants cannot trigger the review without maintainer help;
 - repeated confusion points to README, `SKILL.md`, quickstart, or prompt wording.
+
+For a maintainer-approved simulated fallback, the equivalent no-go is `NO_GO_FOR_CONTROLLED_EXTERNAL_PILOT`; the successful simulated state is labeled separately as `READY_FOR_CONTROLLED_EXTERNAL_PILOT_SIMULATED`.
 
 ## Evidence
 
