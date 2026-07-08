@@ -2,6 +2,8 @@
 
 Date: 2026-07-06
 
+> Historical note: this document reviewed the original MVP/CLI design. The current product positioning is broader: VibeSec Gate is an LLM-native security review Skill for vibe-coded products. Treat references to local static scanning as implementation baseline and evidence collection, not as the full product identity.
+
 ## 1. Fit with OWASP, NIST, and DevSecOps Practice
 
 The original design aligns well with OWASP Top 10, OWASP API Security Top 10, OWASP ASVS, OWASP LLM/GenAI Top 10, and NIST SSDF in broad scope:

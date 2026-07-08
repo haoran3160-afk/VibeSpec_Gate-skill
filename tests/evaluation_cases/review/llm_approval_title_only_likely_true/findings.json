@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-LLM-004",
+    "title": "Agent tool lacks approval before file write",
+    "severity": "P1",
+    "category": "LLM/Agent",
+    "affected_files": ["src/agent.ts:4"],
+    "evidence": "scanner title mentions approval, code writes file directly",
+    "technical_reason": "Generic approval text in a finding title is not a runtime confirmation boundary.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-llm-approval-title-only",
+    "gate_relevant": true
+  }
+]

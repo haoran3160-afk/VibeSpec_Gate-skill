@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "project_profile": {"project_type": "SaaS Web App", "technologies": ["Next.js"], "launch_stage": "public_launch", "risk_level": "L3"},
+  "product_context": {"review_positioning": "LLM-native launch-risk review using deterministic findings as evidence hints."},
+  "sensitive_assets": [{"asset": "customer orders", "source": "VSG-AUTH-001", "reason": "API route reads user data."}],
+  "attack_surfaces": [{"surface": "Authentication or authorization boundary", "source": "VSG-AUTH-001", "reason": "API route may read data without session checks."}],
+  "auth_and_data_flow": {"baseline_findings": [{"finding_id": "VSG-AUTH-001", "title": "API route may miss authentication", "affected_files": ["src/app/api/orders/route.ts"], "evidence_role": "baseline_hint_not_final_judgment"}], "missing_context_questions": ["Is authentication enforced by middleware before this route?"]},
+  "agent_tool_surfaces": [],
+  "evidence_files": [{"path": "src/app/api/orders/route.ts", "finding_id": "VSG-AUTH-001", "snippet_start_line": 8, "snippet_end_line": 35, "redacted": true}],
+  "rule_findings": [{"finding_id": "VSG-AUTH-001", "fingerprint": "missing-auth", "title": "API route may miss authentication", "severity": "P1", "category": "Auth/Data", "source_type": "runtime", "rubric": "auth", "baseline_verdict": "needs_human_review", "baseline_action": "manual_review", "evidence_role": "baseline_hint_not_final_judgment", "reason": "Route reads order data but packet lacks direct auth evidence."}],
+  "review_questions": ["Is middleware guaranteed for this route?"],
+  "requested_outputs": ["nontechnical_user_summary.md", "launch_risk_report.md", "security_review_findings.json", "agent_fix_plan.md", "retest_checklist.md"],
+  "safety_boundaries": ["Use rule findings as evidence hints and baseline signals, not final truth."]
+}

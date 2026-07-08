@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "case_id": "placeholder_secret_overblocks",
+  "risk_domain": "secrets",
+  "expected_launch_decision": "PASS_WITH_WARNINGS",
+  "minimum_score": 80,
+  "expected_pass": false,
+  "expected_failed_checks": ["launch_decision", "launch_decision_consistency"],
+  "required_finding_ids": ["VSG-SEC-002"],
+  "required_evidence_files": [".env.example"],
+  "hard_fail_checks": ["launch_decision", "launch_decision_consistency"],
+  "must_include_phrases": ["safe_to_auto_suppress"],
+  "must_not_include_phrases": ["This is a contract stub, not a completed LLM security review.", "launch-ready without review"]
+}

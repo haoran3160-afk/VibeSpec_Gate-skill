@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "case_id": "secret_runtime_overoptimistic",
+  "risk_domain": "secrets",
+  "expected_launch_decision": "BLOCK",
+  "minimum_score": 80,
+  "expected_pass": false,
+  "expected_failed_checks": ["launch_decision", "launch_decision_consistency", "p1_cross_output_coverage"],
+  "required_finding_ids": ["VSG-SEC-001"],
+  "required_evidence_files": ["src/server.ts"],
+  "hard_fail_checks": ["launch_decision", "launch_decision_consistency", "p1_cross_output_coverage"],
+  "must_include_phrases": ["safe_to_auto_suppress"],
+  "must_not_include_phrases": ["This is a contract stub, not a completed LLM security review.", "launch-ready without review"]
+}

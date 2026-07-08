@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-CONFIG-001",
+    "title": "Debug configuration may be enabled",
+    "severity": "P1",
+    "category": "Config",
+    "affected_files": ["src/config.ts:1"],
+    "evidence": "debug mode marker",
+    "technical_reason": "Debug configuration needs launch-environment confirmation.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-config-debug-downgrade",
+    "gate_relevant": true
+  }
+]

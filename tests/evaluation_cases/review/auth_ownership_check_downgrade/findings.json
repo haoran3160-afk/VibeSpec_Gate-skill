@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-AUTH-003",
+    "title": "API route may lack object ownership check",
+    "severity": "P1",
+    "category": "Authentication",
+    "affected_files": ["app/api/items/route.ts:5"],
+    "evidence": "query filters by user_id",
+    "technical_reason": "Ownership checks downgrade IDOR risk when scoped to the authenticated user.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-auth-ownership-check",
+    "gate_relevant": true
+  }
+]

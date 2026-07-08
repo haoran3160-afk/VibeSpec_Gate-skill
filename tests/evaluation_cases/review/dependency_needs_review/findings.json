@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-DEP-001",
+    "title": "Dependency finding needs package context",
+    "severity": "P1",
+    "category": "Dependency",
+    "affected_files": ["package.json:3"],
+    "evidence": "package version may be vulnerable",
+    "technical_reason": "Dependency risk needs package and lockfile context before prioritizing.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-dependency-needs-review",
+    "gate_relevant": true
+  }
+]

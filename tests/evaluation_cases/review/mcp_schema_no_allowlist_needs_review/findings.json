@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-IPC-004",
+    "title": "MCP tool schema is present but allowlist is unclear",
+    "severity": "P1",
+    "category": "MCP/IPC",
+    "affected_files": ["server.py:4"],
+    "evidence": "schema validation present without allowlist",
+    "technical_reason": "Schema validation alone does not constrain available tool names.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-mcp-schema-no-allowlist",
+    "gate_relevant": true
+  }
+]

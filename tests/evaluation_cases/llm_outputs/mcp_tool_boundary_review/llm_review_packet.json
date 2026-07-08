@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "project_profile": {"project_type": "MCP / IPC Tool", "technologies": ["Node.js"], "launch_stage": "prelaunch", "risk_level": "L3"},
+  "product_context": {"review_positioning": "LLM-native launch-risk review using deterministic findings as evidence hints."},
+  "sensitive_assets": [{"asset": "local file operations", "source": "VSG-MCP-001", "reason": "Tool can access local paths."}],
+  "attack_surfaces": [{"surface": "MCP/IPC protocol boundary", "source": "VSG-MCP-001", "reason": "Tool call boundary needs schema and allowlist."}],
+  "auth_and_data_flow": {"baseline_findings": [], "missing_context_questions": ["Who can call the MCP tool?"]},
+  "agent_tool_surfaces": [{"finding_id": "VSG-MCP-001", "title": "MCP file tool boundary needs review", "surface_type": "mcp_ipc", "affected_files": ["src/mcp/server.ts"], "evidence_role": "baseline_hint_not_final_judgment"}],
+  "evidence_files": [{"path": "src/mcp/server.ts", "finding_id": "VSG-MCP-001", "snippet_start_line": 20, "snippet_end_line": 60, "redacted": true}],
+  "rule_findings": [{"finding_id": "VSG-MCP-001", "fingerprint": "mcp-boundary", "title": "MCP file tool boundary needs review", "severity": "P1", "category": "MCP/IPC", "source_type": "runtime", "rubric": "mcp", "baseline_verdict": "needs_human_review", "baseline_action": "manual_review", "evidence_role": "baseline_hint_not_final_judgment", "reason": "Packet lacks complete schema and allowlist evidence."}],
+  "review_questions": ["Is there an explicit tool allowlist?", "Are path arguments schema-validated and constrained?"],
+  "requested_outputs": ["nontechnical_user_summary.md", "launch_risk_report.md", "security_review_findings.json", "agent_fix_plan.md", "retest_checklist.md"],
+  "safety_boundaries": ["Use rule findings as evidence hints and baseline signals, not final truth.", "Do not provide offensive instructions."]
+}

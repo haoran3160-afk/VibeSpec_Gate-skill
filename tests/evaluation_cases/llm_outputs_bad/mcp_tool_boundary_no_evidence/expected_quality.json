@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "case_id": "mcp_tool_boundary_no_evidence",
+  "risk_domain": "mcp",
+  "expected_launch_decision": "REVIEW",
+  "minimum_score": 80,
+  "expected_pass": false,
+  "expected_failed_checks": ["must_include_phrases", "missing_evidence_acknowledged"],
+  "required_finding_ids": ["VSG-MCP-001"],
+  "required_evidence_files": ["src/mcp/server.ts"],
+  "hard_fail_checks": ["missing_evidence_acknowledged"],
+  "must_include_phrases": ["safe_to_auto_suppress", "allowlist"],
+  "must_not_include_phrases": ["This is a contract stub, not a completed LLM security review.", "launch-ready without review"]
+}

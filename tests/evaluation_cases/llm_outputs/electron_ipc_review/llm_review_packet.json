@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "project_profile": {"project_type": "Desktop/Electron App", "technologies": ["Electron"], "launch_stage": "public_launch", "risk_level": "L3"},
+  "product_context": {"review_positioning": "LLM-native launch-risk review using deterministic findings as evidence hints."},
+  "sensitive_assets": [{"asset": "local filesystem", "source": "VSG-ELECTRON-001", "reason": "IPC handler can reach local files."}],
+  "attack_surfaces": [{"surface": "Electron desktop boundary", "source": "VSG-ELECTRON-001", "reason": "Renderer/main boundary needs validation."}],
+  "auth_and_data_flow": {"baseline_findings": [], "missing_context_questions": ["Can renderer input choose arbitrary paths?"]},
+  "agent_tool_surfaces": [{"finding_id": "VSG-ELECTRON-001", "title": "Electron IPC file handler needs review", "surface_type": "desktop_electron", "affected_files": ["src/main/ipc.ts"], "evidence_role": "baseline_hint_not_final_judgment"}],
+  "evidence_files": [{"path": "src/main/ipc.ts", "finding_id": "VSG-ELECTRON-001", "snippet_start_line": 30, "snippet_end_line": 70, "redacted": true}],
+  "rule_findings": [{"finding_id": "VSG-ELECTRON-001", "fingerprint": "electron-ipc", "title": "Electron IPC file handler needs review", "severity": "P1", "category": "Desktop/Electron", "source_type": "runtime", "rubric": "desktop", "baseline_verdict": "needs_human_review", "baseline_action": "manual_review", "evidence_role": "baseline_hint_not_final_judgment", "reason": "IPC handler crosses renderer/main boundary."}],
+  "review_questions": ["Is contextIsolation enabled?", "Is the IPC path constrained to a user-selected workspace?"],
+  "requested_outputs": ["nontechnical_user_summary.md", "launch_risk_report.md", "security_review_findings.json", "agent_fix_plan.md", "retest_checklist.md"],
+  "safety_boundaries": ["Use rule findings as evidence hints and baseline signals, not final truth.", "Require human confirmation before changing desktop boundaries."]
+}

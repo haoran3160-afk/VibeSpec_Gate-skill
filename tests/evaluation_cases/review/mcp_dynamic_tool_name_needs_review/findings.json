@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-IPC-006",
+    "title": "MCP dynamic tool dispatch lacks allowlist",
+    "severity": "P1",
+    "category": "MCP/IPC",
+    "affected_files": ["server.py:6"],
+    "evidence": "client-provided tool name selects handler dynamically",
+    "technical_reason": "Dynamic dispatch needs an explicit allowlist before any tool call.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-mcp-dynamic-tool-name",
+    "gate_relevant": true
+  }
+]

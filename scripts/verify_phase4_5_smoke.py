@@ -103,8 +103,10 @@ def validate_review_output(output: Path) -> None:
     required = {
         "ai_review.json",
         "ai_review_summary.md",
+        "agent_review_decisions.json",
         "agent_review_decisions.md",
         "human_review_queue.md",
+        "llm_review_packet.json",
         "suppression_candidates.json",
         "review_packets.json",
     }

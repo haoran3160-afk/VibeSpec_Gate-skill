@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "project_profile": {"project_type": "SaaS Web App", "technologies": ["Node.js"], "launch_stage": "public_launch", "risk_level": "L3"},
+  "product_context": {"review_positioning": "LLM-native launch-risk review using deterministic findings as evidence hints."},
+  "sensitive_assets": [{"asset": "runtime API key", "source": "VSG-SEC-001", "reason": "Server source contains a provider-shaped secret."}],
+  "attack_surfaces": [{"surface": "Secret/config exposure surface", "source": "VSG-SEC-001", "reason": "Runtime code can leak a real credential."}],
+  "auth_and_data_flow": {"baseline_findings": [], "missing_context_questions": ["Was the exposed key active in production?"]},
+  "agent_tool_surfaces": [],
+  "evidence_files": [{"path": "src/server.ts", "finding_id": "VSG-SEC-001", "snippet_start_line": 12, "snippet_end_line": 18, "redacted": true}],
+  "rule_findings": [{"finding_id": "VSG-SEC-001", "fingerprint": "secret-runtime", "title": "Runtime provider secret in server source", "severity": "P1", "category": "Secrets", "source_type": "runtime", "rubric": "secret", "baseline_verdict": "likely_true", "baseline_action": "fix", "evidence_role": "baseline_hint_not_final_judgment", "reason": "Provider-shaped secret appears in runtime source."}],
+  "review_questions": ["Does this key require rotation before launch?", "Which deployment secret store should replace the literal?"],
+  "requested_outputs": ["nontechnical_user_summary.md", "launch_risk_report.md", "security_review_findings.json", "agent_fix_plan.md", "retest_checklist.md"],
+  "safety_boundaries": ["Use rule findings as evidence hints and baseline signals, not final truth.", "Do not provide offensive instructions.", "Do not auto-write suppression files."]
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "project_profile": {"project_type": "AI Agent", "technologies": ["TypeScript"], "launch_stage": "public_launch", "risk_level": "L3"},
+  "product_context": {"review_positioning": "LLM-native launch-risk review using deterministic findings as evidence hints."},
+  "sensitive_assets": [{"asset": "file and shell tools", "source": "VSG-AGENT-001", "reason": "Agent can call privileged tools."}],
+  "attack_surfaces": [{"surface": "LLM or Agent tool surface", "source": "VSG-AGENT-001", "reason": "Tool authority needs confirmation gates."}],
+  "auth_and_data_flow": {"baseline_findings": [], "missing_context_questions": ["Does every high-risk tool call require immediate user confirmation?"]},
+  "agent_tool_surfaces": [{"finding_id": "VSG-AGENT-001", "title": "Agent tool authority needs review", "surface_type": "llm_agent_tool", "affected_files": ["src/agent/tools.ts"], "evidence_role": "baseline_hint_not_final_judgment"}],
+  "evidence_files": [{"path": "src/agent/tools.ts", "finding_id": "VSG-AGENT-001", "snippet_start_line": 15, "snippet_end_line": 55, "redacted": true}],
+  "rule_findings": [{"finding_id": "VSG-AGENT-001", "fingerprint": "agent-tool-authority", "title": "Agent tool authority needs review", "severity": "P1", "category": "LLM", "source_type": "runtime", "rubric": "llm", "baseline_verdict": "likely_true", "baseline_action": "fix", "evidence_role": "baseline_hint_not_final_judgment", "reason": "Agent tools can perform privileged actions without clear confirmation evidence."}],
+  "review_questions": ["Which tools require immediate user confirmation?"],
+  "requested_outputs": ["nontechnical_user_summary.md", "launch_risk_report.md", "security_review_findings.json", "agent_fix_plan.md", "retest_checklist.md"],
+  "safety_boundaries": ["Use rule findings as evidence hints and baseline signals, not final truth."]
+}

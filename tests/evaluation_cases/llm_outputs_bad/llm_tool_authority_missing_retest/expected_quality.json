@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "case_id": "llm_tool_authority_missing_retest",
+  "risk_domain": "llm_agent",
+  "expected_launch_decision": "BLOCK",
+  "minimum_score": 80,
+  "expected_pass": false,
+  "expected_failed_checks": ["p1_cross_output_coverage", "retest_commands_present"],
+  "required_finding_ids": ["VSG-AGENT-001"],
+  "required_evidence_files": ["src/agent/tools.ts"],
+  "hard_fail_checks": ["p1_cross_output_coverage", "retest_commands_present"],
+  "must_include_phrases": ["safe_to_auto_suppress", "tool authority"],
+  "must_not_include_phrases": ["This is a contract stub, not a completed LLM security review.", "launch-ready without review"]
+}

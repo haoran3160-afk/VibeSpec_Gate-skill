@@ -1,0 +1,15 @@
+[
+  {
+    "id": "VSG-IPC-005",
+    "title": "MCP allowlist is present but argument schema is unclear",
+    "severity": "P1",
+    "category": "MCP/IPC",
+    "affected_files": ["server.py:5"],
+    "evidence": "allowlist present without schema validation",
+    "technical_reason": "Allowlisting tool names does not validate inbound arguments.",
+    "confidence": "suspected",
+    "source_type": "runtime",
+    "fingerprint": "review-mcp-allowlist-no-schema",
+    "gate_relevant": true
+  }
+]

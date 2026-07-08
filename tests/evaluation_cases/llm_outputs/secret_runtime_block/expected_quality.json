@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "case_id": "secret_runtime_block",
+  "risk_domain": "secrets",
+  "expected_launch_decision": "BLOCK",
+  "minimum_score": 80,
+  "required_finding_ids": ["VSG-SEC-001"],
+  "required_evidence_files": ["src/server.ts"],
+  "required_sections": ["nontechnical_user_summary.md", "launch_risk_report.md", "security_review_findings.json", "agent_fix_plan.md", "retest_checklist.md"],
+  "must_include_phrases": ["safe_to_auto_suppress", "human confirmation", "confirmed risk", "verification commands"],
+  "must_not_include_phrases": ["This is a contract stub, not a completed LLM security review.", "launch-ready without review"]
+}

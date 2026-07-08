@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "project_profile": {"project_type": "Web App", "technologies": ["Node.js"], "launch_stage": "prelaunch", "risk_level": "L2"},
+  "product_context": {"review_positioning": "LLM-native launch-risk review using deterministic findings as evidence hints."},
+  "sensitive_assets": [{"asset": "example API key", "source": "VSG-SEC-002", "reason": "Example file contains placeholder text."}],
+  "attack_surfaces": [{"surface": "Secret/config exposure surface", "source": "VSG-SEC-002", "reason": "Example credentials can confuse users."}],
+  "auth_and_data_flow": {"baseline_findings": [], "missing_context_questions": ["Is any matching real key present outside examples?"]},
+  "agent_tool_surfaces": [],
+  "evidence_files": [{"path": ".env.example", "finding_id": "VSG-SEC-002", "snippet_start_line": 1, "snippet_end_line": 4, "redacted": true}],
+  "rule_findings": [{"finding_id": "VSG-SEC-002", "fingerprint": "placeholder-secret", "title": "Placeholder secret in example env file", "severity": "P2", "category": "Secrets", "source_type": "example", "rubric": "secret", "baseline_verdict": "should_downgrade", "baseline_action": "downgrade", "evidence_role": "baseline_hint_not_final_judgment", "reason": "The evidence is in an example file."}],
+  "review_questions": ["Is the value clearly fake?"],
+  "requested_outputs": ["nontechnical_user_summary.md", "launch_risk_report.md", "security_review_findings.json", "agent_fix_plan.md", "retest_checklist.md"],
+  "safety_boundaries": ["Use rule findings as evidence hints and baseline signals, not final truth."]
+}
