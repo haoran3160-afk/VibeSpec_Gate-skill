@@ -135,14 +135,14 @@ Repository layout:
 
 ```text
 .
-├── SKILL.md
-├── examples/
-├── skill/
-├── src/vibesec/
-├── scripts/
-├── tests/
-├── docs/
-└── .github/
+|-- SKILL.md
+|-- examples/
+|-- skill/
+|-- src/vibesec/
+|-- scripts/
+|-- tests/
+|-- docs/
+`-- .github/
 ```
 
 Generated folders such as `outputs/` and `test output/` are intentionally ignored by Git.
