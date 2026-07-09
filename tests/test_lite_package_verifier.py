@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import shutil
+import uuid
 import zipfile
 from pathlib import Path
 
@@ -34,20 +35,27 @@ def test_lite_package_user_docs_include_login_security_evidence_lane():
 
 
 def test_lite_package_zip_contains_only_prompt_only_files(tmp_path):
-    output_zip = Path.cwd() / "dist" / "test-vibespec-gate-lite.zip"
+    output_zip = Path.cwd() / "dist" / f"test-vibespec-gate-lite-{uuid.uuid4().hex}.zip"
+    staging_dir = output_zip.with_suffix("")
 
-    result = build_lite_package(output_zip.with_suffix(""), output_zip)
+    try:
+        result = build_lite_package(staging_dir, output_zip)
 
-    assert result["files"] == list(REQUIRED_INCLUDE)
-    assert output_zip.exists()
-    with zipfile.ZipFile(output_zip) as archive:
-        names = set(archive.namelist())
-    assert set(REQUIRED_INCLUDE) <= names
-    assert "LICENSE" in names
-    assert "README.md" in names
-    assert "README.en.md" in names
-    assert "README.zh-CN.md" in names
-    assert not any(name.startswith(("tests/", "scripts/", "test output/")) for name in names)
+        assert result["files"] == list(REQUIRED_INCLUDE)
+        assert output_zip.exists()
+        with zipfile.ZipFile(output_zip) as archive:
+            names = set(archive.namelist())
+        assert set(REQUIRED_INCLUDE) <= names
+        assert "LICENSE" in names
+        assert "README.md" in names
+        assert "README.en.md" in names
+        assert "README.zh-CN.md" in names
+        assert not any(name.startswith(("tests/", "scripts/", "test output/")) for name in names)
+    finally:
+        if staging_dir.exists():
+            shutil.rmtree(staging_dir)
+        if output_zip.exists():
+            output_zip.unlink()
 
 
 def test_lite_package_verifier_rejects_excluded_package_files(tmp_path):
