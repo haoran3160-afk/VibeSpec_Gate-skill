@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 import shutil
@@ -97,7 +97,7 @@ def render_top_security_risks(decisions: list[dict[str, Any]]) -> str:
     lines = [
         "# Top Security Risks",
         "",
-        "These are the highest-impact review items from the existing VibeSec Gate review output.",
+        "These are the highest-impact review items from the existing VibeSpec Gate review output.",
         "",
     ]
     if not risks:
@@ -153,7 +153,7 @@ def render_agent_fix_plan(decisions: list[dict[str, Any]]) -> str:
         for rule in item.get("prohibited_changes") or ["Do not broaden scope without human approval."]:
             lines.append(f"  - {rule}")
         lines.extend(["- Verification commands:"])
-        for command in item.get("verification_commands") or ["Rerun VibeSec Gate review after the fix."]:
+        for command in item.get("verification_commands") or ["Rerun VibeSpec Gate review after the fix."]:
             lines.append(f"  - {command}")
         lines.append("")
     return "\n".join(lines)
@@ -177,7 +177,7 @@ def render_retest_checklist(decisions: list[dict[str, Any]]) -> str:
         for command in commands:
             lines.append(f"- {command}")
     else:
-        lines.append("- Rerun the VibeSec Gate review for the same findings.")
+        lines.append("- Rerun the VibeSpec Gate review for the same findings.")
     lines.extend(
         [
             "",

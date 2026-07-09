@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from pathlib import Path
 
@@ -35,8 +35,8 @@ class GitleaksAdapter(ToolAdapter):
                     why_it_matters_for_beginner="专业密钥扫描器发现了疑似凭证，真实值可能已经暴露。",
                     technical_reason="Gitleaks matched a known secret detector pattern.",
                     recommended_fix="确认并轮换真实密钥，从代码和历史中移除，并改用环境变量。",
-                    codex_fix_prompt="Use VibeSec report context to remove the secret and add a prevention check.",
-                    verification_steps=["重新运行 Gitleaks 和 VibeSec Gate。"],
+                    codex_fix_prompt="Use VibeSpec report context to remove the secret and add a prevention check.",
+                    verification_steps=["重新运行 Gitleaks 和 VibeSpec Gate。"],
                     false_positive_notes="Gitleaks 也可能命中测试假值；真实密钥必须轮换。",
                     references=["https://github.com/gitleaks/gitleaks"],
                 )

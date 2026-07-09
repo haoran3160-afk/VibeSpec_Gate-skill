@@ -1,4 +1,4 @@
-# VibeSec Gate Threat Model
+﻿# VibeSpec Gate Threat Model
 
 ## Assets Protected
 

@@ -1,10 +1,10 @@
-# Lite Skill RC Hardening And External Pilot Plan
+﻿# Lite Skill RC Hardening And External Pilot Plan
 
 Date: 2026-07-08
 
 ## 1. Current Judgment
 
-VibeSec Gate Lite has crossed the line from design-only into **release candidate** territory.
+VibeSpec Gate Lite has crossed the line from design-only into **release candidate** territory.
 
 The current evidence supports this classification:
 

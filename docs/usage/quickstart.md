@@ -1,6 +1,6 @@
-# Quickstart
+﻿# Quickstart
 
-VibeSec Gate is an LLM-native security review Skill. The CLI provides evidence collection, deterministic checks, and repeatable review outputs that the Skill or an Agent can reason over.
+VibeSpec Gate is an LLM-native security review Skill. The CLI provides evidence collection, deterministic checks, and repeatable review outputs that the Skill or an Agent can reason over.
 
 ## Install For Local Development
 

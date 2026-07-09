@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 import shutil
@@ -47,7 +47,7 @@ def render_llm_review_prompt(packet: dict[str, Any]) -> str:
     requested = "\n".join(f"- `{name}`" for name in REQUESTED_OUTPUTS)
     boundaries = "\n".join(f"- {item}" for item in packet.get("safety_boundaries", []))
     questions = "\n".join(f"- {item}" for item in packet.get("review_questions", []))
-    return f"""# VibeSec Gate Host-Agent Review Prompt
+    return f"""# VibeSpec Gate Host-Agent Review Prompt
 
 You are a defensive security reviewer for vibe-coded products.
 

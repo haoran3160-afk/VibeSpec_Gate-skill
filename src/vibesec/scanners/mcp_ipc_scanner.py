@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from pathlib import Path
 
@@ -73,7 +73,7 @@ class McpIpcScanner(BaseScanner):
             why_it_matters_for_beginner=reason,
             technical_reason=reason,
             recommended_fix=fix,
-            verification_steps=["Rerun VibeSec Gate and manually verify the MCP/IPC message and tool boundary."],
+            verification_steps=["Rerun VibeSpec Gate and manually verify the MCP/IPC message and tool boundary."],
             false_positive_notes="A local helper script is not automatically remotely exploitable; confirm who can send messages before changing code.",
             references=["https://modelcontextprotocol.io/specification"],
             confidence=confidence,

@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import shutil
@@ -14,11 +14,11 @@ if str(ROOT) not in sys.path:
 from scripts.verify_lite_package import REQUIRED_INCLUDE, check_package, check_source  # noqa: E402
 
 
-DEFAULT_OUTPUT = ROOT / "dist" / "vibesec-gate-lite.zip"
+DEFAULT_OUTPUT = ROOT / "dist" / "vibespec-gate-lite.zip"
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build the prompt-only VibeSec Gate Lite zip package.")
+    parser = argparse.ArgumentParser(description="Build the prompt-only VibeSpec Gate Lite zip package.")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="Zip file to write.")
     args = parser.parse_args(argv)
 

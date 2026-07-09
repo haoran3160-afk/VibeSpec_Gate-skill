@@ -1,4 +1,4 @@
-# Lite Skill Release Validation Plan
+﻿# Lite Skill Release Validation Plan
 
 Date: 2026-07-08
 
@@ -6,7 +6,7 @@ Date: 2026-07-08
 
 The next step is a **release validation sprint**.
 
-Do not add more security rules, do not expand calibration, and do not split the repository yet. The immediate problem is no longer "can VibeSec Gate produce security review artifacts?" The immediate problem is:
+Do not add more security rules, do not expand calibration, and do not split the repository yet. The immediate problem is no longer "can VibeSpec Gate produce security review artifacts?" The immediate problem is:
 
 ```text
 Can a first-time user trigger the Lite Skill, understand the result, act on the fix plan, and retest without learning the maintainer system?

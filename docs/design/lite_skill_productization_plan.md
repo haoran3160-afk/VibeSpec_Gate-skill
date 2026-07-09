@@ -1,10 +1,10 @@
-# VibeSec Gate Lite Skill Productization Plan
+﻿# VibeSpec Gate Lite Skill Productization Plan
 
 Date: 2026-07-08
 
 ## 1. Executive Judgment
 
-VibeSec Gate 的安全判断方向是正确的，但当前工程形态偏重。它更像一个安全评审平台内核，而不是一个轻量 Skill。
+VibeSpec Gate 的安全判断方向是正确的，但当前工程形态偏重。它更像一个安全评审平台内核，而不是一个轻量 Skill。
 
 核心问题不是能力不足，而是复杂度泄漏：
 
@@ -38,7 +38,7 @@ Internal engine:
 4. What should a coding Agent fix, and what must a human confirm first?
 5. How do we retest after fixes?
 
-VibeSec Gate 的内部系统可以继续复杂，但用户第一屏必须只服务这五个问题。
+VibeSpec Gate 的内部系统可以继续复杂，但用户第一屏必须只服务这五个问题。
 
 ## 3. Current Technical Debt
 
@@ -131,11 +131,11 @@ Impact:
 
 ### 3.5 Positioning Debt
 
-VibeSec Gate 正确定位是 LLM-native launch security gate。当前文档有时仍会让人感觉它是一个 CLI/scanner 工程。
+VibeSpec Gate 正确定位是 LLM-native launch security gate。当前文档有时仍会让人感觉它是一个 CLI/scanner 工程。
 
 Impact:
 
-- 与 ReiPenFlow 这类 workflow skill 对比时，VibeSec Gate 的工程深度强，但第一印象不够轻；
+- 与 ReiPenFlow 这类 workflow skill 对比时，VibeSpec Gate 的工程深度强，但第一印象不够轻；
 - 用户难以在 30 秒内理解它相对普通 scanner 的价值。
 
 ## 4. Product Architecture Target
@@ -350,7 +350,7 @@ Acceptance:
 
 Do not solve heaviness by deleting the quality system. The scorer, fixtures, hard failures, and calibration plan are valuable maintainability infrastructure.
 
-Do not merge VibeSec Gate into a ReiPenFlow-style penetration workflow. VibeSec Gate is a launch-risk gate, not a default exploitation assistant.
+Do not merge VibeSpec Gate into a ReiPenFlow-style penetration workflow. VibeSpec Gate is a launch-risk gate, not a default exploitation assistant.
 
 Do not expose Phase 11 calibration as a normal user requirement.
 
@@ -515,12 +515,12 @@ Rejected. Penetration workflow and launch gate workflow solve different jobs.
 Correction:
 
 ```text
-VibeSec Gate should stay centered on safe launch decisions, bounded repair planning, and retest.
+VibeSpec Gate should stay centered on safe launch decisions, bounded repair planning, and retest.
 ```
 
 ## 13. Final Recommendation
 
-Do not rewrite VibeSec Gate.
+Do not rewrite VibeSpec Gate.
 
 Do not reduce security depth.
 

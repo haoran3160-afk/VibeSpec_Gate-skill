@@ -1,13 +1,13 @@
-# Examples
+﻿# Examples
 
-These examples show how the CLI supports the LLM-native VibeSec Gate Skill.
+These examples show how the CLI supports the LLM-native VibeSpec Gate Skill.
 
 ## Ask For A Launch Security Review
 
 Use this when working inside Codex, Claude, Cursor, or another Agent environment:
 
 ```text
-Review this project as VibeSec Gate. Tell me whether it can safely launch, what could leak secrets or user data, and what an Agent should fix first.
+Review this project as VibeSpec Gate. Tell me whether it can safely launch, what could leak secrets or user data, and what an Agent should fix first.
 ```
 
 The Skill should inspect project evidence, explain launch risk, and produce a prioritized repair plan.

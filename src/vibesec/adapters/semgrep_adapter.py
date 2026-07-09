@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from pathlib import Path
 
@@ -28,7 +28,7 @@ class SemgrepAdapter(ToolAdapter):
                 evidence=evidence,
                 why_it_matters_for_beginner="Semgrep 可以发现更多代码级问题，但需要合适规则集来控制噪音。",
                 technical_reason="Adapter status only; no external scan was required for MVP.",
-                recommended_fix="Optionally run Semgrep with vetted rules and feed results into a future VibeSec import.",
+                recommended_fix="Optionally run Semgrep with vetted rules and feed results into a future VibeSpec import.",
                 codex_fix_prompt="No code fix required.",
                 verification_steps=["Run `semgrep --version` if installed."],
                 false_positive_notes="Informational only.",

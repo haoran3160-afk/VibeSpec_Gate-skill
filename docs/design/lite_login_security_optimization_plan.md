@@ -1,10 +1,10 @@
-# Lite Login Security Optimization Plan
+﻿# Lite Login Security Optimization Plan
 
 Date: 2026-07-09
 
 ## 1. Decision
 
-VibeSec Gate Lite should add a focused login-security review lane for vibe-coded products.
+VibeSpec Gate Lite should add a focused login-security review lane for vibe-coded products.
 
 The goal is not to become a full dynamic attack scanner. The goal is to catch common launch-blocking authentication and account-safety mistakes that non-technical builders are likely to miss.
 
@@ -304,4 +304,4 @@ Proceed with this optimization as the next targeted Lite security lane.
 
 This is a high-fit extension because it directly matches the user's product vision: protect vibe-coded products from account takeover, verification-code abuse, token leakage, and user-data exposure before launch.
 
-The implementation should remain narrow, evidence-driven, and safe-by-default. It should improve launch-blocking judgment without turning VibeSec Gate Lite into a live offensive scanner.
+The implementation should remain narrow, evidence-driven, and safe-by-default. It should improve launch-blocking judgment without turning VibeSpec Gate Lite into a live offensive scanner.

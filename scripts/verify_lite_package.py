@@ -12,6 +12,7 @@ REQUIRED_INCLUDE = (
     "LICENSE",
     "SKILL.md",
     "README.md",
+    "README.en.md",
     "README.zh-CN.md",
     "docs/usage/lite_quickstart.md",
     "examples/lite_review_prompt.md",
@@ -143,7 +144,7 @@ def _check_prompt_only_default(root: Path) -> list[str]:
             if phrase not in text:
                 failures.append(f"{doc} missing prompt-only package phrase: {phrase}")
 
-    first_readme = _before_any(readme, ("## optional core-powered path", "## source checkout commands"))
+    first_readme = _before_any(readme, ("## optional core-powered path", "## 可选 core-powered 路径", "## source checkout commands"))
     first_quickstart = _before_any(quickstart, ("## optional repository cli flow", "## optional existing review output input"))
     for doc, text in (("README.md", first_readme), ("docs/usage/lite_quickstart.md", first_quickstart)):
         if "py -3 -m vibesec.cli" in text or "$env:pythonpath" in text:

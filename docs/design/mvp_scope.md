@@ -1,6 +1,6 @@
-# VibeSec Gate MVP Scope
+﻿# VibeSpec Gate MVP Scope
 
-> Historical note: this document describes the original CLI/MVP scope. The current product positioning is in `context.md`, `README.md`, and `SKILL.md`: VibeSec Gate is an LLM-native security review Skill for vibe-coded products. The CLI/static checks described here are supporting evidence and regression infrastructure, not the full product ceiling.
+> Historical note: this document describes the original CLI/MVP scope. The current product positioning is in `context.md`, `README.md`, and `SKILL.md`: VibeSpec Gate is an LLM-native security review Skill for vibe-coded products. The CLI/static checks described here are supporting evidence and regression infrastructure, not the full product ceiling.
 
 ## In Scope
 

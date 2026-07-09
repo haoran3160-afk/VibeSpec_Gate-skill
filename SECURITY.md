@@ -1,8 +1,8 @@
-# Security Policy
+﻿# Security Policy
 
 ## Supported Scope
 
-VibeSec Gate is a defensive security review Skill and review engine for projects you own or are authorized to assess.
+VibeSpec Gate is a defensive security review Skill and review engine for projects you own or are authorized to assess.
 
 It is not a professional security certification, penetration test, legal review, or compliance attestation.
 

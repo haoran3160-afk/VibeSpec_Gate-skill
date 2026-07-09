@@ -1,13 +1,13 @@
----
-name: vibesec-gate
+﻿---
+name: vibespec-gate
 description: LLM-native security review Skill for vibe-coded products. Use to review AI-built apps, SaaS projects, AI Agents, MCP/IPC tools, Electron apps, and local tools for launch-blocking security or data-safety risks, then produce plain-language launch decisions and Agent-ready repair plans.
 ---
 
-# VibeSec Gate
+# VibeSpec Gate
 
 Follow the root `SKILL.md` instructions.
 
-VibeSec Gate helps users decide whether a vibe-coded product is safe enough to launch and what a coding Agent can fix after human confirmation.
+VibeSpec Gate helps users decide whether a vibe-coded product is safe enough to launch and what a coding Agent can fix after human confirmation.
 
 Always focus on:
 

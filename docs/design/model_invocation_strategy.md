@@ -1,6 +1,6 @@
-# Model Invocation Strategy
+﻿# Model Invocation Strategy
 
-VibeSec Gate is an LLM-native security review Skill. The current deterministic CLI is evidence, regression, and fallback infrastructure; it is not the full review intelligence.
+VibeSpec Gate is an LLM-native security review Skill. The current deterministic CLI is evidence, regression, and fallback infrastructure; it is not the full review intelligence.
 
 ## Host-Agent Mode
 
@@ -56,4 +56,4 @@ It should not be described as the product ceiling.
 
 ## Invocation Boundary
 
-VibeSec Gate should generate packets and contracts first. Any actual model call must be decided by the host runtime, user configuration, or explicit future provider integration. The CLI must not silently call external LLM/API providers.
+VibeSpec Gate should generate packets and contracts first. Any actual model call must be decided by the host runtime, user configuration, or explicit future provider integration. The CLI must not silently call external LLM/API providers.

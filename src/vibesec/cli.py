@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import json
@@ -16,7 +16,7 @@ from .core.scan_runner import run_scan
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="vibesec", description="VibeSec Gate defensive launch security scanner.")
+    parser = argparse.ArgumentParser(prog="vibesec", description="VibeSpec Gate defensive launch security scanner.")
     sub = parser.add_subparsers(dest="command", required=True)
 
     scan = sub.add_parser("scan", help="Scan a local user-owned project.")
@@ -65,7 +65,7 @@ def build_parser() -> argparse.ArgumentParser:
     review.add_argument("--reviewer-rule-based", action="store_true", default=True, help="Use the local deterministic reviewer.")
     review.add_argument("--model-provider", choices=["none"], default="none", help="Reserved; Phase 4 supports only none.")
 
-    review_validate = sub.add_parser("review-validate", help="Validate VibeSec review output JSON files.")
+    review_validate = sub.add_parser("review-validate", help="Validate VibeSpec review output JSON files.")
     review_validate.add_argument("review_output_dir")
 
     llm_output_validate = sub.add_parser("llm-output-validate", help="Validate LLM-native review output files.")

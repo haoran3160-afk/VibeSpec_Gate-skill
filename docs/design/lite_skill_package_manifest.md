@@ -1,8 +1,8 @@
-# Lite Skill Package Manifest
+﻿# Lite Skill Package Manifest
 
 Date: 2026-07-08
 
-This manifest defines the file boundary for a downloadable Lite VibeSec Gate Skill package.
+This manifest defines the file boundary for a downloadable Lite VibeSpec Gate Skill package.
 
 The package is intentionally smaller than the repository. It should help a first-time user answer:
 
@@ -49,10 +49,13 @@ These files are required in the default prompt-only Lite package:
 LICENSE
 SKILL.md
 README.md
+README.en.md
 README.zh-CN.md
 docs/usage/lite_quickstart.md
 examples/lite_review_prompt.md
 ```
+
+`README.md` is the Chinese primary entry page. `README.en.md` is the English switch page. `README.zh-CN.md` remains a compatibility entry for older links and package consumers.
 
 `docs/usage/lite_quickstart.md` may mention the Core-powered CLI path, but it must label that path as optional repository usage. The first user path must still work as Agent-native instructions.
 
@@ -142,7 +145,7 @@ Every included user-facing file should use the same launch decision meanings:
 
 ## Safety Boundary
 
-The Lite package must state that VibeSec Gate is not a professional security certification, penetration test, legal review, or compliance attestation.
+The Lite package must state that VibeSpec Gate is not a professional security certification, penetration test, legal review, or compliance attestation.
 
 The Lite package must also state that coding Agents should not auto-fix, auto-suppress, broaden permissions, remove validation, or mutate the reviewed project without explicit human confirmation.
 

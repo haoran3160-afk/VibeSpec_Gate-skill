@@ -1,6 +1,6 @@
-# Lite Package Verification
+﻿# Lite Package Verification
 
-Use this checklist before building or publishing a downloadable Lite VibeSec Gate Skill package.
+Use this checklist before building or publishing a downloadable Lite VibeSpec Gate Skill package.
 
 The package boundary is defined in `docs/design/lite_skill_package_manifest.md`.
 
@@ -68,7 +68,7 @@ test output/lite_rc_hardening/2026-07-08/
 
 ## Safety Boundary
 
-- Confirm the package says VibeSec Gate is not a professional security certification, penetration test, legal review, or compliance attestation.
+- Confirm the package says VibeSpec Gate is not a professional security certification, penetration test, legal review, or compliance attestation.
 - Confirm Agent fix instructions require human confirmation before mutation.
 - Confirm suppression and false-positive decisions are never described as automatic.
 - Confirm dynamic or live-target testing requires explicit authorization and scope.

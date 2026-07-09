@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 
 def build_fix_prompt(
@@ -11,7 +11,7 @@ def build_fix_prompt(
     source_type: str = "runtime",
     category: str = "",
 ) -> str:
-    file_list = "\n".join(f"- {item}" for item in files) or "- Inspect the files listed in the VibeSec report."
+    file_list = "\n".join(f"- {item}" for item in files) or "- Inspect the files listed in the VibeSpec report."
     likely_change_list = file_list if source_type == "runtime" else "- Runtime source or config only after verification."
     test_list = "\n".join(f"- {item}" for item in tests) or "- Add or update a minimal regression test for this risk."
     verify_note = (

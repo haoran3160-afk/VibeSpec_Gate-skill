@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "vibesec-gate"
+name = "vibespec-gate"
 version = "0.1.0"
 description = "LLM-native security review Skill for vibe-coded products."
 readme = "README.md"

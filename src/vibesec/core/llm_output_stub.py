@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 from pathlib import Path
@@ -168,7 +168,7 @@ py -3 scripts\\validate_llm_review_outputs.py "<workspace>"
 
 ## Retest Notes
 
-After real fixes, rerun VibeSec scan/review and validate the completed LLM outputs.
+After real fixes, rerun VibeSpec scan/review and validate the completed LLM outputs.
 """
 
 

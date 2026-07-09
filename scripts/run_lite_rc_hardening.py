@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import json
@@ -498,7 +498,7 @@ def write_pilot_session_materials(output_root: Path) -> None:
         materials / "participant_brief.md",
         """# Lite Skill Pilot Participant Brief
 
-You are testing whether the Lite VibeSec Gate package is understandable without maintainer context.
+You are testing whether the Lite VibeSpec Gate package is understandable without maintainer context.
 
 Use only this package:
 
@@ -946,7 +946,7 @@ def run_real_project_validations(output_root: Path, specs: list[str]) -> dict[st
     lines = [
         "# Real Project Validation Summary",
         "",
-        "Safety boundary: source projects are read-only; all VibeSec outputs are written under this RC evidence folder.",
+        "Safety boundary: source projects are read-only; all VibeSpec outputs are written under this RC evidence folder.",
         "",
         "| Project | CLI | Source unchanged | Decision | Evidence |",
         "| --- | --- | --- | --- | --- |",

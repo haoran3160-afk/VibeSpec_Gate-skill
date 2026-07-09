@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 from pathlib import Path
@@ -46,7 +46,7 @@ def _user_report(profile: ProjectProfile, findings: list[Finding], suppressed: l
     gate_findings = gate_relevant(findings)
     top = gate_findings[:5]
     lines = [
-        "# VibeSec Gate Beginner Security Report",
+        "# VibeSpec Gate Beginner Security Report",
         "",
         f"- Security score: {security_score(gate_findings)}/100",
         f"- Launch gate: {gate['decision']}",
@@ -85,7 +85,7 @@ def _developer_report(profile: ProjectProfile, findings: list[Finding], suppress
     shown = findings[:TOP_ACTIONABLE_LIMIT]
     hidden_count = max(0, len(findings) - len(shown))
     lines = [
-        "# VibeSec Gate Developer Security Report",
+        "# VibeSpec Gate Developer Security Report",
         "",
         f"Gate: `{gate['decision']}`",
         f"Gate-relevant findings: {gate['gate_relevant_findings']} / total active findings: {len(findings)}",
@@ -145,7 +145,7 @@ def _fix_tasks(findings: list[Finding]) -> str:
 
 
 def _initial_loop_review(findings: list[Finding], suppressed: list[Finding], gate: dict[str, object]) -> str:
-    return f"""# VibeSec Gate Loop Review
+    return f"""# VibeSpec Gate Loop Review
 
 ## Scan Loop
 - Current active findings: {len(findings)}

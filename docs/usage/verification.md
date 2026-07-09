@@ -1,4 +1,4 @@
-# Verification
+﻿# Verification
 
 Canonical project root:
 
@@ -19,7 +19,7 @@ $env:PYTHONDONTWRITEBYTECODE = "1"
 
 ## What Verification Means
 
-VibeSec Gate is an LLM-native security review Skill. These commands verify the repository's supporting infrastructure: evidence extraction, deterministic review baseline, schema contracts, decision ledgers, tests, and release hygiene. Passing verification does not mean a target product is absolutely secure; it means the Skill infrastructure is internally consistent and ready to support review work.
+VibeSpec Gate is an LLM-native security review Skill. These commands verify the repository's supporting infrastructure: evidence extraction, deterministic review baseline, schema contracts, decision ledgers, tests, and release hygiene. Passing verification does not mean a target product is absolutely secure; it means the Skill infrastructure is internally consistent and ready to support review work.
 
 ## Smoke Verification
 

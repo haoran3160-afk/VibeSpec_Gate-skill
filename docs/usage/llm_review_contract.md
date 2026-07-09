@@ -1,6 +1,6 @@
-# LLM Review Contract
+﻿# LLM Review Contract
 
-This contract defines how a host agent, API-backed model, or local/private model should use `llm_review_packet.json` to perform a defensive VibeSec Gate review.
+This contract defines how a host agent, API-backed model, or local/private model should use `llm_review_packet.json` to perform a defensive VibeSpec Gate review.
 
 ## Defensive Reviewer Instructions
 

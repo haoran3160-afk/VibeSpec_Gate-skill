@@ -1,4 +1,4 @@
-# VibeSec Gate Security Report
+﻿# VibeSpec Gate Security Report
 
 ## Summary
 - Score:

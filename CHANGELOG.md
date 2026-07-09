@@ -1,6 +1,6 @@
-# Changelog
+﻿# Changelog
 
-All notable changes to VibeSec Gate are documented here.
+All notable changes to VibeSpec Gate are documented here.
 
 ## 0.1.0 - 2026-07-09
 

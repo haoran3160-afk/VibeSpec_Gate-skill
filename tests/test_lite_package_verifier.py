@@ -20,6 +20,7 @@ def test_lite_package_verifier_accepts_required_prompt_only_package(tmp_path):
 
 def test_lite_package_user_docs_include_login_security_evidence_lane():
     required_terms_by_file = {
+        "README.md": ("登录", "注册", "密码重置", "OTP", "session", "rate-limit", "admin"),
         "README.zh-CN.md": ("登录", "注册", "密码重置", "OTP", "session", "rate-limit", "admin"),
         "default": ("login", "signup", "password reset", "OTP", "session", "rate-limit", "admin"),
     }
@@ -33,7 +34,7 @@ def test_lite_package_user_docs_include_login_security_evidence_lane():
 
 
 def test_lite_package_zip_contains_only_prompt_only_files(tmp_path):
-    output_zip = Path.cwd() / "dist" / "test-vibesec-gate-lite.zip"
+    output_zip = Path.cwd() / "dist" / "test-vibespec-gate-lite.zip"
 
     result = build_lite_package(output_zip.with_suffix(""), output_zip)
 
@@ -43,6 +44,8 @@ def test_lite_package_zip_contains_only_prompt_only_files(tmp_path):
         names = set(archive.namelist())
     assert set(REQUIRED_INCLUDE) <= names
     assert "LICENSE" in names
+    assert "README.md" in names
+    assert "README.en.md" in names
     assert "README.zh-CN.md" in names
     assert not any(name.startswith(("tests/", "scripts/", "test output/")) for name in names)
 
@@ -64,8 +67,8 @@ def test_lite_package_verifier_rejects_cli_first_readme(tmp_path):
     readme = tmp_path / "README.md"
     readme.write_text(
         readme.read_text(encoding="utf-8").replace(
-            "Use the prompt-only Lite flow first.",
-            "```powershell\npy -3 -m vibesec.cli lite-review .\\my-project\n```\n\nUse the prompt-only Lite flow first.",
+            "优先使用 prompt-only Lite 流程。",
+            "```powershell\npy -3 -m vibesec.cli lite-review .\\my-project\n```\n\n优先使用 prompt-only Lite 流程。",
         ),
         encoding="utf-8",
     )

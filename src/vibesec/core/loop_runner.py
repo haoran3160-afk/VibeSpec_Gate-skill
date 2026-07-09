@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from pathlib import Path
 
@@ -36,7 +36,7 @@ def _loop_relevant(finding) -> bool:
 
 
 def _loop_review(previous_count: int, current_count: int, fixed: list[str], new: list[str], persisted: list[str], decision: str) -> str:
-    return f"""# VibeSec Gate Loop Review
+    return f"""# VibeSpec Gate Loop Review
 
 ## Retest Comparison
 - Previous findings: {previous_count}

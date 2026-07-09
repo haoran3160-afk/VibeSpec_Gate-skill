@@ -1,8 +1,8 @@
-# VibeSec Gate Design Review and Optimization
+﻿# VibeSpec Gate Design Review and Optimization
 
 Date: 2026-07-06
 
-> Historical note: this document reviewed the original MVP/CLI design. The current product positioning is broader: VibeSec Gate is an LLM-native security review Skill for vibe-coded products. Treat references to local static scanning as implementation baseline and evidence collection, not as the full product identity.
+> Historical note: this document reviewed the original MVP/CLI design. The current product positioning is broader: VibeSpec Gate is an LLM-native security review Skill for vibe-coded products. Treat references to local static scanning as implementation baseline and evidence collection, not as the full product identity.
 
 ## 1. Fit with OWASP, NIST, and DevSecOps Practice
 
@@ -78,7 +78,7 @@ The MVP must prohibit:
 
 ## 7. Final MVP Boundary
 
-VibeSec Gate MVP is a Python CLI plus Codex Skill instructions that:
+VibeSpec Gate MVP is a Python CLI plus Codex Skill instructions that:
 
 - Reads a local project folder.
 - Builds a project risk profile.

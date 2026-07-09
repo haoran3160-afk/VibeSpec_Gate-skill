@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import re
 from pathlib import Path
@@ -114,7 +114,7 @@ class SecretScanner(BaseScanner):
             technical_reason="Static pattern matching found a token/credential-shaped value in a project file.",
             recommended_fix=fix,
             codex_fix_prompt=build_fix_prompt(title, beginner, [location], fix, ["添加测试或扫描步骤，防止密钥再次被提交"]),
-            verification_steps=["重新运行 VibeSec Gate 或 Gitleaks。", "确认报告只显示脱敏片段且不再发现该值。"],
+            verification_steps=["重新运行 VibeSpec Gate 或 Gitleaks。", "确认报告只显示脱敏片段且不再发现该值。"],
             false_positive_notes="测试假值可能误报；真实密钥仍应轮换，因为仓库历史可能已经暴露。",
             references=["https://github.com/gitleaks/gitleaks", "https://docs.gitguardian.com/secrets-detection/secrets-detection-engine/quick_start"],
             confidence=confidence,

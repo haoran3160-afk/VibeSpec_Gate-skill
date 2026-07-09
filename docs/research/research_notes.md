@@ -1,21 +1,21 @@
-# VibeSec Gate Research Notes
+﻿# VibeSpec Gate Research Notes
 
 Date: 2026-07-06
 
-> Historical note: these notes informed the original MVP. The current product positioning is in `context.md`, `README.md`, and `SKILL.md`: VibeSec Gate is an LLM-native security review Skill for vibe-coded products. Local tools and rule-based checks are supporting evidence sources, not the product's ceiling.
+> Historical note: these notes informed the original MVP. The current product positioning is in `context.md`, `README.md`, and `SKILL.md`: VibeSpec Gate is an LLM-native security review Skill for vibe-coded products. Local tools and rule-based checks are supporting evidence sources, not the product's ceiling.
 
-VibeSec Gate should be a defensive launch gate and repair assistant, not a penetration testing tool. The MVP should orchestrate local static checks, normalize findings, explain them for non-specialists, and produce repair and retest tasks.
+VibeSpec Gate should be a defensive launch gate and repair assistant, not a penetration testing tool. The MVP should orchestrate local static checks, normalize findings, explain them for non-specialists, and produce repair and retest tasks.
 
 ## Official Standards
 
 | Source | Version / Date | Relevant conclusion for this MVP |
 |---|---:|---|
-| OWASP Top 10 | 2025 current release, OWASP project page: https://owasp.org/Top10/2025/en/ and https://owasp.org/www-project-top-ten/ | Use as the top-level web risk vocabulary. Broken access control, injection, misconfiguration, vulnerable components, and auth failures map directly to VibeSec scanner categories. |
-| OWASP ASVS | 5.0.0, released May 2025: https://owasp.org/www-project-application-security-verification-standard/ and https://github.com/OWASP/ASVS | Use ASVS as the control checklist source, but the MVP should not claim ASVS compliance. VibeSec should map obvious repo evidence to beginner-friendly findings and mark unknown controls as review-required. |
+| OWASP Top 10 | 2025 current release, OWASP project page: https://owasp.org/Top10/2025/en/ and https://owasp.org/www-project-top-ten/ | Use as the top-level web risk vocabulary. Broken access control, injection, misconfiguration, vulnerable components, and auth failures map directly to VibeSpec scanner categories. |
+| OWASP ASVS | 5.0.0, released May 2025: https://owasp.org/www-project-application-security-verification-standard/ and https://github.com/OWASP/ASVS | Use ASVS as the control checklist source, but the MVP should not claim ASVS compliance. VibeSpec should map obvious repo evidence to beginner-friendly findings and mark unknown controls as review-required. |
 | OWASP API Security Top 10 | 2023 stable release, Feb 14 2023: https://owasp.org/www-project-api-security/ and https://owasp.org/API-Security/editions/2023/en/0x00-header/ | API risks should emphasize BOLA/IDOR, broken authentication, unrestricted resource consumption, and unsafe object-property exposure. These are common in AI-generated CRUD apps. |
 | OWASP Top 10 for LLM / GenAI Applications | 2025 release: https://genai.owasp.org/llm-top-10/ | LLM checks must include prompt injection, sensitive information disclosure, supply chain, excessive agency, unbounded consumption, and output/tool-call governance. |
 | NIST SSDF / SP 800-218 | SP 800-218 final, Feb 2022: https://csrc.nist.gov/pubs/sp/800/218/final and SSDF project page https://csrc.nist.gov/projects/ssdf | The MVP should frame security as an SDLC gate: prepare, protect, produce well-secured software, and respond. It should produce repair tasks and retest loops rather than one-off warnings. |
-| GitHub Advanced Security | GitHub docs: https://docs.github.com/en/get-started/learning-about-github/about-github-advanced-security | GHAS combines secret protection, code security, dependency review, and code scanning. VibeSec should mirror this grouping locally without requiring GitHub Advanced Security. |
+| GitHub Advanced Security | GitHub docs: https://docs.github.com/en/get-started/learning-about-github/about-github-advanced-security | GHAS combines secret protection, code security, dependency review, and code scanning. VibeSpec should mirror this grouping locally without requiring GitHub Advanced Security. |
 | GitHub secret scanning | GitHub docs: https://docs.github.com/code-security/secret-scanning/about-secret-scanning | Secret scanning should consider entire git history in real deployments. MVP static scan can detect current working-tree leaks and warn that history scanning requires Gitleaks/GitHub secret scanning. |
 
 ## Open Source Tools
@@ -47,13 +47,13 @@ Design implication: the MVP should be an orchestration and explanation layer. It
 
 ## Competitor and Adjacent Product Lessons
 
-| Product | Source | Lesson for VibeSec Gate |
+| Product | Source | Lesson for VibeSpec Gate |
 |---|---|---|
 | Snyk | https://snyk.io/product/open-source-security-management/ and https://docs.snyk.io/scan-fix-and-prevent/scan-with-snyk/snyk-open-source | Developer-first prioritization and remediation matter more than raw finding count. |
 | GitGuardian | https://docs.gitguardian.com/ and https://docs.gitguardian.com/secrets-detection/secrets-detection-engine/quick_start | Secrets findings need classification, masking, remediation guidance, and rotation advice. |
 | Socket.dev | https://socket.dev/ and HN discussion https://news.ycombinator.com/item?id=30515090 | Supply-chain checks should consider malicious package signals, not only known CVEs. MVP can warn on risky package hygiene but should not overclaim. |
-| Aikido Security | https://www.aikido.dev/ and https://www.aikido.dev/platform | Consolidation of SAST, SCA, secrets, IaC, and cloud posture reduces user burden. VibeSec should consolidate outputs into one gate decision. |
-| Semgrep Cloud / GHAS | https://semgrep.dev/products/community-edition and GitHub docs above | Strong tools still need triage and context. VibeSec should translate tool output into beginner and Codex repair tasks. |
+| Aikido Security | https://www.aikido.dev/ and https://www.aikido.dev/platform | Consolidation of SAST, SCA, secrets, IaC, and cloud posture reduces user burden. VibeSpec should consolidate outputs into one gate decision. |
+| Semgrep Cloud / GHAS | https://semgrep.dev/products/community-edition and GitHub docs above | Strong tools still need triage and context. VibeSpec should translate tool output into beginner and Codex repair tasks. |
 
 ## Community and Pain-Point Signals
 
@@ -63,9 +63,9 @@ Community sources are useful as demand signals, not as standards:
 - Reddit r/vibecoding thread "Vibe coding without a security audit..." (2026): https://www.reddit.com/r/vibecoding/comments/1sfa9sx/vibe_coding_without_a_security_audit_is_not_a/ describes recurring issues such as Supabase service role exposure and founders not recognizing the risk.
 - GitHub community discussion on AI security headaches (2026): https://github.com/orgs/community/discussions/193727 mentions OWASP-style flaws and secret leakage from AI-suggested code.
 - Reddit r/devops thread on securing AI-generated internal apps (2026): https://www.reddit.com/r/devops/comments/1td7mxp/how_are_you_securing_aigenerated_vibecoded/ shows governance needs: authentication from day one, approved domains, and deployment discovery.
-- Reddit r/github thread on AI-generated vulnerability reports (2026): https://www.reddit.com/r/github/comments/1sjfmfw/received_our_very_first_aigenerated_security/ warns that low-context automated reports can create noise. VibeSec must mark uncertainty and avoid unsupported claims.
+- Reddit r/github thread on AI-generated vulnerability reports (2026): https://www.reddit.com/r/github/comments/1sjfmfw/received_our_very_first_aigenerated_security/ warns that low-context automated reports can create noise. VibeSpec must mark uncertainty and avoid unsupported claims.
 
-## Reusable vs. VibeSec-Owned Responsibilities
+## Reusable vs. VibeSpec-Owned Responsibilities
 
 Reusable through adapters:
 
@@ -74,7 +74,7 @@ Reusable through adapters:
 - Dependency/container/IaC scanning: Trivy, npm audit, pnpm audit, pip-audit, Safety, Dependency-Check where configured.
 - Passive/baseline DAST: ZAP only with explicit authorization.
 
-VibeSec must own:
+VibeSpec must own:
 
 - Project intake and risk profile.
 - Finding schema, deduplication, severity normalization, and gate decision.

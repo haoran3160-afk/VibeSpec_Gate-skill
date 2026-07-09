@@ -1,10 +1,10 @@
-# VibeSec Gate Lite Next Optimization Plan
+﻿# VibeSpec Gate Lite Next Optimization Plan
 
 Date: 2026-07-08
 
 ## 1. Decision
 
-VibeSec Gate should move toward a **heavy core + light skill surface** architecture.
+VibeSpec Gate should move toward a **heavy core + light skill surface** architecture.
 
 The next optimization step is not to delete the core engine, tests, calibration data, scorer, or release verifier. The next step is to reduce what a first-time user must understand before they can run the Skill and get a launch decision.
 

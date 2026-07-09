@@ -1,10 +1,10 @@
-# Contributing
+﻿# Contributing
 
-Thanks for helping improve VibeSec Gate.
+Thanks for helping improve VibeSpec Gate.
 
 ## Project Direction
 
-VibeSec Gate is a prompt-only, Agent-native Skill by default, backed by a heavier review and validation engine for maintainers.
+VibeSpec Gate is a prompt-only, Agent-native Skill by default, backed by a heavier review and validation engine for maintainers.
 
 Contributions should preserve this boundary:
 

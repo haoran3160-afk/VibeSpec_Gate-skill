@@ -1,6 +1,6 @@
-# Lite Review Prompt
+﻿# Lite Review Prompt
 
-Use this prompt when asking a coding Agent to run the prompt-only Lite VibeSec Gate flow.
+Use this prompt when asking a coding Agent to run the prompt-only Lite VibeSpec Gate flow.
 
 ```text
 Review this project for launch-blocking security risks.

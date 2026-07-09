@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from pathlib import Path
 
@@ -70,7 +70,7 @@ class DesktopScanner(BaseScanner):
             why_it_matters_for_beginner=reason,
             technical_reason=reason,
             recommended_fix=fix,
-            verification_steps=["Rerun VibeSec Gate and manually verify the Electron main/preload/renderer boundary."],
+            verification_steps=["Rerun VibeSpec Gate and manually verify the Electron main/preload/renderer boundary."],
             false_positive_notes="If this is test, generated, or strictly internal developer code, downgrade or suppress with evidence.",
             references=["https://www.electronjs.org/docs/latest/tutorial/security"],
             confidence=confidence,

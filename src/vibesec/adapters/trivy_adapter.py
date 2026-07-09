@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from pathlib import Path
 
@@ -23,7 +23,7 @@ class TrivyAdapter(ToolAdapter):
                     evidence="Adapter detected `trivy`; run it explicitly for full filesystem/container/IaC coverage.",
                     why_it_matters_for_beginner="Trivy 可以补充依赖、容器和配置扫描，但 MVP 不会自动执行可能下载数据库的操作。",
                     technical_reason="Avoids surprising network and cache behavior by default.",
-                    recommended_fix="Run `trivy fs <project>` when you want full Trivy output, then review with VibeSec.",
+                    recommended_fix="Run `trivy fs <project>` when you want full Trivy output, then review with VibeSpec.",
                     codex_fix_prompt="No code fix required.",
                     verification_steps=["Run `trivy --version`."],
                     false_positive_notes="Informational only.",

@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from .risk_model import Finding, ProjectProfile, gate_relevant, security_score
 
@@ -47,7 +47,7 @@ def decide_gate(findings: list[Finding], profile: ProjectProfile | None = None) 
         reason = "No blocking runtime issue was found, but lower-priority findings remain."
     else:
         decision = "PASS"
-        reason = "The basic VibeSec launch gate passed."
+        reason = "The basic VibeSpec launch gate passed."
 
     return {
         "decision": decision,

@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 import sys
@@ -54,7 +54,7 @@ def render_prompt(agent: str, packet_text: str, expected_quality_text: str, cont
         [
             f"# Phase 11 Host-Agent Prompt: {agent} / {SHARED_CASE_ID}",
             "",
-            "You are producing a defensive VibeSec Gate LLM review sample for calibration.",
+            "You are producing a defensive VibeSpec Gate LLM review sample for calibration.",
             "",
             "## Rules",
             "",

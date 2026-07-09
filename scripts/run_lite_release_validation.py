@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import json
@@ -541,7 +541,7 @@ def write_release_readiness_decision(
         "",
         f"Decision: {'READY_FOR_RELEASE_CANDIDATE' if ready else 'NOT_RELEASE_READY'}",
         "",
-        "This validation does not make VibeSec Gate a professional security certification, penetration test, legal review, or compliance attestation.",
+        "This validation does not make VibeSpec Gate a professional security certification, penetration test, legal review, or compliance attestation.",
         "",
         "## Gates",
         "",
