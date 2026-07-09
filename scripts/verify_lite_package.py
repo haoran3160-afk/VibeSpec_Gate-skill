@@ -11,6 +11,7 @@ MANIFEST = Path("docs/design/lite_skill_package_manifest.md")
 REQUIRED_INCLUDE = (
     "SKILL.md",
     "README.md",
+    "README.zh-CN.md",
     "docs/usage/lite_quickstart.md",
     "examples/lite_review_prompt.md",
 )

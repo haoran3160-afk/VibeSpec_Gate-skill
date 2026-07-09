@@ -48,6 +48,7 @@ These files are required in the default prompt-only Lite package:
 ```text
 SKILL.md
 README.md
+README.zh-CN.md
 docs/usage/lite_quickstart.md
 examples/lite_review_prompt.md
 ```
@@ -180,12 +181,12 @@ The manifest now makes the most important product distinction explicit: default 
 Remaining risks:
 
 1. Optional files can reintroduce internal language. Each optional include needs the same exposure review as required files.
-2. A future package builder should generate the downloadable artifact from this manifest instead of relying on manual copying.
+2. `scripts/build_lite_package_zip.py` should generate the downloadable artifact from this manifest instead of relying on manual copying.
 
 Next implementation recommendation:
 
 ```text
 1. Keep README, SKILL.md, lite_quickstart, and lite_review_prompt aligned with this manifest.
 2. Run the static verifier before packaging.
-3. Build a downloadable Lite package artifact only after the verifier passes.
+3. Build the downloadable Lite package artifact with `scripts/build_lite_package_zip.py` only after the verifier passes.
 ```

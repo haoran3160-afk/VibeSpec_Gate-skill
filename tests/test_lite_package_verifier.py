@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import shutil
+import zipfile
 from pathlib import Path
 
+from scripts.build_lite_package_zip import build_lite_package
 from scripts.verify_lite_package import REQUIRED_INCLUDE, check_package, check_source
 
 
@@ -17,19 +19,29 @@ def test_lite_package_verifier_accepts_required_prompt_only_package(tmp_path):
 
 
 def test_lite_package_user_docs_include_login_security_evidence_lane():
-    required_terms = (
-        "login",
-        "signup",
-        "password reset",
-        "OTP",
-        "session",
-        "rate-limit",
-        "admin",
-    )
+    required_terms_by_file = {
+        "README.zh-CN.md": ("登录", "注册", "密码重置", "OTP", "session", "rate-limit", "admin"),
+        "default": ("login", "signup", "password reset", "OTP", "session", "rate-limit", "admin"),
+    }
     for file_name in REQUIRED_INCLUDE:
+        terms = required_terms_by_file.get(file_name, required_terms_by_file["default"])
         text = (Path.cwd() / file_name).read_text(encoding="utf-8")
-        for term in required_terms:
+        for term in terms:
             assert term.lower() in text.lower(), f"{file_name} missing {term}"
+
+
+def test_lite_package_zip_contains_only_prompt_only_files(tmp_path):
+    output_zip = Path.cwd() / "dist" / "test-vibespec-gate-skill-lite.zip"
+
+    result = build_lite_package(output_zip.with_suffix(""), output_zip)
+
+    assert result["files"] == list(REQUIRED_INCLUDE)
+    assert output_zip.exists()
+    with zipfile.ZipFile(output_zip) as archive:
+        names = set(archive.namelist())
+    assert set(REQUIRED_INCLUDE) <= names
+    assert "README.zh-CN.md" in names
+    assert not any(name.startswith(("tests/", "scripts/", "test output/")) for name in names)
 
 
 def test_lite_package_verifier_rejects_excluded_package_files(tmp_path):
@@ -49,8 +61,8 @@ def test_lite_package_verifier_rejects_cli_first_readme(tmp_path):
     readme = tmp_path / "README.md"
     readme.write_text(
         readme.read_text(encoding="utf-8").replace(
-            "Use it like this:",
-            "```powershell\npy -3 -m vibesec.cli lite-review .\\my-project\n```\n\nUse it like this:",
+            "Use the prompt-only Lite flow first.",
+            "```powershell\npy -3 -m vibesec.cli lite-review .\\my-project\n```\n\nUse the prompt-only Lite flow first.",
         ),
         encoding="utf-8",
     )
