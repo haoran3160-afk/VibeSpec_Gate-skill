@@ -539,7 +539,7 @@ def _verification_commands(packet: dict[str, Any], action: str) -> list[str]:
     if action == "fix":
         return [
             "Run the smallest local test that covers the inspected file.",
-            "Rerun vibesec review for the same findings after preparing the fix.",
+            "Rerun vibespec-gate review for the same findings after preparing the fix.",
         ]
     if action in {"downgrade", "suppress"}:
         return ["Re-run review-validate on the output directory after any manual downgrade or suppression record is created."]

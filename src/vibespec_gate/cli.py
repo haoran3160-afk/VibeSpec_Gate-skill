@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import argparse
 import json
@@ -16,7 +16,7 @@ from .core.scan_runner import run_scan
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="vibesec", description="VibeSpec Gate defensive launch security scanner.")
+    parser = argparse.ArgumentParser(prog="vibespec-gate", description="VibeSpec Gate defensive launch security scanner.")
     sub = parser.add_subparsers(dest="command", required=True)
 
     scan = sub.add_parser("scan", help="Scan a local user-owned project.")
@@ -36,7 +36,7 @@ def build_parser() -> argparse.ArgumentParser:
     scan.add_argument("--mode", choices=mode_choices, default=None)
     scan.add_argument("--output", default="outputs")
     scan.add_argument("--no-adapters", action="store_true", help="Skip external tool adapter status checks.")
-    scan.add_argument("--suppressions", default=None, help="Path to vibesec.suppressions.json.")
+    scan.add_argument("--suppressions", default=None, help="Path to vibespec_gate.suppressions.json.")
 
     report = sub.add_parser("report", help="Rebuild reports from findings.json.")
     report.add_argument("findings")
@@ -53,7 +53,7 @@ def build_parser() -> argparse.ArgumentParser:
     loop.add_argument("--mode", choices=mode_choices, default=None)
     loop.add_argument("--output", default="outputs")
     loop.add_argument("--no-adapters", action="store_true", help="Skip external tool adapter status checks.")
-    loop.add_argument("--suppressions", default=None, help="Path to vibesec.suppressions.json.")
+    loop.add_argument("--suppressions", default=None, help="Path to vibespec_gate.suppressions.json.")
 
     review = sub.add_parser("review", help="Build offline AI-assisted review packets and a human review queue.")
     review.add_argument("findings")
@@ -76,7 +76,7 @@ def build_parser() -> argparse.ArgumentParser:
     lite_review.add_argument("--output", default=None, help="Bundle directory. Defaults to outputs-lite for projects or <review_output>/lite_review.")
     lite_review.add_argument("--mode", choices=mode_choices, default=None)
     lite_review.add_argument("--no-adapters", action="store_true", help="Skip external tool adapter status checks during project scans.")
-    lite_review.add_argument("--suppressions", default=None, help="Path to vibesec.suppressions.json for project scans.")
+    lite_review.add_argument("--suppressions", default=None, help="Path to vibespec_gate.suppressions.json for project scans.")
     lite_review.add_argument("--max-snippet-lines", type=int, default=80)
     lite_review.add_argument("--p1-only", action="store_true", help="Only include P0/P1 findings in the internal review step.")
     return parser

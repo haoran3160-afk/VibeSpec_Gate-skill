@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import json
 from pathlib import Path
@@ -27,8 +27,8 @@ def write_reports(output_dir: Path, profile: ProjectProfile, findings: list[Find
     )
     gate_summary = {"profile": profile.to_dict(), **gate}
     (output_dir / "gate_summary.json").write_text(json.dumps(gate_summary, ensure_ascii=False, indent=2), encoding="utf-8")
-    (output_dir / "vibesec_report_user.md").write_text(_user_report(profile, active, suppressed, gate), encoding="utf-8")
-    (output_dir / "vibesec_report_developer.md").write_text(
+    (output_dir / "vibespec_gate_report_user.md").write_text(_user_report(profile, active, suppressed, gate), encoding="utf-8")
+    (output_dir / "vibespec_gate_report_developer.md").write_text(
         _developer_report(profile, active, suppressed, gate), encoding="utf-8"
     )
     (output_dir / "codex_fix_tasks.md").write_text(_fix_tasks(active), encoding="utf-8")
@@ -151,7 +151,7 @@ def _initial_loop_review(findings: list[Finding], suppressed: list[Finding], gat
 - Current active findings: {len(findings)}
 - Current suppressed findings: {len(suppressed)}
 - Current gate decision: {gate['decision']}
-- Note: run `vibesec loop <project> --previous <findings.json>` after fixes to compare changes.
+- Note: run `vibespec-gate loop <project> --previous <findings.json>` after fixes to compare changes.
 """
 
 

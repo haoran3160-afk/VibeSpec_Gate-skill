@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from vibesec.core.project_intake import detect_profile
-from vibesec.scanners.auth_data_scanner import AuthDataScanner
+from vibespec_gate.core.project_intake import detect_profile
+from vibespec_gate.scanners.auth_data_scanner import AuthDataScanner
 
 
 def test_auth_data_scanner_detects_missing_auth_and_rls():

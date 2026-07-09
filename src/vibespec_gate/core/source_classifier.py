@@ -52,7 +52,7 @@ CACHE_DIRS = {
     ".mypy_cache",
 }
 IGNORED_DIRS = GENERATED_DIRS | VENDOR_DIRS | CACHE_DIRS | {".worktrees", "file_manager_e2e_sandbox"}
-IGNORED_FILES = {"vibesec.suppressions.json", ".vibesecignore"}
+IGNORED_FILES = {"vibespec_gate.suppressions.json", ".vibespecignore"}
 
 
 def source_type_for_path(path: str | Path) -> str:

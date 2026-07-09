@@ -1,4 +1,4 @@
-﻿# LLM Review Contract
+# LLM Review Contract
 
 This contract defines how a host agent, API-backed model, or local/private model should use `llm_review_packet.json` to perform a defensive VibeSpec Gate review.
 
@@ -124,7 +124,7 @@ Validate completed or stub outputs:
 
 ```powershell
 py -3 scripts\validate_llm_review_outputs.py "<llm_review_workspace>"
-vibesec llm-output-validate "<llm_review_workspace>"
+vibespec-gate llm-output-validate "<llm_review_workspace>"
 ```
 
 The validator checks that all five required files exist, `security_review_findings.json` is valid, finding IDs come from the packet or are marked as new LLM findings, enums are valid, `safe_to_auto_suppress` is never true, repair plans include prohibited changes and verification commands, and obvious unsafe offensive wording is rejected.

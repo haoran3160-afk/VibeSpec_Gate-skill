@@ -1,4 +1,4 @@
-﻿# Agent Review Cookbook
+# Agent Review Cookbook
 
 VibeSpec Gate is an LLM-native security review Skill for vibe coding products. The CLI can generate structured evidence, but the product value comes from model-assisted security judgment, prioritization, explanation, and repair planning.
 
@@ -13,9 +13,9 @@ Review this project as VibeSpec Gate. Identify launch-blocking security or data-
 When CLI evidence is useful:
 
 ```powershell
-vibesec scan ./my-project --output ./outputs
-vibesec review ./outputs/findings.json --project ./my-project --output ./outputs-review --include-p2 --offline --reviewer-rule-based --model-provider none
-vibesec review-validate ./outputs-review
+vibespec-gate scan ./my-project --output ./outputs
+vibespec-gate review ./outputs/findings.json --project ./my-project --output ./outputs-review --include-p2 --offline --reviewer-rule-based --model-provider none
+vibespec-gate review-validate ./outputs-review
 ```
 
 The CLI review command is the deterministic baseline. The Skill should use the generated packets and decision ledgers as evidence, then apply LLM reasoning to validate context and plan repairs.
@@ -154,7 +154,7 @@ Bad fixtures should fail for declared reasons. Manually supplied host-agent samp
 
 ## Suppression Safety
 
-Suppression and false-positive decisions are advisory. Do not write `vibesec.suppressions.json` automatically. `safe_to_auto_suppress` is always false and must remain false unless a future reviewed design changes the safety contract.
+Suppression and false-positive decisions are advisory. Do not write `vibespec_gate.suppressions.json` automatically. `safe_to_auto_suppress` is always false and must remain false unless a future reviewed design changes the safety contract.
 
 ## Interpreting Review Count Changes
 

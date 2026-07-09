@@ -1,4 +1,4 @@
-﻿# VibeSpec Gate Design Review and Optimization
+# VibeSpec Gate Design Review and Optimization
 
 Date: 2026-07-06
 
@@ -99,7 +99,7 @@ VibeSpec Gate MVP is a Python CLI plus Codex Skill instructions that:
 ## 9. Technical Architecture
 
 - Language: Python 3.10+ with standard library only for the MVP.
-- CLI entry: `vibesec`.
+- CLI entry: `vibespec-gate`.
 - Core layers:
   - `project_intake`: file inventory and project profile.
   - `risk_model`: finding schema and severity normalization.
@@ -134,7 +134,7 @@ skill/
   checklists/*.md
   templates/*.md
   rules/risk_scoring.yaml
-src/vibesec/
+src/vibespec_gate/
   cli.py
   core/*.py
   scanners/*.py

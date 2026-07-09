@@ -10,7 +10,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from vibesec.core.lite_review_bundle import build_lite_review_bundle  # noqa: E402
+from vibespec_gate.core.lite_review_bundle import build_lite_review_bundle  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> int:

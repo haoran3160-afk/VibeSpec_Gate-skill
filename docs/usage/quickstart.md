@@ -1,4 +1,4 @@
-﻿# Quickstart
+# Quickstart
 
 VibeSpec Gate is an LLM-native security review Skill. The CLI provides evidence collection, deterministic checks, and repeatable review outputs that the Skill or an Agent can reason over.
 
@@ -12,15 +12,15 @@ Without installation:
 
 ```powershell
 $env:PYTHONPATH = "src"
-py -3 -m vibesec scan .\tests\fixtures\vulnerable_next_supabase_app --output .\outputs\example-next
+py -3 -m vibespec_gate.cli scan .\tests\fixtures\vulnerable_next_supabase_app --output .\outputs\example-next
 ```
 
 ## Basic Gate Flow
 
 ```bash
-vibesec scan tests/fixtures/vulnerable_next_supabase_app --output outputs/demo-next
-vibesec gate outputs/demo-next/findings.json
-vibesec loop tests/fixtures/vulnerable_next_supabase_app --previous outputs/demo-next/findings.json --output outputs/demo-loop
+vibespec-gate scan tests/fixtures/vulnerable_next_supabase_app --output outputs/demo-next
+vibespec-gate gate outputs/demo-next/findings.json
+vibespec-gate loop tests/fixtures/vulnerable_next_supabase_app --previous outputs/demo-next/findings.json --output outputs/demo-loop
 ```
 
 This creates findings, reports, repair prompts, and a launch gate decision.
@@ -30,8 +30,8 @@ This creates findings, reports, repair prompts, and a launch gate decision.
 After a scan, build structured review evidence and decision ledgers:
 
 ```powershell
-vibesec review outputs/demo-next/findings.json --project tests/fixtures/vulnerable_next_supabase_app --output outputs/demo-review --include-p2 --offline --reviewer-rule-based --model-provider none
-vibesec review-validate outputs/demo-review
+vibespec-gate review outputs/demo-next/findings.json --project tests/fixtures/vulnerable_next_supabase_app --output outputs/demo-review --include-p2 --offline --reviewer-rule-based --model-provider none
+vibespec-gate review-validate outputs/demo-review
 ```
 
 The command above is the deterministic CLI baseline. In a full Skill runtime, use the generated evidence plus LLM reasoning to explain the risk, confirm uncertainty, and prepare bounded repair tasks.

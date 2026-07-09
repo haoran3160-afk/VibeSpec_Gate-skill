@@ -70,7 +70,7 @@ Use this only from a source checkout when you want repeatable local evidence:
 
 ```powershell
 $env:PYTHONPATH = "src"
-py -3 -m vibesec.cli lite-review .\my-project --output .\lite_review --no-adapters
+py -3 -m vibespec_gate.cli lite-review .\my-project --output .\lite_review --no-adapters
 ```
 
 This CLI is optional. It is not required for the prompt-only Lite Skill.

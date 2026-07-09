@@ -1,4 +1,4 @@
-﻿# Verification
+# Verification
 
 Canonical project root:
 
@@ -29,7 +29,7 @@ This repository smoke check uses only the Python standard library and does not r
 py -3 scripts\verify_phase4_5_smoke.py
 ```
 
-The smoke script inserts the local `src` directory into `sys.path`, so it can run even when `PYTHONPATH` is not already set. It verifies CLI import, `vibesec review --help`, one review evaluation fixture, existing Phase 4 review JSON and markdown outputs, `llm_review_packet.json`, schema shape, snippet limits, JSON/Markdown agent decision coverage, and provider-secret redaction through the official review schema validator.
+The smoke script inserts the local `src` directory into `sys.path`, so it can run even when `PYTHONPATH` is not already set. It verifies CLI import, `vibespec-gate review --help`, one review evaluation fixture, existing Phase 4 review JSON and markdown outputs, `llm_review_packet.json`, schema shape, snippet limits, JSON/Markdown agent decision coverage, and provider-secret redaction through the official review schema validator.
 
 If `py -3` is unavailable, use the Codex bundled Python runtime if present:
 
@@ -53,7 +53,7 @@ Do not install dependencies or run fix commands inside real reviewed projects un
 Validate a Phase 4 review output directory:
 
 ```powershell
-py -3 -m vibesec.cli review-validate "D:\personal\Vibespec_gate_skill\test output\phase4_review\personal-voice-light-agent"
+py -3 -m vibespec_gate.cli review-validate "D:\personal\Vibespec_gate_skill\test output\phase4_review\personal-voice-light-agent"
 ```
 
 The validator checks JSON structure, enum values, packet/verdict matching, `llm_review_packet.json`, snippet length, secret redaction, `reviewer=rule-based`, `safe_to_auto_suppress=false`, summary counts, and that both `agent_review_decisions.json` and `agent_review_decisions.md` cover every reviewed finding. This validates the deterministic baseline and LLM handoff contract, not the full ceiling of LLM-assisted review quality.
@@ -66,7 +66,7 @@ Build, stub, and validate a host-agent review workspace:
 py -3 scripts\build_llm_review_workspace.py "D:\personal\Vibespec_gate_skill\test output\phase4_review\personal-voice-light-agent"
 py -3 scripts\stub_llm_review_outputs.py "D:\personal\Vibespec_gate_skill\test output\phase4_review\personal-voice-light-agent\llm_review_workspace"
 py -3 scripts\validate_llm_review_outputs.py "D:\personal\Vibespec_gate_skill\test output\phase4_review\personal-voice-light-agent\llm_review_workspace"
-vibesec llm-output-validate "D:\personal\Vibespec_gate_skill\test output\phase4_review\personal-voice-light-agent\llm_review_workspace"
+vibespec-gate llm-output-validate "D:\personal\Vibespec_gate_skill\test output\phase4_review\personal-voice-light-agent\llm_review_workspace"
 ```
 
 The workspace builder does not call external model/API providers and does not copy project source. The stub generator exists only for contract testing; stub files are not completed LLM security reviews.
@@ -146,7 +146,7 @@ It maps review fixtures to domains, expected verdicts, expected actions, `agent_
 {
   "schema_version": "1.0",
   "reviewer": "rule-based",
-  "generated_by": "vibesec review",
+  "generated_by": "vibespec-gate review",
   "summary": {},
   "decisions": []
 }

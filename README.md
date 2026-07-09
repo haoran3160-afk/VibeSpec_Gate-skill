@@ -93,7 +93,7 @@ VibeSpec Gate 不是 professional security certification、penetration test、le
 
 ```powershell
 $env:PYTHONPATH = "src"
-py -3 -m vibesec.cli lite-review .\my-project --output .\lite_review --no-adapters
+py -3 -m vibespec_gate.cli lite-review .\my-project --output .\lite_review --no-adapters
 ```
 
 CLI 是可选能力，不是 prompt-only Lite Skill 的使用前提。

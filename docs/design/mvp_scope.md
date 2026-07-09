@@ -1,4 +1,4 @@
-﻿# VibeSpec Gate MVP Scope
+# VibeSpec Gate MVP Scope
 
 > Historical note: this document describes the original CLI/MVP scope. The current product positioning is in `context.md`, `README.md`, and `SKILL.md`: VibeSpec Gate is an LLM-native security review Skill for vibe coding products. The CLI/static checks described here are supporting evidence and regression infrastructure, not the full product ceiling.
 
@@ -24,8 +24,8 @@
 
 ## Completion Criteria
 
-- `vibesec scan <project> --output <dir>` creates all required reports.
-- `vibesec gate <findings.json>` prints a gate decision.
-- `vibesec loop <project> --previous <findings.json>` creates a comparison report.
+- `vibespec-gate scan <project> --output <dir>` creates all required reports.
+- `vibespec-gate gate <findings.json>` prints a gate decision.
+- `vibespec-gate loop <project> --previous <findings.json>` creates a comparison report.
 - Tests cover intake, secret scanning, auth/data scanning, LLM/Agent scanning, report generation, gate decision, and loop review.
 - Reports mask secret values and contain safety boundaries.

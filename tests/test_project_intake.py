@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from vibesec.core.project_intake import detect_profile
+from vibespec_gate.core.project_intake import detect_profile
 
 
 def test_detect_ai_agent_profile():

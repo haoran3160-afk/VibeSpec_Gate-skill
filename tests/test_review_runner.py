@@ -3,11 +3,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from vibesec.core.review_runner import run_review
-from vibesec.core.review_schema import validate_review_output_dir
-from vibesec.core.review_packets import build_review_packet
-from vibesec.core.risk_model import Finding, ProjectProfile
-from vibesec.core.scan_runner import run_scan
+from vibespec_gate.core.review_runner import run_review
+from vibespec_gate.core.review_schema import validate_review_output_dir
+from vibespec_gate.core.review_packets import build_review_packet
+from vibespec_gate.core.risk_model import Finding, ProjectProfile
+from vibespec_gate.core.scan_runner import run_scan
 
 
 BASE = Path("tests/evaluation_cases/review")

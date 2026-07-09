@@ -8,12 +8,12 @@ from pathlib import Path
 
 import pytest
 
-from vibesec.core.llm_output_schema import validate_llm_review_outputs
-from vibesec.core.llm_output_stub import STUB_DISCLAIMER, write_stub_llm_review_outputs
-from vibesec.core.llm_review_workspace import TEMPLATE_DIR, build_llm_review_workspace
-from vibesec.core.review_llm_packet import REQUESTED_OUTPUTS
-from vibesec.core.review_runner import run_review
-from vibesec.core.review_schema import SchemaValidationError
+from vibespec_gate.core.llm_output_schema import validate_llm_review_outputs
+from vibespec_gate.core.llm_output_stub import STUB_DISCLAIMER, write_stub_llm_review_outputs
+from vibespec_gate.core.llm_review_workspace import TEMPLATE_DIR, build_llm_review_workspace
+from vibespec_gate.core.review_llm_packet import REQUESTED_OUTPUTS
+from vibespec_gate.core.review_runner import run_review
+from vibespec_gate.core.review_schema import SchemaValidationError
 
 
 CASE = Path("tests/evaluation_cases/review/secret_provider_runtime_confirmed")
@@ -149,7 +149,7 @@ def test_validator_rejects_obvious_unsafe_offensive_wording(tmp_path):
 def test_cli_llm_output_validate_accepts_stub_workspace(tmp_path):
     workspace = _workspace_with_stubs(tmp_path)
     result = subprocess.run(
-        [sys.executable, "-m", "vibesec.cli", "llm-output-validate", str(workspace)],
+        [sys.executable, "-m", "vibespec_gate.cli", "llm-output-validate", str(workspace)],
         cwd=Path.cwd(),
         env=_env(),
         text=True,

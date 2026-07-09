@@ -1,4 +1,4 @@
-﻿# Lite Skill Package Manifest
+# Lite Skill Package Manifest
 
 Date: 2026-07-08
 
@@ -36,7 +36,7 @@ The full repository may also provide a **Core-powered runnable path**, but that 
 Runnable overlay flow:
 
 ```text
-clone repository -> install Python project -> run vibesec CLI -> generate lite_review/
+clone repository -> install Python project -> run vibespec-gate CLI -> generate lite_review/
 ```
 
 This distinction prevents a misleading package that looks lightweight but secretly requires the whole engineering platform to work.
@@ -79,7 +79,7 @@ Minimum runnable overlay contents:
 
 ```text
 pyproject.toml
-src/vibesec/
+src/vibespec_gate/
 scripts/build_lite_review_bundle.py
 README.md
 docs/usage/lite_quickstart.md

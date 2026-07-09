@@ -273,8 +273,8 @@ def _validate_decision_output_object(value: Any) -> list[dict[str, Any]]:
     if value["reviewer"] != "rule-based":
         raise SchemaValidationError("agent_review_decisions.reviewer must be rule-based")
     _require_type(value.get("generated_by"), str, "agent_review_decisions.generated_by")
-    if value["generated_by"] != "vibesec review":
-        raise SchemaValidationError("agent_review_decisions.generated_by must be vibesec review")
+    if value["generated_by"] != "vibespec-gate review":
+        raise SchemaValidationError("agent_review_decisions.generated_by must be vibespec-gate review")
     _require_dict(value.get("summary"), "agent_review_decisions.summary")
     decisions = value.get("decisions")
     if not isinstance(decisions, list):

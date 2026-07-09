@@ -1,4 +1,4 @@
-﻿# Model Invocation Strategy
+# Model Invocation Strategy
 
 VibeSpec Gate is an LLM-native security review Skill. The current deterministic CLI is evidence, regression, and fallback infrastructure; it is not the full review intelligence.
 
@@ -9,7 +9,7 @@ Primary Skill mode for Codex, Claude, Cursor, Gemini CLI, or similar environment
 The host agent:
 
 - reads project files under user-authorized scope;
-- uses `vibesec scan` and `vibesec review` when useful to collect evidence;
+- uses `vibespec-gate scan` and `vibespec-gate review` when useful to collect evidence;
 - consumes `llm_review_packet.json`;
 - can use `scripts\build_llm_review_workspace.py` to get a direct prompt and output templates;
 - produces the required review outputs in the active workspace;

@@ -8,8 +8,8 @@ import sys
 from pathlib import Path
 
 from scripts.build_llm_quality_matrix import build_matrix
-from vibesec.core.llm_output_quality import score_llm_review_outputs
-from vibesec.core.llm_output_schema import STUB_DISCLAIMER, validate_llm_review_outputs
+from vibespec_gate.core.llm_output_quality import score_llm_review_outputs
+from vibespec_gate.core.llm_output_schema import STUB_DISCLAIMER, validate_llm_review_outputs
 
 
 FIXTURE_ROOT = Path("tests/evaluation_cases/llm_outputs")

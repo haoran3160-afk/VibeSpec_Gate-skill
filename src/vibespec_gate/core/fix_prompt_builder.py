@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 
 def build_fix_prompt(
@@ -58,7 +58,7 @@ def build_fix_prompt(
 {test_list}
 
 ### Acceptance command
-- vibesec scan <project> --output <output> --no-adapters
+- vibespec-gate scan <project> --output <output> --no-adapters
 """
 
 

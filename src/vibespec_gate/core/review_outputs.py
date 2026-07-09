@@ -136,7 +136,7 @@ def agent_review_decisions_json(summary_data: dict[str, object], decisions: list
     return {
         "schema_version": "1.0",
         "reviewer": "rule-based",
-        "generated_by": "vibesec review",
+        "generated_by": "vibespec-gate review",
         "summary": {
             "project_type": summary_data["project_type"],
             "reviewed_findings": summary_data["reviewed_findings"],

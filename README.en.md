@@ -93,7 +93,7 @@ The optional Core-powered path is available from a source checkout when you want
 
 ```powershell
 $env:PYTHONPATH = "src"
-py -3 -m vibesec.cli lite-review .\my-project --output .\lite_review --no-adapters
+py -3 -m vibespec_gate.cli lite-review .\my-project --output .\lite_review --no-adapters
 ```
 
 The CLI is optional. It is not required for the prompt-only Lite Skill.

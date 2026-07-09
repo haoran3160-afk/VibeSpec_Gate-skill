@@ -23,13 +23,13 @@ Issues = "https://github.com/haoran3160-afk/VibeSpec_Gate-skill/issues"
 Documentation = "https://github.com/haoran3160-afk/VibeSpec_Gate-skill/tree/master/docs"
 
 [project.scripts]
-vibesec = "vibesec.cli:main"
+vibespec-gate = "vibespec_gate.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-vibesec = ["templates/**/*.md", "templates/**/*.json"]
+vibespec_gate = ["templates/**/*.md", "templates/**/*.json"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

@@ -12,7 +12,7 @@ DEFAULT_PHASE11_ROOT = ROOT / "test output" / "phase11_real_host_agent_calibrati
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from vibesec.core.llm_output_quality import score_llm_review_outputs  # noqa: E402
+from vibespec_gate.core.llm_output_quality import score_llm_review_outputs  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> int:

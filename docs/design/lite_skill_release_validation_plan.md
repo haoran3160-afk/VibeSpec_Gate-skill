@@ -1,4 +1,4 @@
-﻿# Lite Skill Release Validation Plan
+# Lite Skill Release Validation Plan
 
 Date: 2026-07-08
 
@@ -156,7 +156,7 @@ Steps:
 
 ```powershell
 $env:PYTHONPATH = "src"
-py -3 -m vibesec.cli lite-review .\my-project --output .\lite_review --no-adapters
+py -3 -m vibespec_gate.cli lite-review .\my-project --output .\lite_review --no-adapters
 ```
 
 2. Confirm the generated directory contains:

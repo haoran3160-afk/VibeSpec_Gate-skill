@@ -13,7 +13,7 @@ OUTPUT_ROOT = ROOT / "test output" / "phase9_real_llm_review_evaluation"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from vibesec.core.llm_output_quality import score_llm_review_outputs  # noqa: E402
+from vibespec_gate.core.llm_output_quality import score_llm_review_outputs  # noqa: E402
 
 
 def main() -> int:

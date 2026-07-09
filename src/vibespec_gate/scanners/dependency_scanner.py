@@ -4,8 +4,8 @@ import json
 import re
 from pathlib import Path
 
-from vibesec.core.fix_prompt_builder import build_fix_prompt
-from vibesec.core.risk_model import Finding, ProjectProfile
+from vibespec_gate.core.fix_prompt_builder import build_fix_prompt
+from vibespec_gate.core.risk_model import Finding, ProjectProfile
 
 from .base import BaseScanner, next_id, rel
 

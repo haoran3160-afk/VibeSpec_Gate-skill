@@ -1,4 +1,4 @@
-﻿# Lite Package Verification
+# Lite Package Verification
 
 Use this checklist before building or publishing a downloadable Lite VibeSpec Gate Skill package.
 
@@ -79,7 +79,7 @@ From a source checkout, run a small Lite review and inspect the output names:
 
 ```powershell
 $env:PYTHONPATH = "src"
-py -3 -m vibesec.cli lite-review .\tests\fixtures\vulnerable_next_supabase_app --output .\lite_review_smoke --no-adapters
+py -3 -m vibespec_gate.cli lite-review .\tests\fixtures\vulnerable_next_supabase_app --output .\lite_review_smoke --no-adapters
 Get-ChildItem .\lite_review_smoke
 ```
 

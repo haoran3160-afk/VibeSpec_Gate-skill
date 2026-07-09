@@ -1,4 +1,4 @@
-﻿---
+---
 name: vibespec-gate
 description: LLM-native security review Skill for vibe coding products. Use when a user wants to know whether an AI-built web app, SaaS product, AI Agent, MCP/IPC tool, Electron app, or local tool has launch-blocking security or data-safety risks such as leaked secrets, weak login/signup/reset/OTP/session flows, missing authentication, broken authorization, unsafe database rules, dangerous deployment config, exposed prompts, excessive Agent/tool authority, or risky local file/command boundaries. Produce plain-language risk explanations, launch gate decisions, human confirmation queues, Agent-ready repair plans, and retest checklists.
 ---
@@ -115,13 +115,13 @@ When running from a source checkout, the optional Core-powered Lite path is:
 
 ```powershell
 $env:PYTHONPATH = "src"
-py -3 -m vibesec.cli lite-review .\my-project --output .\lite_review --no-adapters
+py -3 -m vibespec_gate.cli lite-review .\my-project --output .\lite_review --no-adapters
 ```
 
 If an existing VibeSpec review output directory already exists, build the Lite bundle directly:
 
 ```powershell
-py -3 -m vibesec.cli lite-review .\outputs-review --output .\lite_review
+py -3 -m vibespec_gate.cli lite-review .\outputs-review --output .\lite_review
 ```
 
 The CLI is optional support for repeatable local evidence. It is not required for the prompt-only Lite Skill.

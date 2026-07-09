@@ -65,7 +65,7 @@ def run_command(command: list[str]) -> str:
 
 def review_validate(output: Path) -> str:
     result = subprocess.run(
-        [sys.executable, "-m", "vibesec.cli", "review-validate", str(output)],
+        [sys.executable, "-m", "vibespec_gate.cli", "review-validate", str(output)],
         cwd=ROOT,
         env=os.environ.copy(),
         text=True,

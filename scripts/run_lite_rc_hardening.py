@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import argparse
 import json
@@ -964,7 +964,7 @@ def run_real_project_validations(output_root: Path, specs: list[str]) -> dict[st
             [
                 sys.executable,
                 "-m",
-                "vibesec.cli",
+                "vibespec_gate.cli",
                 "lite-review",
                 str(project),
                 "--output",

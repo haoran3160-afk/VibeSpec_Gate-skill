@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from vibesec.core.project_intake import detect_profile
-from vibesec.scanners.secret_scanner import SecretScanner
+from vibespec_gate.core.project_intake import detect_profile
+from vibespec_gate.scanners.secret_scanner import SecretScanner
 
 
 def test_secret_scanner_masks_values():

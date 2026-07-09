@@ -12,15 +12,15 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from vibesec.core.review_schema import validate_review_output_dir  # noqa: E402
+from vibespec_gate.core.review_schema import validate_review_output_dir  # noqa: E402
 
 
 def main() -> int:
     os.environ["PYTHONPATH"] = str(SRC)
     os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
     checks = [
-        ("import vibesec.cli", check_import),
-        ("vibesec review --help", check_help),
+        ("import vibespec_gate.cli", check_import),
+        ("vibespec-gate review --help", check_help),
         ("fixture review output", check_fixture_review),
         ("phase4 review outputs", check_existing_phase4_outputs),
     ]
@@ -37,21 +37,21 @@ def main() -> int:
 
 
 def check_import() -> str:
-    import vibesec.cli  # noqa: F401
+    import vibespec_gate.cli  # noqa: F401
 
     return "module imported"
 
 
 def check_help() -> str:
     result = subprocess.run(
-        [sys.executable, "-m", "vibesec.cli", "review", "--help"],
+        [sys.executable, "-m", "vibespec_gate.cli", "review", "--help"],
         cwd=ROOT,
         env=os.environ.copy(),
         text=True,
         capture_output=True,
         check=False,
     )
-    if result.returncode != 0 or "vibesec review" not in result.stdout:
+    if result.returncode != 0 or "vibespec-gate review" not in result.stdout:
         raise RuntimeError(result.stderr + result.stdout)
     return "help rendered"
 
@@ -64,7 +64,7 @@ def check_fixture_review() -> str:
             [
                 sys.executable,
                 "-m",
-                "vibesec.cli",
+                "vibespec_gate.cli",
                 "review",
                 str(case / "findings.json"),
                 "--project",

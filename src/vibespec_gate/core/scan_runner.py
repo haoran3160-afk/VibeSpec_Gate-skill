@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from vibesec.adapters import DEFAULT_ADAPTERS
-from vibesec.scanners import DEFAULT_SCANNERS
+from vibespec_gate.adapters import DEFAULT_ADAPTERS
+from vibespec_gate.scanners import DEFAULT_SCANNERS
 
 from .finding_processor import process_findings
 from .project_intake import detect_profile

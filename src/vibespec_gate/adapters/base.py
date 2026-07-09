@@ -6,7 +6,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from vibesec.core.risk_model import Finding, ProjectProfile
+from vibespec_gate.core.risk_model import Finding, ProjectProfile
 
 
 class ToolAdapter:

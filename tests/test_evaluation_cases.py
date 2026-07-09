@@ -4,9 +4,9 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from vibesec.core.loop_runner import _loop_relevant
-from vibesec.core.risk_model import finding_from_dict
-from vibesec.core.scan_runner import run_scan
+from vibespec_gate.core.loop_runner import _loop_relevant
+from vibespec_gate.core.risk_model import finding_from_dict
+from vibespec_gate.core.scan_runner import run_scan
 
 
 BASE = Path("tests/evaluation_cases")

@@ -1,10 +1,10 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import re
 from pathlib import Path
 
-from vibesec.core.fix_prompt_builder import build_fix_prompt
-from vibesec.core.risk_model import Finding, ProjectProfile
+from vibespec_gate.core.fix_prompt_builder import build_fix_prompt
+from vibespec_gate.core.risk_model import Finding, ProjectProfile
 
 from .base import BaseScanner, iter_text_files, looks_like_frontend, mask_secret, next_id, read_lines, rel
 

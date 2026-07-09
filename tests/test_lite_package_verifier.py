@@ -68,7 +68,7 @@ def test_lite_package_verifier_rejects_cli_first_readme(tmp_path):
     readme.write_text(
         readme.read_text(encoding="utf-8").replace(
             "优先使用 prompt-only Lite 流程。",
-            "```powershell\npy -3 -m vibesec.cli lite-review .\\my-project\n```\n\n优先使用 prompt-only Lite 流程。",
+            "```powershell\npy -3 -m vibespec_gate.cli lite-review .\\my-project\n```\n\n优先使用 prompt-only Lite 流程。",
         ),
         encoding="utf-8",
     )

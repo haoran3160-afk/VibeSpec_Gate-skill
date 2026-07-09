@@ -9,7 +9,7 @@ from pathlib import Path
 
 from scripts.build_llm_quality_matrix import build_matrix
 from scripts.compare_host_agent_samples import compare_samples, write_reports
-from vibesec.core.llm_output_quality import score_llm_review_outputs
+from vibespec_gate.core.llm_output_quality import score_llm_review_outputs
 
 
 BAD_FIXTURE_ROOT = Path("tests/evaluation_cases/llm_outputs_bad")

@@ -156,17 +156,17 @@ def _load_suppressions(root: Path, suppression_file: str | None) -> dict[str, Su
     candidates: list[Path] = []
     if suppression_file:
         candidates.append(Path(suppression_file))
-    candidates.extend([root / "vibesec.suppressions.json", root / ".vibesecignore"])
+    candidates.extend([root / "vibespec_gate.suppressions.json", root / ".vibespecignore"])
     suppressions: dict[str, Suppression] = {}
     for path in candidates:
         if not path.exists() or not path.is_file():
             continue
-        if path.name == ".vibesecignore":
+        if path.name == ".vibespecignore":
             for raw in path.read_text(encoding="utf-8", errors="replace").splitlines():
                 line = raw.strip()
                 if not line or line.startswith("#"):
                     continue
-                suppressions[line] = Suppression(fingerprint=line, reason=".vibesecignore")
+                suppressions[line] = Suppression(fingerprint=line, reason=".vibespecignore")
             continue
         data = json.loads(path.read_text(encoding="utf-8"))
         for item in data:

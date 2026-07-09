@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from vibesec.core.project_intake import detect_profile
-from vibesec.scanners.llm_agent_scanner import LlmAgentScanner
+from vibespec_gate.core.project_intake import detect_profile
+from vibespec_gate.scanners.llm_agent_scanner import LlmAgentScanner
 
 
 def test_llm_agent_scanner_detects_agent_risks():

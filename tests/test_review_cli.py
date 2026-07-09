@@ -32,7 +32,7 @@ def test_review_cli_generates_and_validates_outputs(tmp_path):
     command = [
         sys.executable,
         "-m",
-        "vibesec.cli",
+        "vibespec_gate.cli",
         "review",
         str(CASE / "findings.json"),
         "--project",
@@ -89,7 +89,7 @@ def test_review_cli_generates_and_validates_outputs(tmp_path):
     assert "## Suppression and false-positive candidates" in decisions
 
     validate = subprocess.run(
-        [sys.executable, "-m", "vibesec.cli", "review-validate", str(output)],
+        [sys.executable, "-m", "vibespec_gate.cli", "review-validate", str(output)],
         cwd=Path.cwd(),
         env=_env(),
         text=True,
@@ -107,7 +107,7 @@ def test_review_cli_rejects_external_model_provider(tmp_path):
         [
             sys.executable,
             "-m",
-            "vibesec.cli",
+            "vibespec_gate.cli",
             "review",
             str(CASE / "findings.json"),
             "--project",
@@ -144,7 +144,7 @@ export async function POST(req) {
         [
             sys.executable,
             "-m",
-            "vibesec.cli",
+            "vibespec_gate.cli",
             "lite-review",
             str(project),
             "--output",

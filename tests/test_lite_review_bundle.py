@@ -6,7 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from vibesec.core.lite_review_bundle import build_lite_review_bundle
+from vibespec_gate.core.lite_review_bundle import build_lite_review_bundle
 
 
 def test_build_lite_review_bundle_creates_four_primary_outputs_and_evidence(tmp_path):
@@ -54,7 +54,7 @@ def test_lite_review_cli_builds_bundle(tmp_path):
         [
             sys.executable,
             "-m",
-            "vibesec.cli",
+            "vibespec_gate.cli",
             "lite-review",
             str(review_output),
             "--output",
@@ -84,7 +84,7 @@ def test_lite_review_cli_can_run_project_facade(tmp_path):
         [
             sys.executable,
             "-m",
-            "vibesec.cli",
+            "vibespec_gate.cli",
             "lite-review",
             str(project),
             "--output",

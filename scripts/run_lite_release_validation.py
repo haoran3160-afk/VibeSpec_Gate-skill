@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import argparse
 import json
@@ -410,7 +410,7 @@ def run_cli_smoke(output_root: Path) -> dict[str, Any]:
         [
             sys.executable,
             "-m",
-            "vibesec.cli",
+            "vibespec_gate.cli",
             "lite-review",
             "tests/fixtures/vulnerable_next_supabase_app",
             "--output",

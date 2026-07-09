@@ -10,8 +10,8 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from vibesec.core.llm_output_schema import validate_llm_review_outputs  # noqa: E402
-from vibesec.core.review_schema import SchemaValidationError  # noqa: E402
+from vibespec_gate.core.llm_output_schema import validate_llm_review_outputs  # noqa: E402
+from vibespec_gate.core.review_schema import SchemaValidationError  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> int:

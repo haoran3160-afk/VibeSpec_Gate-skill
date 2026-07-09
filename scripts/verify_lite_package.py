@@ -147,7 +147,7 @@ def _check_prompt_only_default(root: Path) -> list[str]:
     first_readme = _before_any(readme, ("## optional core-powered path", "## 可选 core-powered 路径", "## source checkout commands"))
     first_quickstart = _before_any(quickstart, ("## optional repository cli flow", "## optional existing review output input"))
     for doc, text in (("README.md", first_readme), ("docs/usage/lite_quickstart.md", first_quickstart)):
-        if "py -3 -m vibesec.cli" in text or "$env:pythonpath" in text:
+        if "py -3 -m vibespec_gate.cli" in text or "$env:pythonpath" in text:
             failures.append(f"{doc} presents CLI command before the prompt-only default path")
     return failures
 

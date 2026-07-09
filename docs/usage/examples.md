@@ -1,4 +1,4 @@
-﻿# Examples
+# Examples
 
 These examples show how the CLI supports the LLM-native VibeSpec Gate Skill.
 
@@ -15,7 +15,7 @@ The Skill should inspect project evidence, explain launch risk, and produce a pr
 ## Generate Local Evidence
 
 ```bash
-vibesec scan ./my-project --output ./outputs
+vibespec-gate scan ./my-project --output ./outputs
 ```
 
 This creates `findings.json`, user/developer reports, fix tasks, and a gate summary.
@@ -23,7 +23,7 @@ This creates `findings.json`, user/developer reports, fix tasks, and a gate summ
 ## Force An AI-Agent Profile
 
 ```bash
-vibesec scan ./my-agent --mode ai-agent --output ./outputs-agent
+vibespec-gate scan ./my-agent --mode ai-agent --output ./outputs-agent
 ```
 
 Use this when the project has LLM tool calls, autonomous actions, shell/file/database/email/payment tools, or prompt-sensitive workflows.
@@ -31,20 +31,20 @@ Use this when the project has LLM tool calls, autonomous actions, shell/file/dat
 ## Rebuild Reports From Findings
 
 ```bash
-vibesec report ./outputs/findings.json --output ./outputs
+vibespec-gate report ./outputs/findings.json --output ./outputs
 ```
 
 ## Print The Gate Summary
 
 ```bash
-vibesec gate ./outputs/findings.json
+vibespec-gate gate ./outputs/findings.json
 ```
 
 ## Build Agent Review Outputs
 
 ```bash
-vibesec review ./outputs/findings.json --project ./my-project --output ./outputs-review --include-p2 --offline --reviewer-rule-based --model-provider none
-vibesec review-validate ./outputs-review
+vibespec-gate review ./outputs/findings.json --project ./my-project --output ./outputs-review --include-p2 --offline --reviewer-rule-based --model-provider none
+vibespec-gate review-validate ./outputs-review
 ```
 
 This deterministic baseline produces compact queues and complete decision ledgers. A Skill runtime can then use LLM reasoning over those files and the project code.
@@ -68,7 +68,7 @@ Use the workspace prompt when a host Agent should produce the required LLM-nativ
 ```powershell
 py -3 scripts\stub_llm_review_outputs.py ./outputs-review/llm_review_workspace
 py -3 scripts\validate_llm_review_outputs.py ./outputs-review/llm_review_workspace
-vibesec llm-output-validate ./outputs-review/llm_review_workspace
+vibespec-gate llm-output-validate ./outputs-review/llm_review_workspace
 ```
 
 Stub outputs always state that they are not completed LLM security reviews.
@@ -86,7 +86,7 @@ Agents should treat `must_review=true` as a confirmation task before fix prepara
 ## Retest After Fixes
 
 ```bash
-vibesec loop ./my-project --previous ./outputs/findings.json --output ./outputs-retest
+vibespec-gate loop ./my-project --previous ./outputs/findings.json --output ./outputs-retest
 ```
 
 Use the loop output to decide whether the launch gate improved after repairs.

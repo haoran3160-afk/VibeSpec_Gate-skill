@@ -3,8 +3,8 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from vibesec.core.source_classifier import should_ignore_path
-from vibesec.core.risk_model import Finding, ProjectProfile
+from vibespec_gate.core.source_classifier import should_ignore_path
+from vibespec_gate.core.risk_model import Finding, ProjectProfile
 
 
 TEXT_EXTENSIONS = {

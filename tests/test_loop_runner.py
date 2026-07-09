@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from vibesec.core.loop_runner import run_loop
-from vibesec.core.scan_runner import run_scan
+from vibespec_gate.core.loop_runner import run_loop
+from vibespec_gate.core.scan_runner import run_scan
 
 
 def test_loop_runner_writes_review(tmp_path):

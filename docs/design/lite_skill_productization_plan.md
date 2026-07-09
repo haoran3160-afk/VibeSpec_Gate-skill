@@ -1,4 +1,4 @@
-﻿# VibeSpec Gate Lite Skill Productization Plan
+# VibeSpec Gate Lite Skill Productization Plan
 
 Date: 2026-07-08
 
@@ -333,7 +333,7 @@ Acceptance:
 Add a user-level command only after Stage 1 proves the output shape:
 
 ```powershell
-vibesec lite-review <project> --output <out>
+vibespec-gate lite-review <project> --output <out>
 ```
 
 Internally it can call existing scan/review/build-bundle logic.
@@ -445,7 +445,7 @@ Deliverables:
 
 Outcome:
 
-- `vibesec lite-review` exists as a stable user command.
+- `vibespec-gate lite-review` exists as a stable user command.
 
 Deliverables:
 

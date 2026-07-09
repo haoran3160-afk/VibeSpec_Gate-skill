@@ -1,4 +1,4 @@
-﻿# Lite Review Prompt
+# Lite Review Prompt
 
 Use this prompt when asking a coding Agent to run the prompt-only Lite VibeSpec Gate flow.
 
@@ -40,5 +40,5 @@ If you cloned the full source repository and want repeatable local evidence, bui
 
 ```powershell
 $env:PYTHONPATH = "src"
-py -3 -m vibesec.cli lite-review .\my-project --output .\lite_review --no-adapters
+py -3 -m vibespec_gate.cli lite-review .\my-project --output .\lite_review --no-adapters
 ```

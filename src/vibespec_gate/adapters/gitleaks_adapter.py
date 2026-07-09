@@ -1,9 +1,9 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
 
-from vibesec.core.risk_model import Finding, ProjectProfile
-from vibesec.scanners.base import next_id
+from vibespec_gate.core.risk_model import Finding, ProjectProfile
+from vibespec_gate.scanners.base import next_id
 
 from .base import ToolAdapter
 
