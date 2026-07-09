@@ -35,13 +35,52 @@ def test_rc_validation_matrix_covers_required_project_shapes(tmp_path):
     result = evaluate_matrix(tmp_path)
 
     assert result == {"passed": True, "failures": []}
-    assert len(MATRIX_CASES) == 8
+    assert len(MATRIX_CASES) >= 16
     for case in MATRIX_CASES:
         case_dir = tmp_path / "validation_matrix" / case["id"]
         assert (case_dir / "launch_decision.md").exists()
         assert (case_dir / "top_security_risks.md").exists()
         assert (case_dir / "agent_fix_plan.md").exists()
         assert (case_dir / "retest_checklist.md").exists()
+
+
+def test_rc_validation_matrix_covers_login_security_lane(tmp_path):
+    write_validation_matrix(tmp_path)
+
+    login_cases = [case for case in MATRIX_CASES if case.get("domain") == "login_security"]
+    login_ids = {case["id"] for case in login_cases}
+
+    assert len(login_cases) >= 8
+    assert {
+        "case_9_login_private_api_without_auth",
+        "case_10_password_reset_token_no_expiry",
+        "case_11_otp_verify_without_rate_limit",
+        "case_12_reset_endpoint_enumerates_accounts",
+        "case_13_jwt_logged_in_server_logs",
+        "case_14_admin_route_lacks_role_check",
+        "case_15_auth_provider_config_missing",
+        "case_16_clean_provider_backed_auth_with_ownership",
+    } <= login_ids
+
+    for case in login_cases:
+        case_dir = tmp_path / "validation_matrix" / case["id"]
+        combined = "\n".join(
+            (case_dir / name).read_text(encoding="utf-8")
+            for name in ("launch_decision.md", "top_security_risks.md", "agent_fix_plan.md", "retest_checklist.md")
+        ).lower()
+        assert "human confirmation" in combined
+        assert "prohibited changes" in combined
+        assert "retest" in combined
+
+    provider_missing = (tmp_path / "validation_matrix" / "case_15_auth_provider_config_missing" / "launch_decision.md").read_text(encoding="utf-8")
+    clean_provider = (tmp_path / "validation_matrix" / "case_16_clean_provider_backed_auth_with_ownership" / "launch_decision.md").read_text(encoding="utf-8")
+    token_logging_fix = (tmp_path / "validation_matrix" / "case_13_jwt_logged_in_server_logs" / "agent_fix_plan.md").read_text(encoding="utf-8")
+    otp_retest = (tmp_path / "validation_matrix" / "case_11_otp_verify_without_rate_limit" / "retest_checklist.md").read_text(encoding="utf-8")
+
+    assert "Decision: REVIEW" in provider_missing
+    assert "Decision: PASS_WITH_WARNINGS" in clean_provider
+    assert "Do not print full OTPs, reset tokens, JWTs" in token_logging_fix
+    assert "repeated failed OTP attempts" in otp_retest
 
 
 def test_rc_actionability_review_passes_for_matrix_outputs(tmp_path):
@@ -197,6 +236,9 @@ def test_rc_release_decision_labels_simulated_subagent_threshold(tmp_path):
 
     decision = (tmp_path / "release_decision.md").read_text(encoding="utf-8")
     assert "Decision: READY_FOR_CONTROLLED_EXTERNAL_PILOT_SIMULATED" in decision
+    assert "PASS: Simulated usability threshold passes" in decision
+    assert "PENDING: Real external blind usability passes threshold" in decision
+    assert "PASS: External blind usability passes threshold" not in decision
     assert "structured sub-agent sessions are not real external blind user evidence" in decision
 
 

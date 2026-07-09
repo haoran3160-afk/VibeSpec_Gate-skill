@@ -144,6 +144,8 @@ def evidence_context(root: Path, location: str, source_type: str, max_snippet_li
 
 def rubric_for(finding: Finding) -> str:
     combined = f"{finding.category} {finding.title}".lower()
+    if finding.category.lower() == "auth":
+        return "auth"
     if "secret" in combined or "token" in combined or "api key" in combined or "apikey" in combined:
         return "secret"
     if "desktop" in combined or "electron" in combined:

@@ -124,3 +124,41 @@ def test_review_cli_rejects_external_model_provider(tmp_path):
         check=False,
     )
     assert result.returncode != 0
+
+
+def test_lite_review_cli_marks_login_token_logging_as_block(tmp_path):
+    project = tmp_path / "login_app"
+    route = project / "app" / "api" / "login" / "route.ts"
+    route.parent.mkdir(parents=True)
+    route.write_text(
+        """
+export async function POST(req) {
+  console.log("authorization", req.headers.get("authorization"))
+  return Response.json({ ok: true })
+}
+""",
+        encoding="utf-8",
+    )
+    output = tmp_path / "lite_review"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "vibesec.cli",
+            "lite-review",
+            str(project),
+            "--output",
+            str(output),
+            "--no-adapters",
+        ],
+        cwd=Path.cwd(),
+        env=_env(),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "Decision: BLOCK" in (output / "launch_decision.md").read_text(encoding="utf-8")
+    assert "Authentication token or verification code may be logged" in (output / "top_security_risks.md").read_text(encoding="utf-8")
+    assert "Do not auto-fix" in (output / "launch_decision.md").read_text(encoding="utf-8")

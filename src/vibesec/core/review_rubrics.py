@@ -125,7 +125,67 @@ def _review_secret(packet: dict[str, Any]) -> dict[str, Any]:
 
 
 def _review_auth(packet: dict[str, Any]) -> dict[str, Any]:
+    title = packet["finding"]["title"].lower()
     text = packet_text(packet)
+    if any(word in title for word in ("token", "verification code", "otp")) and any(word in text for word in ("log", "authorization", "cookie", "jwt", "session")):
+        return _verdict(
+            packet,
+            "likely_true",
+            "high",
+            "P0",
+            True,
+            "fix",
+            "Auth token, session, or verification-code logging can expose account access material.",
+            verification_commands=["Confirm logs omit raw OTPs, reset tokens, JWTs, cookies, authorization headers, and session ids."],
+        )
+    if "rate limiting" in title or "rate limit" in title:
+        return _verdict(
+            packet,
+            "needs_human_review",
+            "medium",
+            "P1",
+            True,
+            "manual_review",
+            "OTP or reset flow lacks visible throttling evidence and may permit repeated guessing or abuse.",
+            questions=["Is rate limiting enforced in middleware, provider settings, or another service?", "What threshold and user-support behavior has the product owner approved?"],
+            verification_commands=["Confirm repeated failed OTP or reset attempts hit a safe rate-limit path."],
+        )
+    if "reset token" in title and "expiry" in title:
+        return _verdict(
+            packet,
+            "needs_human_review",
+            "medium",
+            "P1",
+            True,
+            "manual_review",
+            "Password reset-token expiry or single-use evidence is missing and needs confirmation.",
+            questions=["Where is reset-token expiry enforced?", "Can a reset token be reused after a successful reset?"],
+            verification_commands=["Confirm expired and already-used reset tokens are rejected."],
+        )
+    if "enumerate accounts" in title:
+        return _verdict(
+            packet,
+            "needs_human_review",
+            "medium",
+            "P2",
+            True,
+            "manual_review",
+            "Public auth response may reveal whether an account exists.",
+            questions=["Is account-existence disclosure an intentional product decision?", "Are reset/signup responses generic for public callers?"],
+            verification_commands=["Confirm public reset/signup/login responses do not reveal account existence unless explicitly accepted."],
+        )
+    if "admin route" in title:
+        return _verdict(
+            packet,
+            "needs_human_review",
+            "medium",
+            "P1",
+            True,
+            "manual_review",
+            "Admin route lacks visible role or permission enforcement evidence.",
+            questions=["Where is admin role or permission enforcement performed?", "Do non-admin users receive a safe denial?"],
+            verification_commands=["Confirm non-admin users cannot reach the admin route."],
+        )
     if any(
         word in text
         for word in (

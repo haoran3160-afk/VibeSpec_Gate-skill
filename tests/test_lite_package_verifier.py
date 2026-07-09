@@ -16,6 +16,22 @@ def test_lite_package_verifier_accepts_required_prompt_only_package(tmp_path):
     assert check_package(tmp_path) == []
 
 
+def test_lite_package_user_docs_include_login_security_evidence_lane():
+    required_terms = (
+        "login",
+        "signup",
+        "password reset",
+        "OTP",
+        "session",
+        "rate-limit",
+        "admin",
+    )
+    for file_name in REQUIRED_INCLUDE:
+        text = (Path.cwd() / file_name).read_text(encoding="utf-8")
+        for term in required_terms:
+            assert term.lower() in text.lower(), f"{file_name} missing {term}"
+
+
 def test_lite_package_verifier_rejects_excluded_package_files(tmp_path):
     _copy_required_package_files(tmp_path)
     excluded = tmp_path / "tests" / "test_internal.py"

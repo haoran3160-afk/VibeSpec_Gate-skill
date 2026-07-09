@@ -20,6 +20,7 @@ Starter prompt:
 Review this project for launch-blocking security risks.
 
 Tell me whether it can safely launch, explain the top security and data-safety risks,
+including login, signup, password reset, OTP, session, token, and admin-auth risks,
 produce bounded coding-Agent fix tasks after human confirmation, and produce a retest checklist.
 ```
 
@@ -67,7 +68,17 @@ Read these in order:
 - Do not ask an Agent to edit the project until a human confirms the evidence.
 - Do not write suppressions automatically.
 - Do not broaden permissions, remove validation, or add bypasses while fixing.
+- Do not ask an Agent to choose CAPTCHA providers, rate-limit thresholds, MFA, identity-provider, recovery-policy, or production-account changes without human confirmation.
+- Do not print full OTPs, reset tokens, JWTs, cookies, session ids, authorization headers, or secrets.
 - Do not treat the Lite bundle as a professional security certification.
+
+## Login-Security Evidence
+
+For products with accounts or private user data, ask the Agent to inspect login, signup, logout, password reset, magic-link, OTP send/verify, verification-code, CAPTCHA or abuse-control, rate-limit, session cookie, JWT, refresh-token, frontend token storage, account-enumeration, and admin-auth evidence.
+
+Use `REVIEW`, not `PASS`, when provider-side login settings, rate limits, CAPTCHA/abuse controls, cookie settings, reset-token expiry, or admin-role evidence is missing from the reviewed files.
+
+Safe retests include checking that unauthenticated private requests are rejected, user A cannot read or mutate user B's data, expired or reused OTP/reset tokens fail, repeated failed verification attempts hit a safe rate-limit path, public reset/signup responses do not reveal account existence, logs omit raw tokens and codes, and non-admin users cannot reach admin routes.
 
 ## Optional Existing Review Output Input
 

@@ -9,7 +9,7 @@ VibeSec Gate is an **LLM-native security review Skill for AI-built products**.
 
 Use it before launch when you need a practical answer to one question:
 
-> Can this app leak secrets, expose user data, ship broken auth, or give an Agent/tool too much authority?
+> Can this app leak secrets, expose user data, ship weak login/session flows, or give an Agent/tool too much authority?
 
 VibeSec Gate reviews project evidence and produces:
 
@@ -34,6 +34,7 @@ Starter prompt:
 Review this project for launch-blocking security risks.
 
 Tell me whether it can safely launch, explain the top security and data-safety risks,
+including login, signup, password reset, OTP, session, and admin-auth risks,
 produce bounded coding-Agent fix tasks after human confirmation, and produce a retest checklist.
 ```
 
@@ -79,7 +80,9 @@ Launch decision meanings:
 VibeSec Gate focuses on launch-impacting issues:
 
 - exposed API keys, service-role keys, database URLs, and credentials;
+- login, signup, password reset, OTP, magic-link, session, token, account-enumeration, and admin-auth mistakes;
 - missing auth, broken ownership checks, and unsafe database rules;
+- missing rate-limit, CAPTCHA/provider abuse-control, or reset-token expiry evidence;
 - risky CORS, cookie, session, header, upload, logging, and deployment config;
 - prompt or prompt-log exposure;
 - excessive Agent, MCP/IPC, Electron, shell, file, email, database, or payment tool authority;
@@ -95,6 +98,7 @@ py -3 -m vibesec.cli lite-review .\my-project --output .\lite_review --no-adapte
 ```
 
 The CLI is repository infrastructure. It is not required for the default prompt-only Skill package.
+When deeper review evidence is available, `llm_review_packet.json` is the LLM-native handoff packet for model-assisted review workflows.
 
 ## Documentation
 
@@ -157,4 +161,3 @@ Generated folders such as `outputs/` and `test output/` are intentionally ignore
 ## License
 
 No open-source license has been selected yet. Until a `LICENSE` file is added, do not assume reuse, redistribution, or relicensing rights.
-

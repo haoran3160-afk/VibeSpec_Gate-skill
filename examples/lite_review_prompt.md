@@ -8,6 +8,7 @@ Review this project for launch-blocking security risks.
 Goal:
 - Tell me whether this AI-built product can safely launch.
 - Explain the top security and data-safety risks in plain language.
+- Review login, signup, password reset, OTP/magic-link, session, token, account-enumeration, rate-limit/CAPTCHA, and admin-auth evidence when present.
 - Produce bounded coding-Agent fix tasks after human confirmation.
 - Produce a retest checklist.
 
@@ -16,6 +17,8 @@ Constraints:
 - Do not auto-write suppressions.
 - Do not call external model/provider APIs from repository scripts.
 - Do not mutate the reviewed project unless I explicitly approve a fix task.
+- Do not provide brute-force, CAPTCHA-bypass, credential-stuffing, phishing, live OTP interception, or exploit instructions.
+- Do not print full OTPs, reset tokens, JWTs, cookies, session ids, authorization headers, or secrets.
 
 Preferred output shape:
 - launch_decision.md

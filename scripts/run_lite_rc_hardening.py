@@ -132,6 +132,7 @@ MATRIX_CASES: tuple[dict[str, Any], ...] = (
         "id": "case_8_upload_logging_privacy_issue",
         "decision": "REVIEW",
         "expected": {"REVIEW", "BLOCK"},
+        "domain": "privacy_logging",
         "surface": "Upload/logging privacy issue",
         "evidence": [
             "Demo upload boundary evidence: uploaded content or request bodies are logged without a redaction rule.",
@@ -142,6 +143,134 @@ MATRIX_CASES: tuple[dict[str, Any], ...] = (
         "human": "Confirm retention, privacy, and support-debugging requirements.",
         "prohibited": "Do not preserve raw sensitive uploads in logs just to simplify debugging.",
         "retest": "Confirm logs redact upload/request bodies and include only necessary metadata.",
+    },
+    {
+        "id": "case_9_login_private_api_without_auth",
+        "decision": "BLOCK",
+        "expected": {"BLOCK"},
+        "domain": "login_security",
+        "surface": "Login private API without auth",
+        "evidence": [
+            "Synthetic login-security evidence: `app/api/profile/route.ts` returns private profile data without a verified server-side session.",
+            "No route middleware or auth helper evidence is visible for the private API.",
+        ],
+        "risk": "Attackers can call a private endpoint directly and read user data without logging in.",
+        "fix": "Add a server-side auth guard to the private route before reading profile data.",
+        "human": "Confirm the intended session helper and whether any global middleware already protects this route.",
+        "prohibited": "Do not rely on frontend-only checks or request-body user identity as proof of login.",
+        "retest": "Confirm unauthenticated requests to the private route return `401` or an equivalent safe denial.",
+    },
+    {
+        "id": "case_10_password_reset_token_no_expiry",
+        "decision": "BLOCK",
+        "expected": {"BLOCK", "REVIEW"},
+        "domain": "login_security",
+        "surface": "Password reset token without expiry",
+        "evidence": [
+            "Synthetic login-security evidence: reset-token storage records `token` and `email` but no `expires_at`, TTL, or single-use marker.",
+            "Reset verification logic checks only token equality before changing the password.",
+        ],
+        "risk": "A leaked reset token can remain usable indefinitely or be replayed after the user changes the password.",
+        "fix": "Add expiry and single-use enforcement for reset tokens before accepting password changes.",
+        "human": "Confirm the product's account recovery policy and acceptable reset-token lifetime.",
+        "prohibited": "Do not log reset tokens or extend token lifetime to avoid failed tests.",
+        "retest": "Confirm expired and already-used reset tokens are rejected before password change.",
+    },
+    {
+        "id": "case_11_otp_verify_without_rate_limit",
+        "decision": "BLOCK",
+        "expected": {"BLOCK", "REVIEW"},
+        "domain": "login_security",
+        "surface": "OTP verify without rate limit",
+        "evidence": [
+            "Synthetic login-security evidence: `app/api/otp/verify/route.ts` accepts repeated verification attempts.",
+            "No rate-limit middleware, provider abuse-control evidence, lockout, or attempt counter is visible.",
+        ],
+        "risk": "Attackers can repeatedly try verification codes until one works, which can lead to account takeover.",
+        "fix": "Add a bounded rate-limit or attempt counter to the OTP verify endpoint.",
+        "human": "Confirm safe thresholds, lockout behavior, and user-support impact before production rollout.",
+        "prohibited": "Do not provide brute-force scripts, bypass CAPTCHA, or lock out production users without approval.",
+        "retest": "Confirm repeated failed OTP attempts hit a safe rate-limit path and valid codes still work within policy.",
+    },
+    {
+        "id": "case_12_reset_endpoint_enumerates_accounts",
+        "decision": "REVIEW",
+        "expected": {"REVIEW", "BLOCK"},
+        "domain": "login_security",
+        "surface": "Reset endpoint enumerates accounts",
+        "evidence": [
+            "Synthetic login-security evidence: reset endpoint returns `email not found` for unknown accounts.",
+            "The same endpoint returns `reset email sent` for existing accounts.",
+        ],
+        "risk": "Public reset responses can reveal whether an email belongs to a user, which can enable targeted abuse.",
+        "fix": "Use a generic public reset response while preserving internal audit logs.",
+        "human": "Confirm whether account-existence disclosure is an intentional product decision.",
+        "prohibited": "Do not remove audit logging or expose account existence through a different public message.",
+        "retest": "Confirm reset responses for existing and non-existing accounts are indistinguishable to public callers.",
+    },
+    {
+        "id": "case_13_jwt_logged_in_server_logs",
+        "decision": "BLOCK",
+        "expected": {"BLOCK"},
+        "domain": "login_security",
+        "surface": "JWT logged in server logs",
+        "evidence": [
+            "Synthetic login-security evidence: server debug logging prints the `Authorization` header and session JWT.",
+            "No redaction rule masks cookies, bearer tokens, or session ids before logging.",
+        ],
+        "risk": "Anyone with log access can reuse bearer tokens or session material to access accounts.",
+        "fix": "Remove raw auth-token logging and keep only redacted metadata needed for debugging.",
+        "human": "Confirm log retention, incident response, and whether any exposed production tokens need rotation.",
+        "prohibited": "Do not print full OTPs, reset tokens, JWTs, cookies, session ids, authorization headers, or secrets.",
+        "retest": "Confirm logs omit raw JWTs, cookies, authorization headers, session ids, OTPs, and reset tokens.",
+    },
+    {
+        "id": "case_14_admin_route_lacks_role_check",
+        "decision": "BLOCK",
+        "expected": {"BLOCK", "REVIEW"},
+        "domain": "login_security",
+        "surface": "Admin route lacks role check",
+        "evidence": [
+            "Synthetic login-security evidence: `app/api/admin/users/route.ts` checks login but not admin role or permission.",
+            "No provider-side role policy or admin guard evidence is present.",
+        ],
+        "risk": "A normal logged-in user may reach privileged account-management behavior.",
+        "fix": "Add an explicit admin role or permission guard before privileged route behavior.",
+        "human": "Confirm admin role source, MFA expectation, and break-glass account policy.",
+        "prohibited": "Do not share the public user session path with admin actions without a role check.",
+        "retest": "Confirm non-admin users are rejected and admin users remain able to perform the intended action.",
+    },
+    {
+        "id": "case_15_auth_provider_config_missing",
+        "decision": "REVIEW",
+        "expected": {"REVIEW"},
+        "domain": "login_security",
+        "surface": "Auth provider used but config missing",
+        "evidence": [
+            "Synthetic login-security evidence: application imports a managed auth provider but repository files do not show cookie, session, rate-limit, or recovery settings.",
+            "No provider dashboard export or deployment configuration evidence is included.",
+        ],
+        "risk": "The provider may be configured safely, but the reviewed evidence cannot prove session, recovery, and abuse controls are production-ready.",
+        "fix": "Document or attach provider configuration evidence for session cookies, recovery tokens, MFA/admin policy, and abuse controls.",
+        "human": "Confirm provider-side security settings in the dashboard or deployment environment.",
+        "prohibited": "Do not mark login security as `PASS` solely because a provider library is imported.",
+        "retest": "Confirm provider configuration evidence covers session cookie settings, recovery token expiry, rate limits or abuse controls, and admin-role enforcement.",
+    },
+    {
+        "id": "case_16_clean_provider_backed_auth_with_ownership",
+        "decision": "PASS_WITH_WARNINGS",
+        "expected": {"PASS_WITH_WARNINGS", "PASS"},
+        "domain": "login_security",
+        "surface": "Clean provider-backed auth with ownership checks",
+        "evidence": [
+            "Synthetic login-security evidence: private routes call `requireAuth(req)` and constrain queries by authenticated `user_id`.",
+            "OTP/reset flows use provider-managed expiry and rate-limit configuration evidence, and admin routes check `role === 'admin'`.",
+        ],
+        "risk": "No material login-security launch blocker was found in reviewed evidence, but production provider settings still need final confirmation.",
+        "fix": "No required Agent fix task; keep auth, ownership, abuse-control, token logging, and admin-role checks covered by tests.",
+        "human": "Confirm production provider dashboard settings match the reviewed evidence.",
+        "prohibited": "Do not remove owner constraints, weaken cookie settings, or disable rate limits to simplify login tests.",
+        "retest": "Confirm unauthenticated private requests fail, user A cannot access user B's data, repeated OTP failures are throttled, logs omit tokens, and non-admin users cannot reach admin routes.",
     },
 )
 
@@ -727,19 +856,26 @@ def write_release_decision(
 ) -> None:
     real_projects = real_projects or {"passed": True, "projects": []}
     package_reproducible = compare_package_file_list(output_root)
+    simulated_sessions = int(external.get("simulated_sessions", 0))
+    real_or_semi_external_sessions = int(external.get("recorded_sessions", 0)) - simulated_sessions
+    usability_gate_name = (
+        "Simulated usability threshold passes"
+        if simulated_sessions
+        else "External blind usability passes threshold"
+    )
     gates = [
         ("Candidate package generation is reproducible", package_reproducible),
         ("Source package verifier passes", command_results["verifier_source"]["returncode"] == 0),
         ("Candidate package verifier passes", command_results["verifier_candidate"]["returncode"] == 0),
         ("Focused Lite tests pass", command_results["focused_tests"]["returncode"] == 0),
         ("Expanded validation matrix has no blocker-level failures", matrix["passed"]),
-        ("External blind usability passes threshold", external["passed"]),
+        (usability_gate_name, external["passed"]),
         ("Actionability review finds no unsafe fix instructions", actionability["passed"]),
         ("Read-only real-project validation does not mutate source files", real_projects["passed"]),
         ("Release notes state limitations and non-certification boundary", True),
     ]
     ready = all(passed for _, passed in gates)
-    simulated_ready = ready and external.get("simulated_sessions", 0) > 0
+    simulated_ready = ready and simulated_sessions > 0
     decision = "NO_GO_FOR_CONTROLLED_EXTERNAL_PILOT"
     if ready:
         decision = (
@@ -759,6 +895,11 @@ def write_release_decision(
     ]
     for name, passed in gates:
         lines.append(f"- {'PASS' if passed else 'FAIL'}: {name}")
+    if simulated_sessions:
+        lines.append(
+            f"- PENDING: Real external blind usability passes threshold "
+            f"({real_or_semi_external_sessions} real/semi-external sessions recorded)"
+        )
     lines.extend(["", "## Triage", ""])
     if external["passed"]:
         if simulated_ready:
