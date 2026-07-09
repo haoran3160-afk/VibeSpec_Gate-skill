@@ -46,6 +46,7 @@ This distinction prevents a misleading package that looks lightweight but secret
 These files are required in the default prompt-only Lite package:
 
 ```text
+LICENSE
 SKILL.md
 README.md
 README.zh-CN.md

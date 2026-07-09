@@ -207,4 +207,6 @@ py -3 -m pytest tests/test_lite_package_verifier.py tests/test_lite_release_vali
 
 ## License
 
-目前还没有选择开源许可证。在添加 `LICENSE` 文件前，不要假定可以复用、再分发或重新授权。
+Apache License 2.0。见 [LICENSE](LICENSE)。
+
+许可证只处理复用和分发授权，不代表 VibeSpec_Gate-skill 是专业安全认证、渗透测试、法律审查或合规证明。

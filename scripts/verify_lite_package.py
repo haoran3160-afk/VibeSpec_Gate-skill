@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = Path("docs/design/lite_skill_package_manifest.md")
 REQUIRED_INCLUDE = (
+    "LICENSE",
     "SKILL.md",
     "README.md",
     "README.zh-CN.md",
@@ -41,6 +42,7 @@ OUTPUT_NAMES = (
     "retest_checklist.md",
 )
 DECISION_NAMES = ("BLOCK", "REVIEW", "PASS_WITH_WARNINGS", "PASS")
+USER_DOC_INCLUDE = tuple(path for path in REQUIRED_INCLUDE if path.endswith(".md"))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -72,7 +74,7 @@ def check_source(root: Path) -> list[str]:
     failures: list[str] = []
     if not (root / MANIFEST).exists():
         failures.append(f"missing {MANIFEST.as_posix()}")
-    failures.extend(_check_user_docs(root, REQUIRED_INCLUDE))
+    failures.extend(_check_user_docs(root, USER_DOC_INCLUDE))
     failures.extend(_check_prompt_only_default(root))
     failures.extend(_check_safety_boundary(root))
     return failures
@@ -99,7 +101,7 @@ def check_package(package_dir: Path) -> list[str]:
             if fnmatch.fnmatch(file_path, pattern):
                 failures.append(f"package contains excluded file: {file_path} matches {pattern}")
 
-    present_docs = [path for path in REQUIRED_INCLUDE + OPTIONAL_INCLUDE if path in files]
+    present_docs = [path for path in USER_DOC_INCLUDE + OPTIONAL_INCLUDE if path in files]
     failures.extend(_check_user_docs(package_dir, present_docs))
     failures.extend(_check_prompt_only_default(package_dir))
     failures.extend(_check_safety_boundary(package_dir))

@@ -208,4 +208,6 @@ Generated folders such as `outputs/` and `test output/` are intentionally ignore
 
 ## License
 
-No open-source license has been selected yet. Until a `LICENSE` file is added, do not assume reuse, redistribution, or relicensing rights.
+Apache License 2.0. See [LICENSE](LICENSE).
+
+The license controls reuse and distribution rights. It does not make VibeSpec_Gate-skill a professional security certification, penetration test, legal review, or compliance attestation.

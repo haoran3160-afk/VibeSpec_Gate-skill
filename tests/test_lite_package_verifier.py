@@ -24,6 +24,8 @@ def test_lite_package_user_docs_include_login_security_evidence_lane():
         "default": ("login", "signup", "password reset", "OTP", "session", "rate-limit", "admin"),
     }
     for file_name in REQUIRED_INCLUDE:
+        if not file_name.endswith(".md"):
+            continue
         terms = required_terms_by_file.get(file_name, required_terms_by_file["default"])
         text = (Path.cwd() / file_name).read_text(encoding="utf-8")
         for term in terms:
@@ -40,6 +42,7 @@ def test_lite_package_zip_contains_only_prompt_only_files(tmp_path):
     with zipfile.ZipFile(output_zip) as archive:
         names = set(archive.namelist())
     assert set(REQUIRED_INCLUDE) <= names
+    assert "LICENSE" in names
     assert "README.zh-CN.md" in names
     assert not any(name.startswith(("tests/", "scripts/", "test output/")) for name in names)
 
