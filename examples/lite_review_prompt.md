@@ -1,6 +1,6 @@
 # Lite Review Prompt
 
-Use this prompt when asking a host Agent or human operator to run the prompt-only Lite VibeSec Gate flow.
+Use this prompt when asking a coding Agent to run the prompt-only Lite VibeSec Gate flow.
 
 ```text
 Review this project for launch-blocking security risks.
@@ -36,7 +36,7 @@ Decision meanings:
 
 Optional repository overlay:
 
-If you cloned the full source repository and want deterministic local evidence generation, build the Lite bundle with:
+If you cloned the full source repository and want repeatable local evidence, build the Lite bundle with:
 
 ```powershell
 $env:PYTHONPATH = "src"

@@ -33,7 +33,7 @@ def test_lite_package_user_docs_include_login_security_evidence_lane():
 
 
 def test_lite_package_zip_contains_only_prompt_only_files(tmp_path):
-    output_zip = Path.cwd() / "dist" / "test-vibespec-gate-skill-lite.zip"
+    output_zip = Path.cwd() / "dist" / "test-vibesec-gate-lite.zip"
 
     result = build_lite_package(output_zip.with_suffix(""), output_zip)
 

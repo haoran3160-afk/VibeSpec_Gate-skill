@@ -20,7 +20,7 @@ Answer four questions:
 
 ## Default Package Mode
 
-The default Lite package is prompt-only and Agent-native. Do not require a first-time user to install the Python project, run repository tests, understand scorer output, inspect calibration data, or use the release verifier before receiving the launch decision.
+The default Lite package is prompt-only and Agent-native. A first-time user only needs these Skill instructions and a coding Agent before receiving the launch decision.
 
 The full repository can provide an optional Core-powered CLI path, but that path is supporting infrastructure, not the default Skill trigger.
 
@@ -124,7 +124,7 @@ If an existing VibeSec review output directory already exists, build the Lite bu
 py -3 -m vibesec.cli lite-review .\outputs-review --output .\lite_review
 ```
 
-The rule-based CLI, output schemas, scoring, calibration, fixtures, and release verifier are maintainer infrastructure. Use them when maintaining or validating the engine, but do not require a first-time Lite user to understand them before reading the launch decision.
+The CLI is optional support for repeatable local evidence. It is not required for the prompt-only Lite Skill.
 
 When deeper review evidence is available, `llm_review_packet.json` is the structured context packet for LLM-native review workflows.
 

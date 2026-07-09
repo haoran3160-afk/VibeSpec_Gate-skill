@@ -1,17 +1,14 @@
 # Changelog
 
-All notable changes to this repository will be documented here.
+All notable changes to VibeSec Gate are documented here.
 
-## Unreleased
+## 0.1.0 - 2026-07-09
 
-- Added prompt-only Lite Skill package surface.
-- Added Lite package manifest and package boundary verifier.
-- Added Lite review bundle outputs: launch decision, top risks, Agent fix plan, retest checklist, and evidence.
-- Added release validation and RC hardening workflows.
-- Added maintainer documentation for package verification, release verification, LLM quality scoring, host-agent calibration, and pilot protocol.
-- Added GitHub governance files, CI, issue templates, and PR template.
+Initial public release.
 
-## 0.1.0
-
-- Established the initial VibeSec Gate baseline.
-
+- Added the prompt-only Lite Skill package.
+- Added the four-file Lite review output: `launch_decision.md`, `top_security_risks.md`, `agent_fix_plan.md`, and `retest_checklist.md`.
+- Added login-security review coverage for login, signup, password reset, OTP, session, token, rate-limit, and admin-auth risks.
+- Added the optional Core-powered CLI path for repeatable local evidence generation.
+- Added Lite zip packaging with the Apache-2.0 license.
+- Added GitHub CI and release-ready verification.
