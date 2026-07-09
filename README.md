@@ -1,17 +1,19 @@
-# VibeSec Gate
+# VibeSpec_Gate-skill
+
+[English](README.md) | [中文](README.zh-CN.md)
 
 [![CI](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![Package mode](https://img.shields.io/badge/package-prompt--only%20Skill-green)](#default-lite-package)
 [![Security boundary](https://img.shields.io/badge/security-not%20a%20certification-orange)](#safety-boundary)
 
-VibeSec Gate is an **LLM-native security review Skill for AI-built products**.
+VibeSpec_Gate-skill is an **LLM-native security review Skill for AI-built products**.
 
 Use it before launch when you need a practical answer to one question:
 
 > Can this app leak secrets, expose user data, ship weak login/session flows, or give an Agent/tool too much authority?
 
-VibeSec Gate reviews project evidence and produces:
+VibeSpec_Gate-skill reviews project evidence and produces:
 
 - a launch decision;
 - the top security and data-safety risks;
@@ -77,7 +79,7 @@ Launch decision meanings:
 
 ## What It Reviews
 
-VibeSec Gate focuses on launch-impacting issues:
+VibeSpec_Gate-skill focuses on launch-impacting issues:
 
 - exposed API keys, service-role keys, database URLs, and credentials;
 - login, signup, password reset, OTP, magic-link, session, token, account-enumeration, and admin-auth mistakes;
