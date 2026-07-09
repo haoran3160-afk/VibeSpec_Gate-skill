@@ -1,4 +1,4 @@
-# VibeSpec Gate
+# VibeSpec Gate skill
 
 [中文](README.md) | [English](README.en.md)
 
@@ -6,7 +6,7 @@
 
 AI 帮你把产品做出来了，但它真的能上线吗？
 
-VibeSpec Gate 让你的 coding Agent 先回答最关键的问题：
+VibeSpec Gate skill 让你的 coding Agent 先回答最关键的问题：
 
 > 会不会泄露密钥、暴露用户数据、登录/权限有洞，或者给 Agent/tool 太大权限？
 
@@ -14,7 +14,7 @@ VibeSpec Gate 让你的 coding Agent 先回答最关键的问题：
 
 ## 你会得到什么
 
-VibeSpec Gate 会生成四个主要文件：
+VibeSpec Gate skill 会生成四个主要文件：
 
 ```text
 lite_review/
@@ -57,7 +57,7 @@ produce bounded coding-Agent fix tasks after human confirmation, and produce a r
 
 ## 它会检查什么
 
-VibeSpec Gate 关注会影响上线的风险：
+VibeSpec Gate skill 关注会影响上线的风险：
 
 - 泄露的 secrets、API keys、service-role keys、数据库 URL 和凭据；
 - 登录、注册、密码重置、OTP、magic-link、session、token、账号枚举、rate-limit 和 admin-auth 错误；
@@ -81,7 +81,7 @@ VibeSpec Gate 关注会影响上线的风险：
 - 不要让 Agent 在没有 human confirmation 的情况下选择 CAPTCHA provider、rate-limit 阈值、MFA 策略、身份提供商、账号找回策略或生产账号变更；
 - 不要在报告或修复计划里打印完整 OTP、reset token、JWT、cookie、session id、authorization header 或 secret。
 
-VibeSpec Gate 不是 professional security certification、penetration test、legal review 或 compliance attestation。
+VibeSpec Gate skill 不是 professional security certification、penetration test、legal review 或 compliance attestation。
 
 ## 默认 Lite 包
 
@@ -119,4 +119,4 @@ zip 内包含 prompt-only Lite 包文件和 Apache-2.0 许可证。
 
 Apache License 2.0。见 [LICENSE](LICENSE)。
 
-许可证只处理复用和分发授权，不代表 VibeSpec Gate 是 professional security certification、penetration test、legal review 或 compliance attestation。
+许可证只处理复用和分发授权，不代表 VibeSpec Gate skill 是 professional security certification、penetration test、legal review 或 compliance attestation。
