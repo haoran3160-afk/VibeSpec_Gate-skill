@@ -64,7 +64,7 @@ The stub outputs are only schema/safety test fixtures. They are not completed LL
 Useful user prompts:
 
 ```text
-Review this vibe-coded product for launch-blocking security risks.
+Review this vibe coding product for launch-blocking security risks.
 Tell me whether this can leak user data or API keys.
 Find the security issues that would let someone bypass auth or read other users' records.
 Create a prioritized fix plan for Codex/Cursor/Claude.

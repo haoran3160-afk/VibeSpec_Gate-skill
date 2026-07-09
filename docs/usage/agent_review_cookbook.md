@@ -1,6 +1,6 @@
 ﻿# Agent Review Cookbook
 
-VibeSpec Gate is an LLM-native security review Skill for vibe-coded products. The CLI can generate structured evidence, but the product value comes from model-assisted security judgment, prioritization, explanation, and repair planning.
+VibeSpec Gate is an LLM-native security review Skill for vibe coding products. The CLI can generate structured evidence, but the product value comes from model-assisted security judgment, prioritization, explanation, and repair planning.
 
 ## Common Flow
 

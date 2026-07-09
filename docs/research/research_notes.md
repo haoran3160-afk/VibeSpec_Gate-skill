@@ -2,7 +2,7 @@
 
 Date: 2026-07-06
 
-> Historical note: these notes informed the original MVP. The current product positioning is in `context.md`, `README.md`, and `SKILL.md`: VibeSpec Gate is an LLM-native security review Skill for vibe-coded products. Local tools and rule-based checks are supporting evidence sources, not the product's ceiling.
+> Historical note: these notes informed the original MVP. The current product positioning is in `context.md`, `README.md`, and `SKILL.md`: VibeSpec Gate is an LLM-native security review Skill for vibe coding products. Local tools and rule-based checks are supporting evidence sources, not the product's ceiling.
 
 VibeSpec Gate should be a defensive launch gate and repair assistant, not a penetration testing tool. The MVP should orchestrate local static checks, normalize findings, explain them for non-specialists, and produce repair and retest tasks.
 

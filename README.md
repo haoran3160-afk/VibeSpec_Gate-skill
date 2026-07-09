@@ -2,13 +2,15 @@
 
 [中文](README.md) | [English](README.en.md)
 
-**面向 vibe-coded 产品的上线安全检查。**
+**给 vibe coding 做出来的产品，一个上线前的安全门禁。**
 
-VibeSpec Gate 帮助产品构建者在上线前回答一个实际问题：
+AI 帮你把产品做出来了，但它真的能上线吗？
 
-> 这个产品可以上线吗，还是存在必须先修的安全或数据风险？
+VibeSpec Gate 让你的 coding Agent 先回答最关键的问题：
 
-它是一个 LLM-native Skill。你的 coding Agent 会读取 Skill 说明、审查项目证据，并生成一份简洁的上线安全审查结果。
+> 会不会泄露密钥、暴露用户数据、登录/权限有洞，或者给 Agent/tool 太大权限？
+
+它会输出能不能上线、最该先修的风险、Agent 可执行的修复任务和复测清单。
 
 ## 你会得到什么
 

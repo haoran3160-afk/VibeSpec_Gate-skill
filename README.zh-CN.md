@@ -6,7 +6,7 @@
 
 本文件保留为兼容入口，方便旧链接、打包脚本或用户收藏继续访问。
 
-VibeSpec Gate 是面向 vibe-coded 产品的 LLM-native 上线安全检查 Skill。它帮助你在上线前判断产品是否存在必须先修的安全或数据风险。
+VibeSpec Gate 是面向 vibe coding 产品的 LLM-native 上线安全检查 Skill。它帮助你在上线前判断产品是否存在必须先修的安全或数据风险。
 
 主要输出：
 

@@ -2,13 +2,15 @@
 
 [中文](README.md) | [English](README.en.md)
 
-**A launch safety check for vibe-coded products.**
+**A launch gate for products built with vibe coding.**
 
-VibeSpec Gate helps builders answer one practical question before launch:
+AI helped you build it. Can it actually go live?
 
-> Can this product go live, or is there a security or data-safety problem to fix first?
+VibeSpec Gate asks your coding Agent to answer the launch-risk question first:
 
-It is an LLM-native Skill. Your coding Agent reads the Skill instructions, reviews the project evidence, and writes a concise launch review.
+> Could this leak secrets, expose user data, break login/permissions, or give an Agent/tool too much authority?
+
+It then produces a launch decision, top risks, bounded Agent fix tasks, and a retest checklist.
 
 ## What You Get
 

@@ -55,7 +55,7 @@ def test_workspace_builder_creates_prompt_readme_packet_and_templates(tmp_path):
         assert (workspace / "output_templates" / output_name).exists()
 
     prompt = (workspace / "llm_review_prompt.md").read_text(encoding="utf-8")
-    assert "defensive security reviewer for vibe-coded products" in prompt
+    assert "defensive security reviewer for vibe coding products" in prompt
     assert "llm_review_packet.json" in prompt
     assert "baseline_hint_not_final_judgment" in prompt
     assert "Safety boundaries" in prompt

@@ -4,7 +4,7 @@ This contract defines how a host agent, API-backed model, or local/private model
 
 ## Defensive Reviewer Instructions
 
-The reviewer is a defensive security reviewer for user-owned vibe-coded products. It should:
+The reviewer is a defensive security reviewer for user-owned vibe coding products. It should:
 
 - use rule findings as evidence hints, not final truth;
 - reason about launch risk, data exposure, and Agent/tool authority;

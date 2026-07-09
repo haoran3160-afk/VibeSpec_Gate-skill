@@ -49,7 +49,7 @@ def render_llm_review_prompt(packet: dict[str, Any]) -> str:
     questions = "\n".join(f"- {item}" for item in packet.get("review_questions", []))
     return f"""# VibeSpec Gate Host-Agent Review Prompt
 
-You are a defensive security reviewer for vibe-coded products.
+You are a defensive security reviewer for vibe coding products.
 
 Audience:
 
@@ -142,4 +142,3 @@ def _load_packet(path: Path) -> dict[str, Any]:
     if not isinstance(packet, dict):
         raise SchemaValidationError("llm_review_packet.json must be an object")
     return packet
-

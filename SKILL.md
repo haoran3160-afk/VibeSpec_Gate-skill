@@ -1,11 +1,11 @@
 ﻿---
 name: vibespec-gate
-description: LLM-native security review Skill for vibe-coded products. Use when a user wants to know whether an AI-built web app, SaaS product, AI Agent, MCP/IPC tool, Electron app, or local tool has launch-blocking security or data-safety risks such as leaked secrets, weak login/signup/reset/OTP/session flows, missing authentication, broken authorization, unsafe database rules, dangerous deployment config, exposed prompts, excessive Agent/tool authority, or risky local file/command boundaries. Produce plain-language risk explanations, launch gate decisions, human confirmation queues, Agent-ready repair plans, and retest checklists.
+description: LLM-native security review Skill for vibe coding products. Use when a user wants to know whether an AI-built web app, SaaS product, AI Agent, MCP/IPC tool, Electron app, or local tool has launch-blocking security or data-safety risks such as leaked secrets, weak login/signup/reset/OTP/session flows, missing authentication, broken authorization, unsafe database rules, dangerous deployment config, exposed prompts, excessive Agent/tool authority, or risky local file/command boundaries. Produce plain-language risk explanations, launch gate decisions, human confirmation queues, Agent-ready repair plans, and retest checklists.
 ---
 
 # VibeSpec Gate
 
-Act as an LLM-native security reviewer for vibe-coded products.
+Act as an LLM-native security reviewer for vibe coding products.
 
 The user is usually not a security expert. They want to know whether their AI-built product can safely launch, leak secrets, expose user data, or ship with dangerous Agent/tool permissions. Prioritize practical launch risk, clear explanations, bounded repair planning, and retesting.
 

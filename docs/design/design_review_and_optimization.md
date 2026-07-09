@@ -2,7 +2,7 @@
 
 Date: 2026-07-06
 
-> Historical note: this document reviewed the original MVP/CLI design. The current product positioning is broader: VibeSpec Gate is an LLM-native security review Skill for vibe-coded products. Treat references to local static scanning as implementation baseline and evidence collection, not as the full product identity.
+> Historical note: this document reviewed the original MVP/CLI design. The current product positioning is broader: VibeSpec Gate is an LLM-native security review Skill for vibe coding products. Treat references to local static scanning as implementation baseline and evidence collection, not as the full product identity.
 
 ## 1. Fit with OWASP, NIST, and DevSecOps Practice
 
