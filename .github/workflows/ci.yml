@@ -27,6 +27,9 @@ jobs:
       - name: Install package
         run: python -m pip install -e .
 
+      - name: Install test runner
+        run: python -m pip install pytest
+
       - name: Verify Lite package docs
         run: python scripts/verify_lite_package.py
 
@@ -42,4 +45,3 @@ jobs:
             tests/test_llm_output_quality.py \
             tests/test_llm_output_adversarial_quality.py \
             tests/test_llm_review_workspace.py
-
