@@ -2,24 +2,32 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-[![CI](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/actions/workflows/ci.yml)
-[![Status: RC](https://img.shields.io/badge/status-0.2.0rc1-orange.svg)](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/blob/master/ROADMAP.md)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-**An Agent-native, LLM-native launch security review for products built with vibe coding.**
+**A launch security review Skill for products built with vibe coding.**
 
 Before shipping, ask your coding Agent to inspect project evidence and answer one practical question:
 
 > Could this product leak secrets, expose user data, ship weak login or authorization, or give an Agent/tool too much authority?
 
-VibeSpec Gate produces a launch decision, the highest-impact risks, bounded repair tasks that require human confirmation, and a retest checklist.
+VibeSpec Gate produces a launch decision, the highest-impact risks, scoped repair steps that require human confirmation, and a retest checklist.
 
-> **Release-candidate status:** the Skill has deterministic regression coverage and maintainer-authored synthetic walkthroughs, but no completed external blind-user pilot. Synthetic walkthroughs are contract tests, not usability evidence. It is not a professional security certification or penetration test.
+<!-- section:capabilities -->
+## Core Capabilities
+
+VibeSpec Gate focuses on controls that can change a launch decision, not general code quality:
+
+- **Identity and access:** login, signup, password reset, OTP, session, token, ownership, and admin authorization.
+- **Secrets and sensitive data:** exposed credentials, unsafe client-side data access, and weak database or storage rules.
+- **Agent and tool authority:** excessive LLM tool, MCP, IPC, Electron, filesystem, shell, database, email, or payment permissions.
+- **Deployment exposure:** dangerous production configuration, public debug surfaces, missing rate limits, and insecure defaults.
+
+For each issue, it separates confirmed risks from unanswered questions, requires human confirmation before changes, and produces project-specific retests.
 
 <!-- section:see-it-work -->
 ## See It Work
 
-The default Lite package is prompt-only. Its first review asks the host Agent to create:
+VibeSpec Gate runs through your coding Agent. During a review, the Agent creates this bundle under an approved output directory outside the reviewed project:
 
 ```text
 lite_review/
@@ -33,7 +41,7 @@ lite_review/
 Example decision excerpt:
 
 ```text
-SYNTHETIC EXAMPLE - NOT A REAL SECURITY REVIEW
+ILLUSTRATIVE EXAMPLE - NOT A REAL SECURITY REVIEW
 
 Decision: BLOCK
 Risk: A private orders route does not verify the caller or record owner.
@@ -43,16 +51,28 @@ Agent task: Add server-side auth and constrain reads/writes to the authenticated
 Retest: Verify user A cannot read or mutate user B's order.
 ```
 
-This example is synthetic. Do not use it as a launch decision, audit result, or evidence that any project is secure. See the [full synthetic example](examples/synthetic_review_example.md).
+This example is for illustration only. Do not use it as a launch decision, audit result, or evidence that any project is secure. See the [full example](examples/synthetic_review_example.md).
+
+<!-- section:how-it-works -->
+## How It Works
+
+```text
+project files you authorize
+        -> coding Agent review
+        -> BLOCK / REVIEW / PASS_WITH_WARNINGS / PASS
+        -> human confirmation
+        -> scoped repair task
+        -> project-specific retest
+```
 
 <!-- section:install -->
-## Install The Lite Skill
+## Install VibeSpec Gate
 
-The installable unit is the single `vibespec-gate/` directory inside the Lite zip. Its entry point is `vibespec-gate/SKILL.md`.
+Install the entire `vibespec-gate/` directory from the zip in your coding Agent's Skill directory. The Agent reads `vibespec-gate/SKILL.md` when the Skill is invoked.
 
 ### Build And Install From Source
 
-Requires Git and Python 3.10 or newer. Python is used to build the zip; the installed prompt-only Skill does not require the Python CLI.
+Requires Git and Python 3.10 or newer. Python is used to build the zip; the installed Skill does not require Python.
 
 Windows PowerShell:
 
@@ -80,34 +100,28 @@ python3 -m zipfile -e dist/vibespec-gate-lite.zip "${CODEX_HOME:-$HOME/.codex}/s
 test -f "${CODEX_HOME:-$HOME/.codex}/skills/vibespec-gate/SKILL.md"
 ```
 
-The build command should print `PASS Lite package zip built`. The final check should return `True` on PowerShell or exit successfully on macOS/Linux.
+The build command should print a `PASS` message. The final check should return `True` on PowerShell or exit successfully on macOS/Linux.
 
-Open a new host task and run this activation smoke before reviewing code:
+Open a new coding Agent task and check the installation before reviewing code:
 
 ```text
 Use $vibespec-gate. Without reading a project, state its four launch decisions and
 the required confirmation rule before Agent edits, then stop.
 ```
 
-Expected terms: `BLOCK`, `REVIEW`, `PASS_WITH_WARNINGS`, `PASS`, and `human confirmation`. This confirms instruction loading more directly than a file-existence check, but host behavior still depends on the installed Agent.
+Expected terms: `BLOCK`, `REVIEW`, `PASS_WITH_WARNINGS`, `PASS`, and `human confirmation`. If they appear, the coding Agent has loaded the Skill instructions.
 
-### Install A Published Release
+### Install From GitHub Releases
 
-After a GitHub Release is published, download `vibespec-gate-lite.zip` and verify it against the attached `SHA256SUMS` before extracting it into the host's Skill directory. The tag workflow rebuilds, tests, validates, and attaches both files from the tagged commit.
-
-- [Release page](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/releases)
-- [Latest Lite zip](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/releases/latest/download/vibespec-gate-lite.zip), available after the first RC Release
-- [Latest SHA256SUMS](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/releases/latest/download/SHA256SUMS), available after the first RC Release
-
-There is currently no GA release. Do not treat the older `v0.1.0` tag as the renamed `vibespec-gate` package.
+Open the [Releases page](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/releases), choose a version, and download both `vibespec-gate-lite.zip` and `SHA256SUMS`. Verify the zip against the checksum before extracting it into your coding Agent's Skill directory.
 
 ### Compatibility
 
-| Host | Current evidence |
+| Environment | Installation notes |
 | --- | --- |
-| Codex Skill directory | Package structure and `agents/openai.yaml` are validated; restart or open a new task after installation. |
-| Other hosts that load `SKILL.md` | The prompt contract may be portable, but installation and behavior are not yet claimed as validated. |
-| Optional Python CLI | Tested on Python 3.10 and 3.12; CI covers Linux, Windows, and macOS. |
+| Codex | Install `vibespec-gate/` under `$CODEX_HOME/skills`, then open a new task. |
+| Coding Agents that support `SKILL.md` | Place `vibespec-gate/` in the Skill location documented by that Agent. |
+| Optional CLI | Requires Python 3.10 or newer. |
 
 <!-- section:quick-start -->
 ## 60-Second Review
@@ -122,7 +136,7 @@ project. Do not default to writing lite_review/ inside the project.
 
 Tell me whether it can safely launch, explain the top security and data-safety risks,
 including login, signup, password reset, OTP, session, token, rate-limit, ownership,
-and admin-auth risks. Produce bounded coding-Agent fix tasks only after human
+and admin-auth risks. Produce scoped coding-Agent fix tasks only after human
 confirmation, and produce a project-specific retest checklist.
 ```
 
@@ -142,27 +156,13 @@ Decision meanings:
 
 `PASS` is not proof that a product is secure.
 
-<!-- section:how-it-works -->
-## How It Works
-
-```text
-authorized project evidence
-        -> host Agent review
-        -> BLOCK / REVIEW / PASS_WITH_WARNINGS / PASS
-        -> human confirmation
-        -> bounded Agent repair task
-        -> project-specific retest
-```
-
-The Skill prioritizes leaked secrets, login and session weaknesses, missing server-side authentication, broken ownership checks, unsafe database or storage rules, dangerous deployment settings, exposed prompts, and excessive Agent/MCP/IPC/Electron/tool authority.
-
 <!-- section:data-boundary -->
 ## Data And Privacy Boundary
 
-- **Prompt-only mode:** the current host Agent reads project files under the permissions you grant it. Whether content leaves your machine depends on that host, model provider, and configuration. Review those policies before using private code.
-- **Local CLI with `--no-adapters`:** repository code reads local files and writes review output to the path you choose. It does not call an LLM provider or enable external scanner adapters.
-- **Optional adapters:** installed tools such as Semgrep, Gitleaks, Trivy, or ZAP run only when enabled. Their own network and data-handling behavior is outside this Skill's guarantee.
-- **Generated evidence:** reports and `evidence/` may contain paths, snippets, findings, or sensitive project context. Inspect and sanitize them manually before sharing. A `redacted` field is not a guarantee that every sensitive value was removed.
+- **Coding Agent review:** your coding Agent reads project files under the permissions you grant it. Whether content leaves your machine depends on that Agent, model provider, and configuration. Review those policies before using private code.
+- **Local CLI with `--no-adapters`:** repository code reads local files and writes review output to the path you choose. This option does not call an LLM provider or run external scanners.
+- **External scanners:** tools such as Semgrep, Gitleaks, Trivy, or ZAP run only when you enable them. Review each tool's network and data-handling behavior before use.
+- **Review files:** reports and `evidence/` may contain paths, code excerpts, findings, or sensitive project context. Inspect and sanitize them manually before sharing, even when a report says sensitive values were redacted.
 
 VibeSpec Gate does not silently choose an identity provider, CAPTCHA provider, rate-limit threshold, MFA policy, secret-rotation plan, or production-account change.
 
@@ -172,7 +172,7 @@ VibeSpec Gate does not silently choose an identity provider, CAPTCHA provider, r
 `agent_fix_plan.md` is a repair plan, not permission for blind edits.
 
 - Confirm each finding, affected file, and allowed scope with a human before mutation.
-- Do not auto-write suppressions, broaden permissions, remove validation, or add bypasses.
+- Do not automatically hide findings, broaden permissions, remove security checks, or add bypasses.
 - Do not print full OTPs, reset tokens, JWTs, cookies, session IDs, authorization headers, or secrets.
 - Do not run brute-force, CAPTCHA-bypass, credential-stuffing, phishing, destructive, or unauthorized scans.
 - Keep all real-project review output outside the reviewed project.
@@ -180,11 +180,9 @@ VibeSpec Gate does not silently choose an identity provider, CAPTCHA provider, r
 VibeSpec Gate is not a professional security certification, penetration test, legal review, compliance attestation, or guarantee of absolute security.
 
 <!-- section:optional-cli -->
-## Optional Core-Powered CLI
+## Optional CLI
 
-The CLI is supporting evidence and regression infrastructure, not the default Skill experience.
-
-When deeper review evidence exists, `llm_review_packet.json` is the structured handoff packet for host-Agent reasoning. It can contain sensitive project context and requires the same sharing review as other evidence.
+Use the CLI when you want a repeatable command-line review or need results that can be archived and compared. The coding Agent workflow above remains the simplest way to start.
 
 ```bash
 python -m pip install -e .
@@ -204,20 +202,10 @@ $env:PYTHONPATH = "src"
 py -3 -m vibespec_gate.cli lite-review .\my-project --output .\lite_review --no-adapters
 ```
 
-<!-- section:validation -->
-## Validation And Maturity
-
-- Full tests, package verification, archive validation, and version checks run in CI.
-- Release tags rerun the full test and package gates before publishing an asset.
-- Maintainer hardening uses deterministic fixtures, explicitly labeled synthetic walkthroughs, and authorized project checks with before/after source-file integrity comparison.
-- Real external blind-user evidence is still pending; synthetic walkthroughs are not described as Agent or participant sessions.
-
-See the [roadmap](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/blob/master/ROADMAP.md) for the current maturity boundary.
-
 <!-- section:project -->
 ## Project Resources
 
-- [Lite quickstart](docs/usage/lite_quickstart.md)
+- [Quickstart](docs/usage/lite_quickstart.md)
 - [Review prompt](examples/lite_review_prompt.md)
 - [Agent review cookbook](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/blob/master/docs/usage/agent_review_cookbook.md)
 - [Documentation index](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/blob/master/docs/README.md)

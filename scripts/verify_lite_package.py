@@ -146,7 +146,7 @@ def _check_prompt_only_default(root: Path) -> list[str]:
     prompt = _read_lower(root / "examples/lite_review_prompt.md")
 
     required_phrases = {
-        "README.md": (readme, ("default lite package", "prompt-only", "optional core-powered")),
+        "README.md": (readme, ("coding agent", "optional cli")),
         "docs/usage/lite_quickstart.md": (quickstart, ("agent-native flow", "prompt-only", "optional repository cli flow")),
         "SKILL.md": (skill, ("default package mode", "prompt-only", "optional core-powered")),
         "examples/lite_review_prompt.md": (prompt, ("prompt-only", "optional repository overlay")),
@@ -158,12 +158,12 @@ def _check_prompt_only_default(root: Path) -> list[str]:
 
     first_readme = _before_any(
         readme,
-        ("## optional core-powered path", "## optional core-powered cli", "## 可选 core-powered 路径", "## source checkout commands"),
+        ("## optional cli", "## source checkout commands"),
     )
     first_quickstart = _before_any(quickstart, ("## optional repository cli flow", "## optional existing review output input"))
     for doc, text in (("README.md", first_readme), ("docs/usage/lite_quickstart.md", first_quickstart)):
         if "py -3 -m vibespec_gate.cli" in text or "$env:pythonpath" in text:
-            failures.append(f"{doc} presents CLI command before the prompt-only default path")
+            failures.append(f"{doc} presents CLI command before the default Skill path")
     return failures
 
 
@@ -219,7 +219,7 @@ def _check_translation_parity(root: Path) -> list[str]:
 def _check_sensitive_evidence_boundary(root: Path) -> list[str]:
     failures: list[str] = []
     checks = {
-        "README.md": (_read_lower(root / "README.md"), ("synthetic", "manual", "sharing")),
+        "README.md": (_read_lower(root / "README.md"), ("manually", "sharing")),
         "docs/usage/lite_quickstart.md": (
             _read_lower(root / "docs/usage/lite_quickstart.md"),
             ("manual", "sharing", "redacted"),

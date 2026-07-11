@@ -76,15 +76,15 @@ def test_lite_package_verifier_rejects_cli_first_readme(tmp_path):
     readme = tmp_path / "README.md"
     readme.write_text(
         readme.read_text(encoding="utf-8").replace(
-            "The default Lite package is prompt-only.",
-            "```powershell\npy -3 -m vibespec_gate.cli lite-review .\\my-project\n```\n\nThe default Lite package is prompt-only.",
+            "VibeSpec Gate runs through your coding Agent.",
+            "```powershell\npy -3 -m vibespec_gate.cli lite-review .\\my-project\n```\n\nVibeSpec Gate runs through your coding Agent.",
         ),
         encoding="utf-8",
     )
 
     failures = check_package(tmp_path)
 
-    assert any("README.md presents CLI command before the prompt-only default path" in failure for failure in failures)
+    assert any("README.md presents CLI command before the default Skill path" in failure for failure in failures)
 
 
 def test_lite_package_has_install_data_and_translation_contracts():
@@ -92,11 +92,36 @@ def test_lite_package_has_install_data_and_translation_contracts():
     chinese = Path("README.zh-CN.md").read_text(encoding="utf-8")
 
     assert "vibespec-gate\\SKILL.md" in readme
-    assert "SYNTHETIC EXAMPLE" in readme
-    assert "a `redacted` field is not a guarantee" in readme.lower()
-    assert "redacted` 字段不保证" in chinese
+    assert "ILLUSTRATIVE EXAMPLE" in readme
+    assert "even when a report says sensitive values were redacted" in readme.lower()
+    assert "即使报告显示敏感值已经脱敏" in chinese
     assert "README.en.md" not in REQUIRED_INCLUDE
     assert "agents/openai.yaml" in REQUIRED_INCLUDE
+
+
+def test_readmes_keep_internal_release_language_out_of_user_presentation():
+    banned_phrases = (
+        "release-candidate",
+        "status: rc",
+        "synthetic walkthrough",
+        "deterministic fixture",
+        "prompt-only",
+        "host agent",
+        "core-powered",
+        "validation and maturity",
+        "maintainer hardening",
+        "real external blind-user",
+        "llm_review_packet",
+        "候选发布状态",
+        "确定性 fixture",
+        "宿主 agent",
+        "验证与成熟度",
+        "当前成熟度",
+    )
+    for path in (Path("README.md"), Path("README.zh-CN.md")):
+        text = path.read_text(encoding="utf-8").lower()
+        for phrase in banned_phrases:
+            assert phrase not in text, f"{path} exposes internal phrase: {phrase}"
 
 
 def _copy_required_package_files(package_dir: Path) -> None:

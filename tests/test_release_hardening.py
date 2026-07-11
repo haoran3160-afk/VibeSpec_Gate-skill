@@ -95,8 +95,12 @@ def test_core_docs_keep_llm_native_positioning():
 
     for doc in docs:
         text = doc.read_text(encoding="utf-8").lower()
-        assert "llm-native" in text, doc
-        assert "llm_review_packet.json" in text, doc
+        if doc == Path("README.md"):
+            assert "launch security review" in text
+            assert "products built with vibe coding" in text
+        else:
+            assert "llm-native" in text, doc
+            assert "llm_review_packet.json" in text, doc
         for claim in forbidden_claims:
             assert claim not in text, (doc, claim)
 
