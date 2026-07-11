@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vibespec-gate"
-version = "0.1.0"
-description = "LLM-native security review Skill for vibe coding products."
+version = "0.2.0rc1"
+description = "Agent-native launch security review for vibe-coded products."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }

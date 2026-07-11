@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "launch_decision": "REVIEW",
+  "findings": [
+    {
+      "finding_id": "VSG-ELECTRON-001",
+      "new_llm_finding": false,
+      "title": "Electron IPC file handler needs review",
+      "severity": "P1",
+      "confidence": "medium",
+      "launch_impact": "review",
+      "evidence_files": ["src/main/ipc.ts"],
+      "reasoning_summary": "The output identifies the IPC boundary but proposes an unbounded repair.",
+      "missing_evidence": ["contextIsolation setting", "path validation"],
+      "recommended_action": "verify_before_fix",
+      "human_confirmation_required": true,
+      "safe_to_auto_suppress": false
+    }
+  ]
+}

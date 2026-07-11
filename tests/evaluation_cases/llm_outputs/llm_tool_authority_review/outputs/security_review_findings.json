@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "launch_decision": "BLOCK",
+  "findings": [
+    {
+      "finding_id": "VSG-AGENT-001",
+      "new_llm_finding": false,
+      "title": "Agent tool authority needs review",
+      "severity": "P1",
+      "confidence": "high",
+      "launch_impact": "block",
+      "evidence_files": ["src/agent/tools.ts"],
+      "reasoning_summary": "Agent tool authority can trigger privileged actions. Without immediate human confirmation and allowlisted arguments, this is launch-blocking for an AI Agent product.",
+      "missing_evidence": ["Immediate human confirmation flow.", "Tool allowlist and argument constraints."],
+      "recommended_action": "fix",
+      "human_confirmation_required": true,
+      "safe_to_auto_suppress": false
+    }
+  ]
+}

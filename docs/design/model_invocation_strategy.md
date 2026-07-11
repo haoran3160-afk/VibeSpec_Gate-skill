@@ -4,7 +4,9 @@ VibeSpec Gate is an LLM-native security review Skill. The current deterministic 
 
 ## Host-Agent Mode
 
-Primary Skill mode for Codex, Claude, Cursor, Gemini CLI, or similar environments.
+Primary Skill mode for an authorized host Agent that can load the `SKILL.md` contract.
+
+The Lite archive layout and `agents/openai.yaml` are validated for a Codex Skill directory. Claude, Cursor, Gemini CLI, and other hosts may use similar instruction files, but this repository does not currently claim host-specific installation or behavioral validation for them.
 
 The host agent:
 

@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
+
+import pytest
 
 from scripts.run_lite_rc_hardening import (
     MATRIX_CASES,
@@ -8,7 +11,9 @@ from scripts.run_lite_rc_hardening import (
     evaluate_matrix,
     load_external_sessions,
     run_real_project_validations,
+    snapshot_project_state,
     stage_candidate_package,
+    validate_real_project_boundaries,
     write_actionability_review,
     write_external_session_template,
     write_package_file_list,
@@ -19,6 +24,24 @@ from scripts.run_lite_rc_hardening import (
     write_validation_matrix,
 )
 from scripts.verify_lite_package import check_package
+
+
+def _recorded_session(name: str, profile: str, **overrides):
+    session = {
+        "name": name,
+        "profile": profile,
+        "source": "recorded_external",
+        "started": True,
+        "files": True,
+        "fix": True,
+        "retest": True,
+        "certification_safe": True,
+        "blind_edit_safe": True,
+        "notes": "Observed behavior recorded by the pilot observer.",
+        "transcript": "Sanitized participant trace.",
+    }
+    session.update(overrides)
+    return session
 
 
 def test_rc_candidate_package_is_manifest_clean_and_reproducible(tmp_path):
@@ -126,7 +149,9 @@ def test_rc_external_session_template_and_json_sessions_can_pass_threshold(tmp_p
       "fix": true,
       "retest": true,
       "certification_safe": true,
-      "notes": "Started from README and did not ask for maintainer docs."
+      "blind_edit_safe": true,
+      "notes": "Started from README and did not ask for maintainer docs.",
+      "transcript": "Sanitized participant trace."
     },
     {
       "name": "participant_agent_developer",
@@ -136,7 +161,9 @@ def test_rc_external_session_template_and_json_sessions_can_pass_threshold(tmp_p
       "fix": true,
       "retest": true,
       "certification_safe": true,
-      "notes": "Understood bounded Agent fix tasks."
+      "blind_edit_safe": true,
+      "notes": "Understood bounded Agent fix tasks.",
+      "transcript": "Sanitized participant trace."
     },
     {
       "name": "participant_saas_builder",
@@ -146,7 +173,9 @@ def test_rc_external_session_template_and_json_sessions_can_pass_threshold(tmp_p
       "fix": true,
       "retest": true,
       "certification_safe": true,
-      "notes": "Identified retest path and non-certification boundary."
+      "blind_edit_safe": true,
+      "notes": "Identified retest path and non-certification boundary.",
+      "transcript": "Sanitized participant trace."
     }
   ]
 }
@@ -164,19 +193,59 @@ def test_rc_external_session_template_and_json_sessions_can_pass_threshold(tmp_p
     assert all(result["profile_coverage"].values())
 
 
-def test_rc_simulated_subagent_sessions_generate_evidence_and_pass_threshold(tmp_path):
+def test_rc_synthetic_walkthroughs_generate_contract_evidence(tmp_path):
     sessions = write_simulated_subagent_sessions(tmp_path)
 
     result = write_pilot_usability_notes(tmp_path, sessions)
 
     assert result["passed"] is True
-    assert result["simulated_sessions"] == 4
+    assert result["synthetic_walkthroughs"] == 4
     assert all(result["profile_coverage"].values())
-    assert (tmp_path / "simulated_subagent_sessions" / "simulation_summary.md").exists()
-    assert (tmp_path / "simulated_subagent_sessions" / "subagent_1_non_security_builder_prompt.md").exists()
+    assert (tmp_path / "synthetic_walkthrough_sessions" / "walkthrough_summary.md").exists()
+    assert (tmp_path / "synthetic_walkthrough_sessions" / "subagent_1_non_security_builder_prompt.md").exists()
     notes = (tmp_path / "pilot_usability_notes.md").read_text(encoding="utf-8")
-    assert "source=simulated_subagent" in notes
-    assert "not real blind user evidence" in notes
+    assert "source=synthetic_walkthrough" in notes
+    assert "not executed Agent sessions" in notes
+
+
+def test_rc_session_safety_failure_is_an_all_participant_veto(tmp_path):
+    sessions = [
+        _recorded_session("non_security_builder", "non_security_builder"),
+        _recorded_session("agent_developer", "coding_agent_developer"),
+        _recorded_session("saas_builder", "ai_agent_or_saas_project"),
+        _recorded_session("extra_builder", "non_security_builder"),
+        _recorded_session("unsafe_interpretation", "coding_agent_developer", certification_safe=False),
+    ]
+
+    result = write_pilot_usability_notes(tmp_path, sessions)
+
+    assert result["pass_rate"] == 0.8
+    assert result["safety_veto"] is True
+    assert result["passed"] is False
+
+
+def test_rc_session_loader_parses_false_strings_strictly(tmp_path):
+    session_file = tmp_path / "sessions.json"
+    session_file.write_text(
+        """{"sessions": [{"name": "non_security_builder", "profile": "non_security_builder", "started": "true", "files": "true", "fix": "true", "retest": "true", "certification_safe": "false", "blind_edit_safe": "true", "notes": "Observed.", "transcript": "Trace."}]}""",
+        encoding="utf-8",
+    )
+
+    sessions = load_external_sessions([], [session_file])
+
+    assert sessions[0]["certification_safe"] is False
+    assert write_pilot_usability_notes(tmp_path, sessions)["passed"] is False
+
+
+def test_rc_inline_session_requires_six_booleans_and_does_not_count_without_trace(tmp_path):
+    with pytest.raises(ValueError, match="requires 6 booleans"):
+        load_external_sessions(["participant:true,true,true,true,true"], [])
+
+    sessions = load_external_sessions(["non_security_builder:true,true,true,true,true,true"], [])
+    result = write_pilot_usability_notes(tmp_path, sessions)
+
+    assert result["evidence_complete"] is False
+    assert result["passed"] is False
 
 
 def test_rc_pilot_session_materials_are_generated_outside_candidate_package(tmp_path):
@@ -197,14 +266,11 @@ def test_rc_release_decision_can_promote_after_real_session_threshold(tmp_path):
     write_validation_matrix(tmp_path)
     matrix = evaluate_matrix(tmp_path)
     actionability = write_actionability_review(tmp_path)
-    sessions = load_external_sessions(
-        [
-            "non_security_builder:true,true,true,true,true",
-            "agent_developer:true,true,true,true,true",
-            "saas_builder:true,true,true,true,true",
-        ],
-        [],
-    )
+    sessions = [
+        _recorded_session("non_security_builder", "non_security_builder"),
+        _recorded_session("agent_developer", "coding_agent_developer"),
+        _recorded_session("saas_builder", "ai_agent_or_saas_project"),
+    ]
     external = write_pilot_usability_notes(tmp_path, sessions)
     command_results = {
         "verifier_source": {"returncode": 0},
@@ -219,7 +285,7 @@ def test_rc_release_decision_can_promote_after_real_session_threshold(tmp_path):
     assert "PASS: External blind usability passes threshold" in decision
 
 
-def test_rc_release_decision_labels_simulated_subagent_threshold(tmp_path):
+def test_rc_release_decision_labels_synthetic_walkthrough_threshold(tmp_path):
     candidate = stage_candidate_package(tmp_path)
     write_package_file_list(candidate, tmp_path)
     write_validation_matrix(tmp_path)
@@ -235,11 +301,12 @@ def test_rc_release_decision_labels_simulated_subagent_threshold(tmp_path):
     write_release_decision(tmp_path, command_results, matrix, actionability, external)
 
     decision = (tmp_path / "release_decision.md").read_text(encoding="utf-8")
-    assert "Decision: READY_FOR_CONTROLLED_EXTERNAL_PILOT_SIMULATED" in decision
-    assert "PASS: Simulated usability threshold passes" in decision
+    assert "Decision: READY_FOR_CONTROLLED_EXTERNAL_PILOT_SYNTHETIC" in decision
+    assert "PASS: Synthetic walkthrough contract threshold passes" in decision
     assert "PENDING: Real external blind usability passes threshold" in decision
     assert "PASS: External blind usability passes threshold" not in decision
-    assert "structured sub-agent sessions are not real external blind user evidence" in decision
+    assert "prewritten role walkthroughs are not executed Agent sessions" in decision
+    assert "SKIPPED: Real-project included source-file final states match" in decision
 
 
 def test_rc_real_project_validation_is_read_only_and_writes_evidence_outside_project(tmp_path):
@@ -256,3 +323,44 @@ def test_rc_real_project_validation_is_read_only_and_writes_evidence_outside_pro
     assert (tmp_path / "real_project_validation" / "demo" / "source_state_after.json").exists()
     assert (tmp_path / "real_project_validation" / "demo" / "lite_review" / "launch_decision.md").exists()
     assert (project / "README.md").read_text(encoding="utf-8") == before
+
+
+def test_rc_real_project_preflight_rejects_any_output_overlap_before_reset(tmp_path):
+    output_root = tmp_path / "output"
+    nested_project = output_root / "project"
+    nested_project.mkdir(parents=True)
+    with pytest.raises(ValueError, match="must not overlap"):
+        validate_real_project_boundaries(output_root, [f"nested={nested_project}"])
+
+    project = tmp_path / "project-root"
+    output_inside_project = project / "evidence"
+    project.mkdir()
+    with pytest.raises(ValueError, match="must not overlap"):
+        validate_real_project_boundaries(output_inside_project, [f"parent={project}"])
+
+
+def test_rc_no_real_project_is_reported_as_skipped(tmp_path):
+    result = run_real_project_validations(tmp_path, [])
+
+    assert result["passed"] is None
+    assert result["status"] == "SKIPPED"
+
+
+def test_project_snapshot_detects_same_size_content_change_with_restored_mtime(tmp_path):
+    project = tmp_path / "project"
+    project.mkdir()
+    source = project / "app.py"
+    source.write_text("AAAA", encoding="utf-8")
+    original = source.stat()
+    before = snapshot_project_state(project)
+    assert before["project_name"] == "project"
+    assert "project" not in before
+
+    source.write_text("BBBB", encoding="utf-8")
+    os.utime(source, ns=(original.st_atime_ns, original.st_mtime_ns))
+    after = snapshot_project_state(project)
+
+    assert before != after
+    assert before["files"][0]["size"] == after["files"][0]["size"]
+    assert before["files"][0]["mtime_ns"] == after["files"][0]["mtime_ns"]
+    assert before["files"][0]["sha256"] != after["files"][0]["sha256"]

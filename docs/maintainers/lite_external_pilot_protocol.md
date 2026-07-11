@@ -9,7 +9,7 @@ test output/lite_rc_hardening/2026-07-08/release_decision.md
 ```
 
 Do not promote to controlled external pilot while that file says `NO_GO_FOR_CONTROLLED_EXTERNAL_PILOT`.
-If blind users are unavailable and the maintainer explicitly accepts simulation, the runner may produce `READY_FOR_CONTROLLED_EXTERNAL_PILOT_SIMULATED`; treat that as internal RC hardening evidence, not as real external user validation.
+If blind users are unavailable, the runner may produce `READY_FOR_CONTROLLED_EXTERNAL_PILOT_SYNTHETIC`; treat that as a contract-test state based on maintainer-authored walkthroughs, not executed Agent sessions or real external user validation.
 
 ## Participant Requirements
 
@@ -76,10 +76,13 @@ The external blind usability gate passes only when:
 - no participant interprets the result as certification;
 - no participant believes `agent_fix_plan.md` permits blind edits;
 - at least 80% can explain the retest path.
+- every recorded session includes sanitized observation notes and a transcript or trace.
 
-## Simulated Sub-Agent Fallback
+The certification and blind-edit conditions are all-participant vetoes. An 80% aggregate score cannot override either failure.
 
-When no blind users are available, maintainers may run a structured simulation to exercise the same usability gate:
+## Synthetic Walkthrough Fallback
+
+When no blind users are available, maintainers may generate deterministic, prewritten role walkthroughs to test documentation and scoring contracts:
 
 ```powershell
 py -3 scripts\run_lite_rc_hardening.py --simulate-subagents
@@ -88,13 +91,13 @@ py -3 scripts\run_lite_rc_hardening.py --simulate-subagents
 The runner generates:
 
 ```text
-test output/lite_rc_hardening/2026-07-08/simulated_subagent_sessions/
-  simulation_summary.md
+test output/lite_rc_hardening/2026-07-08/synthetic_walkthrough_sessions/
+  walkthrough_summary.md
   *_prompt.md
   *_transcript.md
 ```
 
-Simulation roles cover:
+Walkthrough roles cover:
 
 - non-security product builder;
 - developer who uses coding Agents;
@@ -103,31 +106,29 @@ Simulation roles cover:
 
 Boundary:
 
-- simulated sessions must be marked `source=simulated_subagent`;
-- simulated sessions may unblock maintainer-approved RC hardening when blind users are unavailable;
-- simulated sessions are not real external blind user evidence;
+- walkthroughs must be marked `source=synthetic_walkthrough`;
+- walkthroughs are maintainer-authored files, not executed sub-agent sessions;
+- walkthroughs may exercise package and scoring contracts but are not usability evidence;
 - record real blind sessions before treating the gate as GA or broad-market validation.
 
 ## Recording Format
 
-Use `scripts/run_lite_rc_hardening.py --external-session` to record each session result.
+The `--external-session` shorthand accepts six strict booleans but cannot satisfy the external evidence gate because it has no notes or transcript. Use it only for non-promoting drafts.
 
 Format:
 
 ```powershell
 py -3 scripts\run_lite_rc_hardening.py `
-  --external-session "non_security_builder:true,true,true,true,true" `
-  --external-session "agent_developer:true,true,true,true,true" `
-  --external-session "saas_builder:true,true,true,true,true"
+  --external-session "non_security_builder:true,true,true,true,true,true"
 ```
 
 Fields after the participant name:
 
 ```text
-started,files,fix,retest,certification_safe
+started,files,fix,retest,certification_safe,blind_edit_safe
 ```
 
-Use `true` only when the observation is supported by the session notes.
+Use `true` only when the observation is supported by sanitized session notes and a transcript or trace. String values such as `"false"` are parsed strictly as false, not as a truthy non-empty string.
 
 Preferred format for real evidence is a JSON session file:
 
@@ -142,7 +143,9 @@ Preferred format for real evidence is a JSON session file:
       "fix": true,
       "retest": true,
       "certification_safe": true,
-      "notes": "Observed from session notes."
+      "blind_edit_safe": true,
+      "notes": "Observed from session notes.",
+      "transcript": "Sanitized participant trace."
     },
     {
       "name": "participant_agent_developer",
@@ -152,7 +155,9 @@ Preferred format for real evidence is a JSON session file:
       "fix": true,
       "retest": true,
       "certification_safe": true,
-      "notes": "Observed from session notes."
+      "blind_edit_safe": true,
+      "notes": "Observed from session notes.",
+      "transcript": "Sanitized participant trace."
     },
     {
       "name": "participant_saas_builder",
@@ -162,7 +167,9 @@ Preferred format for real evidence is a JSON session file:
       "fix": true,
       "retest": true,
       "certification_safe": true,
-      "notes": "Observed from session notes."
+      "blind_edit_safe": true,
+      "notes": "Observed from session notes.",
+      "transcript": "Sanitized participant trace."
     }
   ]
 }
@@ -174,7 +181,7 @@ Then run:
 py -3 scripts\run_lite_rc_hardening.py --external-session-file .\pilot_sessions.json
 ```
 
-The runner also writes a starter template to:
+Use pseudonyms and remove personal data, private repository paths, secrets, and customer identifiers from notes and transcripts. The runner also writes a starter template to:
 
 ```text
 test output/lite_rc_hardening/2026-07-08/external_session_template.json
@@ -190,7 +197,7 @@ Do not promote if:
 - two or more participants cannot trigger the review without maintainer help;
 - repeated confusion points to README, `SKILL.md`, quickstart, or prompt wording.
 
-For a maintainer-approved simulated fallback, the equivalent no-go is `NO_GO_FOR_CONTROLLED_EXTERNAL_PILOT`; the successful simulated state is labeled separately as `READY_FOR_CONTROLLED_EXTERNAL_PILOT_SIMULATED`.
+For a synthetic walkthrough fallback, the equivalent no-go is `NO_GO_FOR_CONTROLLED_EXTERNAL_PILOT`; a successful contract-only state is labeled separately as `READY_FOR_CONTROLLED_EXTERNAL_PILOT_SYNTHETIC` and does not satisfy the real-user gate.
 
 ## Evidence
 
@@ -218,8 +225,10 @@ Example:
 
 ```powershell
 py -3 scripts\run_lite_rc_hardening.py `
-  --real-project "file_manager=D:\Agent_programs\file_manager" `
-  --real-project "voice_light_agent=D:\personal\voice-light-agent"
+  --real-project "project_a=C:\path\to\project-a" `
+  --real-project "project_b=C:\path\to\project-b"
 ```
 
-The runner records `source_state_before.json` and `source_state_after.json` for each project and fails the real-project gate if source file metadata changes.
+Before resetting or creating evidence, the runner rejects any overlap between an authorized project and the RC output tree. It then records `source_state_before.json` and `source_state_after.json` and fails when an included source file path, size, timestamp, or SHA-256 content hash differs at process completion.
+
+This is a final-state integrity check, not proof that no transient write, permission change, empty-directory change, symlink/junction change, or excluded dependency/cache/build write occurred. A run with no `--real-project` inputs is reported as `SKIPPED`, never `PASS`.

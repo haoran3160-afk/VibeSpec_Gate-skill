@@ -3,7 +3,7 @@
 ## Current Stage
 
 ```text
-Stage: Release candidate hardening
+Stage: 0.2.0rc1 release-candidate hardening
 Default package: prompt-only Agent-native Skill
 Optional overlay: Core-powered repository CLI
 Public GA: not claimed
@@ -11,16 +11,17 @@ Public GA: not claimed
 
 ## Near Term
 
-- Keep the Lite package manifest and verifier aligned.
+- Publish the `0.2.0rc1` commit and confirm the cross-platform GitHub CI is green.
+- Publish the verified Lite zip through the tag-gated GitHub Release workflow.
 - Run controlled external pilot sessions with real users.
-- Replace simulated usability evidence with real blind-session evidence.
+- Collect real blind-session evidence; synthetic walkthroughs remain contract tests only.
 - Expand validation coverage across SaaS, Agent/MCP, Supabase/Firebase, Electron/Desktop, upload/logging, and low-risk projects.
 - Document host-Agent variance.
 
 ## Mid Term
 
-- Add a reproducible package builder from `docs/design/lite_skill_package_manifest.md`.
-- Publish a small release artifact for the prompt-only Lite package.
+- Keep the reproducible package builder and archive validator aligned with the Lite manifest.
+- Promote an RC to GA only after real external pilot evidence and release gates pass.
 - Improve real-project validation summaries without committing raw generated output.
 - Add more regression cases for false confidence and over-blocking.
 
@@ -36,4 +37,3 @@ Public GA: not claimed
 - Unauthorized scans.
 - Claims of certification or compliance.
 - Broad repo restructuring before package boundaries are stable.
-

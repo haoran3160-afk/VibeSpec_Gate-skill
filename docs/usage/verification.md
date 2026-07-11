@@ -1,12 +1,12 @@
 # Verification
 
-Canonical project root:
+Run commands from the repository root:
 
-```powershell
-cd D:\personal\Vibespec_gate_skill
+```bash
+cd VibeSpec_Gate-skill
 ```
 
-Use `py -3` on Windows when available. Avoid the Microsoft Store `python.exe` launcher if it points at `C:\Users\lenovo\AppData\Local\Microsoft\WindowsApps\python.exe`.
+Use `py -3` on Windows when available and `python3` on macOS/Linux. The examples below use PowerShell where environment-variable syntax differs.
 
 Set these variables for verification commands that import the local source tree directly:
 
@@ -31,10 +31,10 @@ py -3 scripts\verify_phase4_5_smoke.py
 
 The smoke script inserts the local `src` directory into `sys.path`, so it can run even when `PYTHONPATH` is not already set. It verifies CLI import, `vibespec-gate review --help`, one review evaluation fixture, existing Phase 4 review JSON and markdown outputs, `llm_review_packet.json`, schema shape, snippet limits, JSON/Markdown agent decision coverage, and provider-secret redaction through the official review schema validator.
 
-If `py -3` is unavailable, use the Codex bundled Python runtime if present:
+On macOS/Linux, the equivalent command is:
 
-```powershell
-& "C:\Users\lenovo\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe" scripts\verify_phase4_5_smoke.py
+```bash
+python3 scripts/verify_phase4_5_smoke.py
 ```
 
 ## Pytest Verification
@@ -46,14 +46,14 @@ py -3 -m pytest -q -p no:cacheprovider
 py -3 -m pytest tests\test_evaluation_cases.py -q -p no:cacheprovider
 ```
 
-Do not install dependencies or run fix commands inside real reviewed projects unless the user explicitly asks for a repair implementation. Real-project review and scan outputs used for regression should be written only under this project root, for example `D:\personal\Vibespec_gate_skill\test output`.
+Do not install dependencies or run fix commands inside real reviewed projects unless the user explicitly asks for a repair implementation. Real-project review and scan outputs used for regression must be written only under this repository, for example `./test output`.
 
 ## Review Schema Validation
 
 Validate a Phase 4 review output directory:
 
 ```powershell
-py -3 -m vibespec_gate.cli review-validate "D:\personal\Vibespec_gate_skill\test output\phase4_review\personal-voice-light-agent"
+py -3 -m vibespec_gate.cli review-validate ".\test output\phase4_review\example-project"
 ```
 
 The validator checks JSON structure, enum values, packet/verdict matching, `llm_review_packet.json`, snippet length, secret redaction, `reviewer=rule-based`, `safe_to_auto_suppress=false`, summary counts, and that both `agent_review_decisions.json` and `agent_review_decisions.md` cover every reviewed finding. This validates the deterministic baseline and LLM handoff contract, not the full ceiling of LLM-assisted review quality.
@@ -63,10 +63,10 @@ The validator checks JSON structure, enum values, packet/verdict matching, `llm_
 Build, stub, and validate a host-agent review workspace:
 
 ```powershell
-py -3 scripts\build_llm_review_workspace.py "D:\personal\Vibespec_gate_skill\test output\phase4_review\personal-voice-light-agent"
-py -3 scripts\stub_llm_review_outputs.py "D:\personal\Vibespec_gate_skill\test output\phase4_review\personal-voice-light-agent\llm_review_workspace"
-py -3 scripts\validate_llm_review_outputs.py "D:\personal\Vibespec_gate_skill\test output\phase4_review\personal-voice-light-agent\llm_review_workspace"
-vibespec-gate llm-output-validate "D:\personal\Vibespec_gate_skill\test output\phase4_review\personal-voice-light-agent\llm_review_workspace"
+py -3 scripts\build_llm_review_workspace.py ".\test output\phase4_review\example-project"
+py -3 scripts\stub_llm_review_outputs.py ".\test output\phase4_review\example-project\llm_review_workspace"
+py -3 scripts\validate_llm_review_outputs.py ".\test output\phase4_review\example-project\llm_review_workspace"
+vibespec-gate llm-output-validate ".\test output\phase4_review\example-project\llm_review_workspace"
 ```
 
 The workspace builder does not call external model/API providers and does not copy project source. The stub generator exists only for contract testing; stub files are not completed LLM security reviews.

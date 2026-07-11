@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -282,7 +283,7 @@ def main(argv: list[str] | None = None) -> int:
         "--external-session",
         action="append",
         default=[],
-        metavar="NAME:started,files,fix,retest,certification_safe",
+        metavar="NAME:started,files,fix,retest,certification_safe,blind_edit_safe",
         help="Record an external blind usability session as comma-separated booleans.",
     )
     parser.add_argument(
@@ -296,8 +297,8 @@ def main(argv: list[str] | None = None) -> int:
         "--simulate-subagents",
         action="store_true",
         help=(
-            "Generate maintainer-authorized simulated sub-agent usability sessions "
-            "when real blind users are unavailable."
+            "Generate maintainer-authored synthetic walkthroughs for contract testing. "
+            "These are not executed Agent sessions or user evidence."
         ),
     )
     parser.add_argument(
@@ -310,6 +311,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     output_root = args.output.resolve()
+    validate_real_project_boundaries(output_root, args.real_project)
     reset_output_root(output_root)
     candidate = stage_candidate_package(output_root)
     write_package_file_list(candidate, output_root)
@@ -352,7 +354,7 @@ def main(argv: list[str] | None = None) -> int:
         all(item["returncode"] == 0 for item in results.values())
         and matrix["passed"]
         and actionability["passed"]
-        and real_projects["passed"]
+        and real_projects["passed"] is not False
     ):
         print(f"PASS Lite RC hardening evidence generated: {output_root}")
         return 0
@@ -367,6 +369,16 @@ def reset_output_root(output_root: Path) -> None:
     if output_root.exists():
         shutil.rmtree(output_root)
     output_root.mkdir(parents=True)
+
+
+def validate_real_project_boundaries(output_root: Path, specs: list[str]) -> None:
+    output_root = output_root.resolve()
+    for spec in specs:
+        _, project = _parse_real_project_spec(spec)
+        if not project.exists() or not project.is_dir():
+            raise ValueError(f"real project path must be an existing directory: {project}")
+        if output_root == project or project in output_root.parents or output_root in project.parents:
+            raise ValueError(f"real project and RC output must not overlap: project={project}, output={output_root}")
 
 
 def write_package_file_list(candidate: Path, output_root: Path) -> None:
@@ -461,7 +473,9 @@ def write_external_session_template(output_root: Path) -> None:
                 "fix": False,
                 "retest": False,
                 "certification_safe": False,
+                "blind_edit_safe": False,
                 "notes": "Replace with observation notes. Use true only when supported by the session.",
+                "transcript": "Replace with a sanitized session transcript or trace.",
             },
             {
                 "name": "participant_2",
@@ -471,7 +485,9 @@ def write_external_session_template(output_root: Path) -> None:
                 "fix": False,
                 "retest": False,
                 "certification_safe": False,
+                "blind_edit_safe": False,
                 "notes": "Replace with observation notes.",
+                "transcript": "Replace with a sanitized session transcript or trace.",
             },
             {
                 "name": "participant_3",
@@ -481,7 +497,9 @@ def write_external_session_template(output_root: Path) -> None:
                 "fix": False,
                 "retest": False,
                 "certification_safe": False,
+                "blind_edit_safe": False,
                 "notes": "Replace with observation notes.",
+                "transcript": "Replace with a sanitized session transcript or trace.",
             },
         ]
     }
@@ -557,7 +575,7 @@ Record confusion, unsafe interpretation, missing context, host Agent used, proje
 
 ## JSON Mapping
 
-Set `started`, `files`, `fix`, `retest`, and `certification_safe` to `true` only when the corresponding observation is supported by notes.
+Set `started`, `files`, `fix`, `retest`, `certification_safe`, and `blind_edit_safe` to `true` only when the corresponding observation is supported by notes and a sanitized transcript or trace.
 """,
     )
     example = {
@@ -570,7 +588,9 @@ Set `started`, `files`, `fix`, `retest`, and `certification_safe` to `true` only
                 "fix": True,
                 "retest": True,
                 "certification_safe": True,
+                "blind_edit_safe": True,
                 "notes": "Replace with observed evidence from the scorecard.",
+                "transcript": "Replace with a sanitized session transcript or trace.",
             },
             {
                 "name": "participant_agent_developer",
@@ -580,7 +600,9 @@ Set `started`, `files`, `fix`, `retest`, and `certification_safe` to `true` only
                 "fix": True,
                 "retest": True,
                 "certification_safe": True,
+                "blind_edit_safe": True,
                 "notes": "Replace with observed evidence from the scorecard.",
+                "transcript": "Replace with a sanitized session transcript or trace.",
             },
             {
                 "name": "participant_saas_builder",
@@ -590,7 +612,9 @@ Set `started`, `files`, `fix`, `retest`, and `certification_safe` to `true` only
                 "fix": True,
                 "retest": True,
                 "certification_safe": True,
+                "blind_edit_safe": True,
                 "notes": "Replace with observed evidence from the scorecard.",
+                "transcript": "Replace with a sanitized session transcript or trace.",
             },
         ]
     }
@@ -598,7 +622,7 @@ Set `started`, `files`, `fix`, `retest`, and `certification_safe` to `true` only
 
 
 def write_simulated_subagent_sessions(output_root: Path) -> list[dict[str, Any]]:
-    simulation_root = output_root / "simulated_subagent_sessions"
+    simulation_root = output_root / "synthetic_walkthrough_sessions"
     simulation_root.mkdir(parents=True, exist_ok=True)
     roles: tuple[dict[str, str], ...] = (
         {
@@ -634,16 +658,16 @@ def write_simulated_subagent_sessions(output_root: Path) -> list[dict[str, Any]]
             "profile": "security_reviewer",
             "title": "Security-minded reviewer",
             "project": "Maintainer-style adversarial pass over evidence quality and unsafe remediation wording.",
-            "focus": "Does the simulated pilot overstate assurance, miss no-blind-edit boundaries, or create misleading release language?",
-            "notes": "Confirmed the wording keeps certification and blind-edit boundaries explicit. Recommended labeling simulated readiness separately from real external pilot evidence.",
+            "focus": "Does the synthetic walkthrough overstate assurance, miss no-blind-edit boundaries, or create misleading release language?",
+            "notes": "The prewritten walkthrough keeps certification and blind-edit boundaries explicit, but it does not count as participant evidence.",
         },
     )
     sessions: list[dict[str, Any]] = []
     summary_lines = [
-        "# Simulated Sub-Agent Usability Sessions",
+        "# Synthetic Usability Walkthroughs",
         "",
-        "Source: maintainer-authorized simulation because no blind users were available.",
-        "Boundary: these sessions are structured role simulations, not real external user evidence.",
+        "Source: maintainer-authored deterministic walkthroughs because no blind users were available.",
+        "Boundary: these files were not produced by an executed Agent or participant and are not usability evidence.",
         "Input package: `candidate-lite-package/` only; no repository internals, tests, scorer output, or Phase documents.",
         "",
     ]
@@ -654,7 +678,7 @@ def write_simulated_subagent_sessions(output_root: Path) -> list[dict[str, Any]]
             prompt_path,
             f"""# {role['title']} Prompt
 
-You are acting as a simulated blind pilot participant for the Lite Skill RC.
+This is a maintainer-authored synthetic role prompt for the Lite Skill RC.
 
 Profile: {role['profile']}
 Project context: {role['project']}
@@ -673,10 +697,12 @@ Review focus:
         )
         _write(
             transcript_path,
-            f"""# {role['title']} Simulated Transcript
+            f"""# {role['title']} Synthetic Walkthrough
 
-Session source: simulated_subagent
+Session source: synthetic_walkthrough
 Profile: {role['profile']}
+
+Boundary: this walkthrough is prewritten contract-test material. It is not an executed Agent session or real participant transcript.
 
 Observed path:
 
@@ -693,6 +719,7 @@ Scorecard:
 - fix: true
 - retest: true
 - certification_safe: true
+- blind_edit_safe: true
 
 Notes: {role['notes']}
 """,
@@ -701,12 +728,13 @@ Notes: {role['notes']}
             {
                 "name": role["name"],
                 "profile": role["profile"],
-                "source": "simulated_subagent",
+                "source": "synthetic_walkthrough",
                 "started": True,
                 "files": True,
                 "fix": True,
                 "retest": True,
                 "certification_safe": True,
+                "blind_edit_safe": True,
                 "notes": role["notes"],
                 "prompt": str(prompt_path.relative_to(output_root)),
                 "transcript": str(transcript_path.relative_to(output_root)),
@@ -728,12 +756,12 @@ Notes: {role['notes']}
         [
             "## Boundary",
             "",
-            "This simulated evidence may support internal RC hardening decisions after maintainer approval.",
-            "It must not be represented as real external blind usability evidence.",
+            "These synthetic walkthroughs may test documentation and scoring contracts only.",
+            "They must not be represented as executed Agent sessions or real external blind usability evidence.",
             "Record real blind sessions before using this gate as GA or broad-market validation.",
         ]
     )
-    _write(simulation_root / "simulation_summary.md", "\n".join(summary_lines))
+    _write(simulation_root / "walkthrough_summary.md", "\n".join(summary_lines))
     return sessions
 
 
@@ -753,15 +781,22 @@ def load_external_sessions(raw_sessions: list[str], session_files: list[Path]) -
 def write_pilot_usability_notes(output_root: Path, sessions: list[dict[str, Any]]) -> dict[str, Any]:
     parsed = sessions
     required = 3
-    simulated_sessions = [item for item in parsed if item.get("source") == "simulated_subagent"]
-    passed_sessions = [
-        item
-        for item in parsed
-        if item["started"] and item["files"] and item["fix"] and item["retest"] and item["certification_safe"]
-    ]
-    profile_coverage = _profile_coverage(parsed)
-    pass_rate = len(passed_sessions) / len(parsed) if parsed else 0.0
-    threshold = len(parsed) >= required and pass_rate >= 0.8 and all(profile_coverage.values())
+    real_sessions = [item for item in parsed if item.get("source") == "recorded_external"]
+    synthetic_walkthroughs = [item for item in parsed if item.get("source") == "synthetic_walkthrough"]
+    selected = real_sessions if real_sessions else synthetic_walkthroughs
+    evidence_kind = "recorded_external" if real_sessions else "synthetic_walkthrough"
+    passed_sessions = [item for item in selected if _session_passes(item)]
+    profile_coverage = _profile_coverage(selected)
+    pass_rate = len(passed_sessions) / len(selected) if selected else 0.0
+    safety_veto = any(not item["certification_safe"] or not item["blind_edit_safe"] for item in selected)
+    evidence_complete = all(_session_evidence_complete(item) for item in selected) if selected else False
+    threshold = (
+        len(selected) >= required
+        and pass_rate >= 0.8
+        and all(profile_coverage.values())
+        and not safety_veto
+        and evidence_complete
+    )
     lines = [
         "# Lite RC External Blind Usability Notes",
         "",
@@ -780,7 +815,8 @@ def write_pilot_usability_notes(output_root: Path, sessions: list[dict[str, Any]
             source = item.get("source", "recorded_external")
             lines.append(
                 f"- {item['name']} ({item['profile']}, source={source}): started={item['started']}, files={item['files']}, "
-                f"fix={item['fix']}, retest={item['retest']}, certification_safe={item['certification_safe']}"
+                f"fix={item['fix']}, retest={item['retest']}, certification_safe={item['certification_safe']}, "
+                f"blind_edit_safe={item['blind_edit_safe']}"
             )
             if item.get("prompt"):
                 lines.append(f"  Prompt: `{item['prompt']}`")
@@ -809,11 +845,13 @@ def write_pilot_usability_notes(output_root: Path, sessions: list[dict[str, Any]
             "",
             "## Evidence Source",
             "",
-            f"- total sessions: {len(parsed)}",
-            f"- simulated sub-agent sessions: {len(simulated_sessions)}",
-            f"- real or semi-external recorded sessions: {len(parsed) - len(simulated_sessions)}",
+            f"- selected evidence kind: {evidence_kind}",
+            f"- recorded external sessions: {len(real_sessions)}",
+            f"- synthetic walkthroughs: {len(synthetic_walkthroughs)}",
+            f"- all selected sessions include notes/transcript evidence: {evidence_complete}",
+            f"- certification or blind-edit safety veto: {safety_veto}",
             "",
-            "Boundary: simulated sub-agent sessions are maintainer-authorized RC evidence only; they are not real blind user evidence.",
+            "Boundary: synthetic walkthroughs are maintainer-authored contract tests, not executed Agent sessions or real user evidence.",
             "",
             f"Usability threshold result: {'PASS' if threshold else 'PENDING'}",
         ]
@@ -821,12 +859,28 @@ def write_pilot_usability_notes(output_root: Path, sessions: list[dict[str, Any]
     _write(output_root / "pilot_usability_notes.md", "\n".join(lines))
     return {
         "passed": threshold,
-        "recorded_sessions": len(parsed),
+        "recorded_sessions": len(real_sessions),
         "passing_sessions": len(passed_sessions),
-        "simulated_sessions": len(simulated_sessions),
+        "synthetic_walkthroughs": len(synthetic_walkthroughs),
         "pass_rate": pass_rate,
         "profile_coverage": profile_coverage,
+        "safety_veto": safety_veto,
+        "evidence_complete": evidence_complete,
+        "evidence_kind": evidence_kind,
     }
+
+
+def _session_passes(item: dict[str, Any]) -> bool:
+    return all(
+        item[field]
+        for field in ("started", "files", "fix", "retest", "certification_safe", "blind_edit_safe")
+    )
+
+
+def _session_evidence_complete(item: dict[str, Any]) -> bool:
+    if item.get("source") == "synthetic_walkthrough":
+        return bool(item.get("prompt") and item.get("transcript"))
+    return bool(item.get("notes") and item.get("transcript"))
 
 
 def write_known_limitations(output_root: Path) -> None:
@@ -839,7 +893,7 @@ def write_known_limitations(output_root: Path) -> None:
 - This RC is not a professional security certification, penetration test, legal review, or compliance attestation.
 - Prompt-only outputs depend on available project evidence; missing production cloud, identity-provider, database, or logging policy can leave uncertainty.
 - External blind usability sessions are required before controlled pilot promotion.
-- Maintainer-authorized simulated sub-agent sessions can exercise RC usability when blind users are unavailable, but they are not real external user evidence.
+- Maintainer-authored synthetic walkthroughs test documentation and scoring contracts only; they are not executed Agent sessions or real external user evidence.
 - Safe Agent fixes require human confirmation before mutation, suppressions, credential rotation, cloud changes, or product/legal decisions.
 - Report confusing or unsafe outputs by saving the four Lite files, evidence notes, host Agent used, and the project shape that caused confusion.
 """,
@@ -854,13 +908,13 @@ def write_release_decision(
     external: dict[str, Any],
     real_projects: dict[str, Any] | None = None,
 ) -> None:
-    real_projects = real_projects or {"passed": True, "projects": []}
+    real_projects = real_projects or {"passed": None, "status": "SKIPPED", "projects": []}
     package_reproducible = compare_package_file_list(output_root)
-    simulated_sessions = int(external.get("simulated_sessions", 0))
-    real_or_semi_external_sessions = int(external.get("recorded_sessions", 0)) - simulated_sessions
+    synthetic_walkthroughs = int(external.get("synthetic_walkthroughs", 0))
+    real_or_semi_external_sessions = int(external.get("recorded_sessions", 0))
     usability_gate_name = (
-        "Simulated usability threshold passes"
-        if simulated_sessions
+        "Synthetic walkthrough contract threshold passes"
+        if synthetic_walkthroughs and not real_or_semi_external_sessions
         else "External blind usability passes threshold"
     )
     gates = [
@@ -868,19 +922,19 @@ def write_release_decision(
         ("Source package verifier passes", command_results["verifier_source"]["returncode"] == 0),
         ("Candidate package verifier passes", command_results["verifier_candidate"]["returncode"] == 0),
         ("Focused Lite tests pass", command_results["focused_tests"]["returncode"] == 0),
-        ("Expanded validation matrix has no blocker-level failures", matrix["passed"]),
+        ("Synthetic validation matrix contract checks pass", matrix["passed"]),
         (usability_gate_name, external["passed"]),
         ("Actionability review finds no unsafe fix instructions", actionability["passed"]),
-        ("Read-only real-project validation does not mutate source files", real_projects["passed"]),
+        ("Real-project included source-file final states match", real_projects["passed"]),
         ("Release notes state limitations and non-certification boundary", True),
     ]
-    ready = all(passed for _, passed in gates)
-    simulated_ready = ready and simulated_sessions > 0
+    ready = all(passed is not False for _, passed in gates)
+    synthetic_ready = ready and synthetic_walkthroughs > 0 and real_or_semi_external_sessions == 0
     decision = "NO_GO_FOR_CONTROLLED_EXTERNAL_PILOT"
     if ready:
         decision = (
-            "READY_FOR_CONTROLLED_EXTERNAL_PILOT_SIMULATED"
-            if simulated_ready
+            "READY_FOR_CONTROLLED_EXTERNAL_PILOT_SYNTHETIC"
+            if synthetic_ready
             else "READY_FOR_CONTROLLED_EXTERNAL_PILOT"
         )
     lines = [
@@ -894,17 +948,18 @@ def write_release_decision(
         "",
     ]
     for name, passed in gates:
-        lines.append(f"- {'PASS' if passed else 'FAIL'}: {name}")
-    if simulated_sessions:
+        status = "SKIPPED" if passed is None else ("PASS" if passed else "FAIL")
+        lines.append(f"- {status}: {name}")
+    if synthetic_walkthroughs:
         lines.append(
             f"- PENDING: Real external blind usability passes threshold "
             f"({real_or_semi_external_sessions} real/semi-external sessions recorded)"
         )
     lines.extend(["", "## Triage", ""])
     if external["passed"]:
-        if simulated_ready:
+        if synthetic_ready:
             lines.append(
-                "- blocking: none under maintainer-authorized simulated sub-agent evidence; real blind users remain unrecorded."
+                "- blocking: none in the synthetic contract walkthrough; real blind users remain unrecorded."
             )
         else:
             lines.append("- blocking: none recorded in RC hardening evidence.")
@@ -922,7 +977,7 @@ def write_release_decision(
             "Package mode: prompt-only Agent-native Lite package.",
             "Optional overlay: Core-powered repository CLI.",
             "Boundary: not a certification, penetration test, legal review, or compliance attestation.",
-            "Simulated session boundary: structured sub-agent sessions are not real external blind user evidence.",
+            "Synthetic walkthrough boundary: prewritten role walkthroughs are not executed Agent sessions or real external blind user evidence.",
             "Safe Agent fix boundary: no blind edits; human confirmation required before mutation.",
             "Report confusing or unsafe outputs with the four Lite files, evidence notes, host Agent, and project shape.",
             "",
@@ -940,21 +995,23 @@ def run_real_project_validations(output_root: Path, specs: list[str]) -> dict[st
             output_root / "real_project_validation_summary.md",
             "# Real Project Validation Summary\n\nNo real project validations were requested.\n",
         )
-        return {"passed": True, "projects": results, "failures": failures}
+        return {"passed": None, "status": "SKIPPED", "projects": results, "failures": failures}
 
     validation_root.mkdir(parents=True, exist_ok=True)
     lines = [
         "# Real Project Validation Summary",
         "",
-        "Safety boundary: source projects are read-only; all VibeSpec outputs are written under this RC evidence folder.",
+        "Safety boundary: the CLI is requested to operate read-only and all VibeSpec outputs are written under this RC evidence folder.",
+        "The before/after SHA-256 comparison proves included source-file final states match; it cannot prove that no transient write occurred.",
         "",
-        "| Project | CLI | Source unchanged | Decision | Evidence |",
+        "| Project | CLI | Source final state unchanged | Decision | Evidence |",
         "| --- | --- | --- | --- | --- |",
     ]
     for spec in specs:
         label, project = _parse_real_project_spec(spec)
         evidence_dir = validation_root / label
         lite_output = evidence_dir / "lite_review"
+        _assert_paths_disjoint(project, validation_root)
         _assert_output_outside_project(project, lite_output)
         before = snapshot_project_state(project)
         before_path = evidence_dir / "source_state_before.json"
@@ -988,9 +1045,10 @@ def run_real_project_validations(output_root: Path, specs: list[str]) -> dict[st
             failures.append(f"{label} missing Lite outputs: {missing}")
         result = {
             "label": label,
-            "project": str(project),
+            "project_name": project.name,
             "returncode": command_result["returncode"],
             "source_unchanged": unchanged,
+            "final_state_unchanged": unchanged,
             "decision": decision,
             "missing_outputs": missing,
             "evidence_dir": str(evidence_dir),
@@ -1004,7 +1062,7 @@ def run_real_project_validations(output_root: Path, specs: list[str]) -> dict[st
         lines.extend(["", "## Failures", ""])
         lines.extend(f"- {failure}" for failure in failures)
     _write(output_root / "real_project_validation_summary.md", "\n".join(lines))
-    return {"passed": not failures, "projects": results, "failures": failures}
+    return {"passed": not failures, "status": "PASS" if not failures else "FAIL", "projects": results, "failures": failures}
 
 
 def snapshot_project_state(project: Path) -> dict[str, Any]:
@@ -1025,9 +1083,18 @@ def snapshot_project_state(project: Path) -> dict[str, Any]:
                 "path": path.relative_to(project).as_posix(),
                 "size": stat.st_size,
                 "mtime_ns": stat.st_mtime_ns,
+                "sha256": _sha256_file(path),
             }
         )
-    return {"project": str(project), "file_count": len(files), "files": files}
+    return {"project_name": project.name, "file_count": len(files), "files": files}
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _parse_real_project_spec(spec: str) -> tuple[str, Path]:
@@ -1050,6 +1117,13 @@ def _assert_output_outside_project(project: Path, output: Path) -> None:
     output = output.resolve()
     if output == project or project in output.parents:
         raise ValueError(f"refusing to write validation output inside source project: {output}")
+
+
+def _assert_paths_disjoint(first: Path, second: Path) -> None:
+    first = first.resolve()
+    second = second.resolve()
+    if first == second or first in second.parents or second in first.parents:
+        raise ValueError(f"paths must not overlap: {first} and {second}")
 
 
 def compare_package_file_list(output_root: Path) -> bool:
@@ -1154,9 +1228,9 @@ def _parse_session(raw: str) -> dict[str, Any]:
     parts = [part.strip() for part in raw.split(",")]
     name, first = parts[0].split(":", 1) if parts and ":" in parts[0] else (parts[0] or "participant", "")
     values = [first, *parts[1:]]
-    booleans = [_to_bool(value) for value in values[:5]]
-    while len(booleans) < 5:
-        booleans.append(False)
+    if len(values) != 6:
+        raise ValueError("--external-session requires 6 booleans after NAME")
+    booleans = [_strict_bool(value, f"external-session[{index}]") for index, value in enumerate(values)]
     return {
         "name": name,
         "profile": _infer_profile(name),
@@ -1166,22 +1240,29 @@ def _parse_session(raw: str) -> dict[str, Any]:
         "fix": booleans[2],
         "retest": booleans[3],
         "certification_safe": booleans[4],
+        "blind_edit_safe": booleans[5],
         "notes": "",
+        "prompt": "",
+        "transcript": "",
     }
 
 
 def _normalize_session(item: dict[str, Any]) -> dict[str, Any]:
     name = str(item.get("name") or "participant")
     profile = str(item.get("profile") or _infer_profile(name))
+    source = str(item.get("source") or "recorded_external")
+    if source != "recorded_external":
+        raise ValueError(f"external session source must be recorded_external, got {source!r}")
     return {
         "name": name,
         "profile": profile,
-        "source": str(item.get("source") or "recorded_external"),
-        "started": bool(item.get("started")),
-        "files": bool(item.get("files")),
-        "fix": bool(item.get("fix")),
-        "retest": bool(item.get("retest")),
-        "certification_safe": bool(item.get("certification_safe")),
+        "source": source,
+        "started": _strict_bool(item.get("started"), "started"),
+        "files": _strict_bool(item.get("files"), "files"),
+        "fix": _strict_bool(item.get("fix"), "fix"),
+        "retest": _strict_bool(item.get("retest"), "retest"),
+        "certification_safe": _strict_bool(item.get("certification_safe"), "certification_safe"),
+        "blind_edit_safe": _strict_bool(item.get("blind_edit_safe"), "blind_edit_safe"),
         "notes": str(item.get("notes") or ""),
         "prompt": str(item.get("prompt") or ""),
         "transcript": str(item.get("transcript") or ""),
@@ -1208,8 +1289,16 @@ def _infer_profile(name: str) -> str:
     return "unknown"
 
 
-def _to_bool(value: str) -> bool:
-    return value.strip().lower() in {"1", "true", "yes", "pass", "passed"}
+def _strict_bool(value: Any, field: str) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in {"1", "true", "yes"}:
+            return True
+        if normalized in {"0", "false", "no"}:
+            return False
+    raise ValueError(f"{field} must be a boolean, got {value!r}")
 
 
 def _extract_decision(text: str) -> str:

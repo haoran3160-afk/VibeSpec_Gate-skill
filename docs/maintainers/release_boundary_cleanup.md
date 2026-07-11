@@ -12,7 +12,6 @@ scripts/
 docs/
 README.md
 SKILL.md
-skill/
 pyproject.toml
 ```
 
@@ -76,4 +75,4 @@ The Lite path should not require users to read:
 
 ## Current Recommendation
 
-Keep the Stage 1 Lite facade and Stage 2 maintainer docs. Defer destructive cleanup until the Lite path has been used on at least one real review workflow.
+Keep the repository-root `SKILL.md` as the only authoritative Skill entry. The incomplete `skill/` compatibility directory was removed before GA because copying it alone produced a broken reference to the repository root.

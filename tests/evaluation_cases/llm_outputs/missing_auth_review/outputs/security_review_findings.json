@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "launch_decision": "REVIEW",
+  "findings": [
+    {
+      "finding_id": "VSG-AUTH-001",
+      "new_llm_finding": false,
+      "title": "API route may miss authentication",
+      "severity": "P1",
+      "confidence": "medium",
+      "launch_impact": "review",
+      "evidence_files": ["src/app/api/orders/route.ts"],
+      "reasoning_summary": "The route appears to access customer orders, but the packet does not prove authentication or ownership checks. This should stay in REVIEW until middleware and query ownership are confirmed.",
+      "missing_evidence": ["Middleware coverage for the route.", "User ownership check in the order query."],
+      "recommended_action": "verify_before_fix",
+      "human_confirmation_required": true,
+      "safe_to_auto_suppress": false
+    }
+  ]
+}

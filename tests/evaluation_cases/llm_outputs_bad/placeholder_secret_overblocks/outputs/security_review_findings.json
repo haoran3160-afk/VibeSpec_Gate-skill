@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "launch_decision": "BLOCK",
+  "findings": [
+    {
+      "finding_id": "VSG-SEC-002",
+      "new_llm_finding": false,
+      "title": "Placeholder secret in example env file",
+      "severity": "P2",
+      "confidence": "medium",
+      "launch_impact": "warning",
+      "evidence_files": [".env.example"],
+      "reasoning_summary": "This bad fixture overblocks example-only evidence.",
+      "missing_evidence": [],
+      "recommended_action": "fix",
+      "human_confirmation_required": true,
+      "safe_to_auto_suppress": false
+    }
+  ]
+}

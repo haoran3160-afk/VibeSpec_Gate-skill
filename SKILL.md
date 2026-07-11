@@ -47,13 +47,16 @@ The full repository can provide an optional Core-powered CLI path, but that path
    - `REVIEW`: do not treat as launch-ready yet; human confirmation or missing evidence remains.
    - `PASS_WITH_WARNINGS`: no launch-blocking finding is present, but warnings or downgrade/suppression candidates need review.
    - `PASS`: no material launch risk was found in the reviewed evidence.
-5. Produce the Lite outputs:
+5. Confirm the output boundary:
+   - for read-only reviews, require an explicitly approved output directory outside the reviewed project;
+   - if no outside directory is approved, stop before creating files and ask the user for one.
+6. Produce the Lite outputs:
    - `launch_decision.md`
    - `top_security_risks.md`
    - `agent_fix_plan.md`
    - `retest_checklist.md`
    - `evidence/` for machine-readable review data and auditability.
-6. Retest after fixes and update the gate decision.
+7. Retest after fixes and update the gate decision.
 
 ## Login-Security Lane
 
@@ -104,6 +107,10 @@ Do not provide brute-force scripts, CAPTCHA-bypass instructions, credential-stuf
 ## Safety Boundaries
 
 - Review only projects the user owns or is authorized to assess.
+- In prompt-only mode, state that project content is handled by the host Agent and its configured provider policy; do not claim the Skill keeps host-Agent data local.
+- When the optional CLI runs with `--no-adapters`, keep review output at the user-selected path and do not claim that optional third-party adapters share the same data boundary.
+- Treat generated reports and `evidence/` as potentially sensitive because they may include paths, snippets, findings, or project context. Require manual inspection before sharing.
+- Do not claim a `redacted` field proves complete sanitization.
 - Do not provide exploit payloads, login bypass instructions, brute force guidance, credential theft, persistence, privilege escalation paths, or destructive testing.
 - Do not run dynamic or live-target scans unless the user explicitly authorizes scope.
 - Mask complete secrets in reports and findings.

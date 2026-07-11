@@ -34,6 +34,14 @@ def main() -> int:
         ("pytest", lambda: run_command([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"])),
         ("compileall", lambda: run_command([sys.executable, "-m", "compileall", "-q", "src", "tests", "scripts"])),
         ("Lite package manifest", lambda: run_command([sys.executable, "scripts/verify_lite_package.py"])),
+        ("release metadata", lambda: run_command([sys.executable, "scripts/verify_release_metadata.py"])),
+        ("Lite archive build", lambda: run_command([sys.executable, "scripts/build_lite_package_zip.py"])),
+        (
+            "Lite archive metadata",
+            lambda: run_command(
+                [sys.executable, "scripts/verify_release_metadata.py", "--archive", "dist/vibespec-gate-lite.zip"]
+            ),
+        ),
         ("Lite release validation", lambda: run_command([sys.executable, "scripts/run_lite_release_validation.py"])),
         ("Lite RC hardening evidence", lambda: run_command([sys.executable, "scripts/run_lite_rc_hardening.py"])),
         ("review-validate personal-voice-light-agent", lambda: review_validate(PHASE4_OUTPUTS[0])),
@@ -147,6 +155,14 @@ def check_git_hygiene() -> str:
         result = subprocess.run(["git", "check-ignore", "-q", path], cwd=ROOT, text=True, capture_output=True, check=False)
         if result.returncode != 0:
             raise RuntimeError(f"{path} is not ignored")
+    curated_fixture = "tests/evaluation_cases/llm_outputs/secret_runtime_block/outputs/nontechnical_user_summary.md"
+    if not (ROOT / curated_fixture).exists():
+        raise RuntimeError(f"missing curated quality fixture: {curated_fixture}")
+    ignored_fixture = subprocess.run(
+        ["git", "check-ignore", "-q", curated_fixture], cwd=ROOT, text=True, capture_output=True, check=False
+    )
+    if ignored_fixture.returncode == 0:
+        raise RuntimeError(f"curated quality fixture must not be ignored: {curated_fixture}")
     cached = subprocess.run(["git", "diff", "--cached", "--name-only"], cwd=ROOT, text=True, capture_output=True, check=False)
     if cached.returncode != 0:
         raise RuntimeError(cached.stderr.strip())

@@ -28,7 +28,7 @@ This means a user can install or copy the package into an Agent environment and 
 Default package flow:
 
 ```text
-download Lite package -> read README/SKILL -> trigger Agent review -> receive four-file review shape
+download Lite package -> extract vibespec-gate/ -> read README/SKILL -> trigger Agent review -> receive four-file review shape
 ```
 
 The full repository may also provide a **Core-powered runnable path**, but that path is an optional overlay, not the default Lite package.
@@ -49,13 +49,18 @@ These files are required in the default prompt-only Lite package:
 LICENSE
 SKILL.md
 README.md
-README.en.md
 README.zh-CN.md
+agents/openai.yaml
 docs/usage/lite_quickstart.md
 examples/lite_review_prompt.md
+examples/synthetic_review_example.md
 ```
 
-`README.md` is the Chinese primary entry page. `README.en.md` is the English switch page. `README.zh-CN.md` remains a compatibility entry for older links and package consumers.
+`README.md` is the canonical English GitHub and package entry page. `README.zh-CN.md` is the complete Simplified Chinese translation. `README.en.md` remains only as a repository compatibility redirect and is not part of the Lite package.
+
+The zip archive must contain exactly one top-level directory named `vibespec-gate/`. It must not place `SKILL.md`, README files, or any other package file directly at the archive root.
+
+`agents/openai.yaml` supplies Codex-facing UI metadata. Other hosts may consume `SKILL.md`, but the package must not claim their install path or runtime behavior is validated without host-specific evidence.
 
 `docs/usage/lite_quickstart.md` may mention the Core-powered CLI path, but it must label that path as optional repository usage. The first user path must still work as Agent-native instructions.
 
@@ -149,6 +154,8 @@ The Lite package must state that VibeSpec Gate is not a professional security ce
 
 The Lite package must also state that coding Agents should not auto-fix, auto-suppress, broaden permissions, remove validation, or mutate the reviewed project without explicit human confirmation.
 
+Synthetic examples must be labeled as synthetic and must not be presented as real launch decisions, audit results, or share-safe evidence. User docs must warn that generated evidence can contain source paths, snippets, findings, or other sensitive context and requires manual inspection before sharing.
+
 ## Verification Contract
 
 The manifest is only useful if it can be checked. `scripts/verify_lite_package.py` should fail when:
@@ -159,6 +166,8 @@ The manifest is only useful if it can be checked. `scripts/verify_lite_package.p
 4. The package first path requires Phase outputs, calibration, scorer, quality matrix, release verifier, or fixtures.
 5. CLI commands are presented as mandatory for the default prompt-only package.
 6. The safety boundary is missing from either README or quickstart.
+7. The English and Chinese README section markers diverge.
+8. Install instructions omit the `vibespec-gate/SKILL.md` entry point or supported platform commands.
 
 The first version is `scripts/verify_lite_package.py`. It is a static check and does not need to validate security findings or run the full review engine.
 

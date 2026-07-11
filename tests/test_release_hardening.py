@@ -79,10 +79,8 @@ def test_llm_review_contract_documents_required_outputs():
 
 def test_core_docs_keep_llm_native_positioning():
     docs = [
-        Path("context.md"),
         Path("README.md"),
         Path("SKILL.md"),
-        Path("skill/SKILL.md"),
         Path("docs/usage/quickstart.md"),
         Path("docs/usage/examples.md"),
         Path("docs/usage/agent_review_cookbook.md"),
@@ -101,3 +99,8 @@ def test_core_docs_keep_llm_native_positioning():
         assert "llm_review_packet.json" in text, doc
         for claim in forbidden_claims:
             assert claim not in text, (doc, claim)
+
+
+def test_repository_has_one_authoritative_skill_entry():
+    assert Path("SKILL.md").exists()
+    assert not Path("skill/SKILL.md").exists()

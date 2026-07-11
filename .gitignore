@@ -24,6 +24,13 @@ dist/
 # Default generated scan output
 outputs/
 
+# Curated LLM quality fixtures are source-controlled regression inputs even
+# though their leaf directory is named outputs.
+!tests/evaluation_cases/llm_outputs/**/outputs/
+!tests/evaluation_cases/llm_outputs/**/outputs/**
+!tests/evaluation_cases/llm_outputs_bad/**/outputs/
+!tests/evaluation_cases/llm_outputs_bad/**/outputs/**
+
 # Large or regenerated review/scan outputs kept out of the baseline.
 test output/
 test output/phase3_regression/

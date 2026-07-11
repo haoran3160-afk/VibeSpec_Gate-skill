@@ -5,7 +5,7 @@ import uuid
 import zipfile
 from pathlib import Path
 
-from scripts.build_lite_package_zip import build_lite_package
+from scripts.build_lite_package_zip import ARCHIVE_ROOT, build_lite_package
 from scripts.verify_lite_package import REQUIRED_INCLUDE, check_package, check_source
 
 
@@ -21,8 +21,8 @@ def test_lite_package_verifier_accepts_required_prompt_only_package(tmp_path):
 
 def test_lite_package_user_docs_include_login_security_evidence_lane():
     required_terms_by_file = {
-        "README.md": ("登录", "注册", "密码重置", "OTP", "session", "rate-limit", "admin"),
         "README.zh-CN.md": ("登录", "注册", "密码重置", "OTP", "session", "rate-limit", "admin"),
+        "examples/synthetic_review_example.md": ("ownership", "human confirmation", "retest"),
         "default": ("login", "signup", "password reset", "OTP", "session", "rate-limit", "admin"),
     }
     for file_name in REQUIRED_INCLUDE:
@@ -45,11 +45,12 @@ def test_lite_package_zip_contains_only_prompt_only_files(tmp_path):
         assert output_zip.exists()
         with zipfile.ZipFile(output_zip) as archive:
             names = set(archive.namelist())
-        assert set(REQUIRED_INCLUDE) <= names
-        assert "LICENSE" in names
-        assert "README.md" in names
-        assert "README.en.md" in names
-        assert "README.zh-CN.md" in names
+        expected = {f"{ARCHIVE_ROOT}/{name}" for name in REQUIRED_INCLUDE}
+        assert names == expected
+        assert f"{ARCHIVE_ROOT}/LICENSE" in names
+        assert f"{ARCHIVE_ROOT}/README.md" in names
+        assert f"{ARCHIVE_ROOT}/README.zh-CN.md" in names
+        assert f"{ARCHIVE_ROOT}/agents/openai.yaml" in names
         assert not any(name.startswith(("tests/", "scripts/", "test output/")) for name in names)
     finally:
         if staging_dir.exists():
@@ -75,8 +76,8 @@ def test_lite_package_verifier_rejects_cli_first_readme(tmp_path):
     readme = tmp_path / "README.md"
     readme.write_text(
         readme.read_text(encoding="utf-8").replace(
-            "优先使用 prompt-only Lite 流程。",
-            "```powershell\npy -3 -m vibespec_gate.cli lite-review .\\my-project\n```\n\n优先使用 prompt-only Lite 流程。",
+            "The default Lite package is prompt-only.",
+            "```powershell\npy -3 -m vibespec_gate.cli lite-review .\\my-project\n```\n\nThe default Lite package is prompt-only.",
         ),
         encoding="utf-8",
     )
@@ -84,6 +85,18 @@ def test_lite_package_verifier_rejects_cli_first_readme(tmp_path):
     failures = check_package(tmp_path)
 
     assert any("README.md presents CLI command before the prompt-only default path" in failure for failure in failures)
+
+
+def test_lite_package_has_install_data_and_translation_contracts():
+    readme = Path("README.md").read_text(encoding="utf-8")
+    chinese = Path("README.zh-CN.md").read_text(encoding="utf-8")
+
+    assert "vibespec-gate\\SKILL.md" in readme
+    assert "SYNTHETIC EXAMPLE" in readme
+    assert "a `redacted` field is not a guarantee" in readme.lower()
+    assert "redacted` 字段不保证" in chinese
+    assert "README.en.md" not in REQUIRED_INCLUDE
+    assert "agents/openai.yaml" in REQUIRED_INCLUDE
 
 
 def _copy_required_package_files(package_dir: Path) -> None:

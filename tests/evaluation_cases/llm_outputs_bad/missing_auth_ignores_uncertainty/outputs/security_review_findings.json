@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "launch_decision": "PASS",
+  "findings": [
+    {
+      "finding_id": "VSG-AUTH-001",
+      "new_llm_finding": false,
+      "title": "API route may miss authentication",
+      "severity": "P1",
+      "confidence": "low",
+      "launch_impact": "review",
+      "evidence_files": ["src/app/api/orders/route.ts"],
+      "reasoning_summary": "This bad fixture ignores uncertainty and marks the route as pass.",
+      "missing_evidence": [],
+      "recommended_action": "verify_before_fix",
+      "human_confirmation_required": false,
+      "safe_to_auto_suppress": false
+    }
+  ]
+}

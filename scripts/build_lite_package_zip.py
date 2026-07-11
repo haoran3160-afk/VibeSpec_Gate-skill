@@ -15,6 +15,7 @@ from scripts.verify_lite_package import REQUIRED_INCLUDE, check_package, check_s
 
 
 DEFAULT_OUTPUT = ROOT / "dist" / "vibespec-gate-lite.zip"
+ARCHIVE_ROOT = "vibespec-gate"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -62,12 +63,14 @@ def build_lite_package(staging_dir: Path, output_zip: Path) -> dict[str, object]
     with zipfile.ZipFile(output_zip, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         for path in sorted(staging_dir.rglob("*")):
             if path.is_file():
-                archive.write(path, path.relative_to(staging_dir).as_posix())
+                relative_name = path.relative_to(staging_dir).as_posix()
+                archive.write(path, f"{ARCHIVE_ROOT}/{relative_name}")
 
     return {
         "zip": str(output_zip),
         "staging_dir": str(staging_dir),
         "files": list(REQUIRED_INCLUDE),
+        "archive_root": ARCHIVE_ROOT,
     }
 
 

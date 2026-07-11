@@ -1,0 +1,4 @@
+interface:
+  display_name: "VibeSpec Gate"
+  short_description: "Review launch-blocking security risks"
+  default_prompt: "Use $vibespec-gate to review this project for launch-blocking security and data-safety risks."

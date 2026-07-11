@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "launch_decision": "PASS_WITH_WARNINGS",
+  "findings": [
+    {
+      "finding_id": "VSG-SEC-001",
+      "new_llm_finding": false,
+      "title": "Runtime provider secret in server source",
+      "severity": "P1",
+      "confidence": "high",
+      "launch_impact": "block",
+      "evidence_files": ["src/server.ts"],
+      "reasoning_summary": "The runtime secret is present, but this bad fixture incorrectly allows launch.",
+      "missing_evidence": [],
+      "recommended_action": "keep",
+      "human_confirmation_required": false,
+      "safe_to_auto_suppress": false
+    }
+  ]
+}

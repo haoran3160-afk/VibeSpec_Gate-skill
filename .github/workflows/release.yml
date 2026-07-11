@@ -1,0 +1,58 @@
+name: Release Lite Skill
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Verify and publish ${{ github.ref_name }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out tagged commit
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Require tagged commit on master
+        shell: bash
+        run: |
+          git fetch origin master
+          git merge-base --is-ancestor "${GITHUB_SHA}" origin/master
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install package and test runner
+        run: python -m pip install -e . pytest
+
+      - name: Run release gates
+        run: |
+          python scripts/verify_lite_package.py
+          python scripts/verify_release_metadata.py --tag "${GITHUB_REF_NAME}"
+          python -m pytest -q -p no:cacheprovider
+          python -m compileall -q src tests scripts
+
+      - name: Build and verify Lite archive
+        run: |
+          python scripts/build_lite_package_zip.py
+          python scripts/verify_release_metadata.py --tag "${GITHUB_REF_NAME}" --archive dist/vibespec-gate-lite.zip
+          (cd dist && sha256sum vibespec-gate-lite.zip > SHA256SUMS)
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          args=(release create "${GITHUB_REF_NAME}" dist/vibespec-gate-lite.zip dist/SHA256SUMS --verify-tag --generate-notes --title "VibeSpec Gate ${GITHUB_REF_NAME}")
+          if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+            args+=(--prerelease)
+          fi
+          gh "${args[@]}"

@@ -4,13 +4,15 @@ These examples show how the CLI supports the LLM-native VibeSpec Gate Skill.
 
 ## Ask For A Launch Security Review
 
-Use this when working inside Codex, Claude, Cursor, or another Agent environment:
+Use this in an authorized host Agent after installing the `vibespec-gate/` Skill directory or otherwise loading the repository-root `SKILL.md` contract:
 
 ```text
 Review this project as VibeSpec Gate. Tell me whether it can safely launch, what could leak secrets or user data, and what an Agent should fix first.
 ```
 
 The Skill should inspect project evidence, explain launch risk, and produce a prioritized repair plan.
+
+The Lite package layout is validated for a Codex Skill directory. Other hosts may be able to consume `SKILL.md`, but their installation and behavior are not yet claimed as validated.
 
 ## Generate Local Evidence
 

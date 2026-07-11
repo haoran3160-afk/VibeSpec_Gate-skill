@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "launch_decision": "PASS_WITH_WARNINGS",
+  "findings": [
+    {
+      "finding_id": "VSG-SEC-002",
+      "new_llm_finding": false,
+      "title": "Placeholder secret in example env file",
+      "severity": "P2",
+      "confidence": "medium",
+      "launch_impact": "warning",
+      "evidence_files": [".env.example"],
+      "reasoning_summary": "The evidence is in an example file, so this is a downgrade candidate rather than a launch blocker.",
+      "missing_evidence": ["Confirmation that no equivalent real secret exists in runtime files."],
+      "recommended_action": "downgrade",
+      "human_confirmation_required": true,
+      "safe_to_auto_suppress": false
+    }
+  ]
+}

@@ -27,14 +27,21 @@ py -3 scripts\verify_lite_package.py
 
 Run focused tests:
 
-```powershell
-py -3 -m pytest tests/test_lite_package_verifier.py tests/test_lite_release_validation.py tests/test_lite_review_bundle.py tests/test_lite_rc_hardening.py
+```bash
+python -m pytest -q -p no:cacheprovider
 ```
 
-Run broader release checks before a release candidate:
+Build and verify the installable Lite archive:
 
-```powershell
-py -3 scripts\verify_release.py
+```bash
+python scripts/build_lite_package_zip.py
+python scripts/verify_release_metadata.py --archive dist/vibespec-gate-lite.zip
+```
+
+Run broader maintainer checks before a release candidate when the required local evidence directories are available:
+
+```bash
+python scripts/verify_release.py
 ```
 
 ## Pull Request Standards
@@ -61,4 +68,3 @@ Use clear task-oriented docs:
 - how-to guides for operators;
 - references for schemas and contracts;
 - maintainer docs for release, scoring, and calibration workflows.
-

@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "launch_decision": "REVIEW",
+  "findings": [
+    {
+      "finding_id": "VSG-MCP-001",
+      "new_llm_finding": false,
+      "title": "MCP file tool boundary needs review",
+      "severity": "P1",
+      "confidence": "medium",
+      "launch_impact": "review",
+      "evidence_files": ["src/mcp/server.ts"],
+      "reasoning_summary": "This bad fixture claims review status but does not identify the missing boundary evidence.",
+      "missing_evidence": [],
+      "recommended_action": "verify_before_fix",
+      "human_confirmation_required": false,
+      "safe_to_auto_suppress": false
+    }
+  ]
+}

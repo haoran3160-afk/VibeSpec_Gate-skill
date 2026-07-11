@@ -51,6 +51,7 @@ def test_llm_output_fixtures_exist_and_are_not_stubs():
         ):
             text = (output_dir / name).read_text(encoding="utf-8")
             assert STUB_DISCLAIMER not in text, fixture
+            assert "vibesec.cli" not in text, (fixture, name)
 
 
 def test_score_llm_review_outputs_shape_and_passes_all_fixtures():

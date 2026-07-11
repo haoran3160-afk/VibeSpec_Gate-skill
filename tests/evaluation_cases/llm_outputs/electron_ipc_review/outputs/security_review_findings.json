@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "launch_decision": "REVIEW",
+  "findings": [
+    {
+      "finding_id": "VSG-ELECTRON-001",
+      "new_llm_finding": false,
+      "title": "Electron IPC file handler needs review",
+      "severity": "P1",
+      "confidence": "medium",
+      "launch_impact": "review",
+      "evidence_files": ["src/main/ipc.ts"],
+      "reasoning_summary": "Electron IPC handlers can bridge untrusted renderer input into privileged main-process file behavior. This requires review until contextIsolation, preload exposure, and path constraints are proven.",
+      "missing_evidence": ["contextIsolation setting.", "Preload API shape.", "Path allowlist or workspace constraint."],
+      "recommended_action": "verify_before_fix",
+      "human_confirmation_required": true,
+      "safe_to_auto_suppress": false
+    }
+  ]
+}
