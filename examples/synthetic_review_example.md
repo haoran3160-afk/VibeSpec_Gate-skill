@@ -2,7 +2,7 @@
 
 > **SYNTHETIC EXAMPLE - NOT A REAL SECURITY REVIEW**
 >
-> This document demonstrates the output contract only. Do not use it as a launch decision, audit result, compliance evidence, or proof that a project is secure. Generated evidence may contain sensitive context and must be manually inspected before sharing.
+> This document shows the format of optional saved reports. The Agent creates these files only after the user approves an output directory outside the reviewed project. Do not use this example as a launch decision, audit result, compliance evidence, or proof that a project is secure. Generated evidence may contain sensitive context and must be manually inspected before sharing.
 
 ## Output Shape
 
@@ -19,9 +19,12 @@ lite_review/
 
 ```text
 Decision: BLOCK
+Coverage status: partial
 
 Do not launch yet. A private orders route reads records by id without proving
 that the caller is authenticated or owns the requested order.
+
+Missing evidence: deployment middleware and database ownership policies.
 ```
 
 ## `top_security_risks.md`
@@ -52,4 +55,4 @@ Prohibited: Do not trust user_id from request JSON or broaden admin access.
 - Rerun the review and update the launch decision from new evidence.
 ```
 
-The complete decision vocabulary is `BLOCK`, `REVIEW`, `PASS_WITH_WARNINGS`, and `PASS`. `PASS` means no material blocker was identified in reviewed evidence; it is not a security guarantee.
+The complete decision vocabulary is `BLOCK`, `REVIEW`, `PASS_WITH_WARNINGS`, and `PASS`. `PASS` requires complete coverage with no material risk or remaining warning; it is not a security guarantee.
