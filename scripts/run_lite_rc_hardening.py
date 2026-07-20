@@ -706,8 +706,8 @@ Boundary: this walkthrough is prewritten contract-test material. It is not an ex
 
 Observed path:
 
-1. Started from `README.md` inside `candidate-lite-package/`.
-2. Located `launch_decision.md`, `top_security_risks.md`, `agent_fix_plan.md`, and `retest_checklist.md`.
+1. Started from `SKILL.md` inside `candidate-lite-package/`.
+2. Followed its routes to the four templates for `launch_decision.md`, `top_security_risks.md`, `agent_fix_plan.md`, and `retest_checklist.md`.
 3. Checked whether fix tasks were bounded and whether human-confirmation boundaries were clear.
 4. Checked whether retest steps could be followed without hidden maintainer context.
 5. Checked whether non-certification language was visible.

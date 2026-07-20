@@ -80,7 +80,7 @@ def test_llm_review_contract_documents_required_outputs():
 def test_core_docs_keep_llm_native_positioning():
     docs = [
         Path("README.md"),
-        Path("SKILL.md"),
+        Path("skills/vibespec-gate/SKILL.md"),
         Path("docs/usage/quickstart.md"),
         Path("docs/usage/examples.md"),
         Path("docs/usage/agent_review_cookbook.md"),
@@ -96,8 +96,14 @@ def test_core_docs_keep_llm_native_positioning():
     for doc in docs:
         text = doc.read_text(encoding="utf-8").lower()
         if doc == Path("README.md"):
-            assert "launch security review" in text
-            assert "products built with vibe coding" in text
+            assert "上线阻断风险" in text
+            assert "vibe coding" in text
+        elif doc == Path("skills/vibespec-gate/SKILL.md"):
+            assert "review authorized project evidence" in text
+            assert "references/evidence-coverage.md" in text
+        elif doc == Path("docs/usage/lite_quickstart.md"):
+            assert "$home/.agents/skills/vibespec-gate" in text
+            assert "evidence coverage" in text
         else:
             assert "llm-native" in text, doc
             assert "llm_review_packet.json" in text, doc
@@ -106,5 +112,6 @@ def test_core_docs_keep_llm_native_positioning():
 
 
 def test_repository_has_one_authoritative_skill_entry():
-    assert Path("SKILL.md").exists()
+    assert Path("skills/vibespec-gate/SKILL.md").exists()
+    assert not Path("SKILL.md").exists()
     assert not Path("skill/SKILL.md").exists()

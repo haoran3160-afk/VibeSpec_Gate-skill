@@ -1,119 +1,86 @@
-# Lite Quickstart
+# VibeSpec Gate Quickstart
 
-Use the default prompt-only, Agent-native flow when you want a launch-risk review without installing the optional Python CLI.
+VibeSpec Gate reviews authorized project evidence and returns coverage, one launch decision, the highest-impact risks, human-gated repair tasks, and project-specific retests.
 
 ## Install
 
-The Lite archive contains one installable directory: `vibespec-gate/`. The entry point is `vibespec-gate/SKILL.md`.
+Recommended:
 
-From a source checkout on Windows PowerShell:
+```text
+Use $skill-installer to install the Skill from https://github.com/haoran3160-afk/VibeSpec_Gate-skill/tree/master/skills/vibespec-gate.
+```
+
+Open a new Agent task after installation. `$skill-installer` defaults to `$CODEX_HOME/skills/vibespec-gate`, normally `$HOME/.codex/skills/vibespec-gate`. Manual installs may use `$HOME/.agents/skills/vibespec-gate`; a repository-specific installation uses `.agents/skills/vibespec-gate`.
+
+Manual Windows PowerShell installation from a source checkout:
 
 ```powershell
-py -3 -c "import sys; assert sys.version_info >= (3, 10), sys.version"
-py -3 scripts/build_lite_package_zip.py
-$CodexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $HOME ".codex" }
-$SkillRoot = Join-Path $CodexHome "skills"
-New-Item -ItemType Directory -Force $SkillRoot | Out-Null
-py -3 -m zipfile -e dist/vibespec-gate-lite.zip $SkillRoot
-Test-Path (Join-Path $SkillRoot "vibespec-gate\SKILL.md")
+$Target = Join-Path $HOME ".agents/skills/vibespec-gate"
+if (Test-Path -LiteralPath $Target) { throw "Target already exists: $Target" }
+New-Item -ItemType Directory -Force (Split-Path -Parent $Target) | Out-Null
+Copy-Item -LiteralPath "skills/vibespec-gate" -Destination $Target -Recurse
+Test-Path -LiteralPath (Join-Path $Target "SKILL.md")
 ```
 
-From a source checkout on macOS or Linux:
+Manual macOS or Linux installation:
 
 ```bash
-python3 -c 'import sys; assert sys.version_info >= (3, 10), sys.version'
-python3 scripts/build_lite_package_zip.py
-mkdir -p "${CODEX_HOME:-$HOME/.codex}/skills"
-python3 -m zipfile -e dist/vibespec-gate-lite.zip "${CODEX_HOME:-$HOME/.codex}/skills"
-test -f "${CODEX_HOME:-$HOME/.codex}/skills/vibespec-gate/SKILL.md"
+test ! -e "$HOME/.agents/skills/vibespec-gate"
+mkdir -p "$HOME/.agents/skills"
+cp -R skills/vibespec-gate "$HOME/.agents/skills/vibespec-gate"
+test -f "$HOME/.agents/skills/vibespec-gate/SKILL.md"
 ```
 
-Expected build output: `PASS Lite package zip built`. Restart the host or open a new task after installation, then ask `$vibespec-gate` to state `BLOCK`, `REVIEW`, `PASS_WITH_WARNINGS`, `PASS`, and the `human confirmation` rule without reading a project. Other hosts may load the same `SKILL.md` contract, but their installation and behavior are not yet claimed as validated.
+Copy the complete directory so both references and all four output templates remain available.
 
-## Agent-Native Flow
+## Start In Chat
 
-Open the product repository in the host Agent and ask:
+Open the product repository in a new Agent task and ask:
 
 ```text
 Use $vibespec-gate to review this project for launch-blocking security risks.
 
-Before writing files, ask me for an approved output directory outside the reviewed
-project. Do not default to writing lite_review/ inside the project.
-
-Tell me whether it can safely launch, explain the top security and data-safety risks,
-including login, signup, password reset, OTP, session, token, rate-limit, ownership,
-and admin-auth risks. Produce bounded coding-Agent fix tasks only after human
-confirmation, and produce a project-specific retest checklist.
+Keep the project read-only. Start with a chat-only result and do not create files.
+Show evidence coverage, the launch decision, the highest-impact risks, repair tasks
+that require human confirmation, and a project-specific retest checklist.
 ```
 
-The Agent should produce:
+The first result should include all seven surfaces: `auth`, `authorization`, `secrets`, `data_rules`, `deployment`, `agent_tools`, and `desktop_ipc`.
+
+Decision meanings:
+
+- `BLOCK`: confirmed launch-blocking evidence exists.
+- `REVIEW`: evidence is insufficient, partial, truncated, ambiguous, or needs human judgment.
+- `PASS_WITH_WARNINGS`: coverage is complete and no blocker remains, but a warning remains.
+- `PASS`: coverage is complete, no surface is missing, and no material risk or remaining warning was found.
+
+`PASS` is evidence-scoped and is not proof that the product is secure.
+
+## Save Results
+
+Saving is optional. Approve an output directory outside the reviewed project only when you need files. The Agent then creates:
 
 ```text
-lite_review/
-  launch_decision.md
-  top_security_risks.md
-  agent_fix_plan.md
-  retest_checklist.md
-  evidence/
+launch_decision.md
+top_security_risks.md
+agent_fix_plan.md
+retest_checklist.md
+evidence/
 ```
 
-Read the files in that order.
+Input and output must not be equal or contain one another. Reports can contain paths, snippets, and sensitive context; inspect them manually before sharing.
 
-## Launch Decision Meanings
+Review does not authorize repair. Confirm the finding, allowed files, prohibited changes, and product choices before any edit.
 
-- `BLOCK`: do not launch yet; reviewed evidence shows a launch blocker.
-- `REVIEW`: missing or ambiguous evidence requires human review.
-- `PASS_WITH_WARNINGS`: no blocker was identified, but warnings remain.
-- `PASS`: no material launch blocker was identified in reviewed evidence.
+## Optional CLI
 
-`PASS` is not proof that a product is secure.
-
-## Login-Security Evidence
-
-For products with accounts or private data, inspect login, signup, logout, password reset, magic-link, OTP send/verify, CAPTCHA or abuse controls, rate limits, session cookies, JWT and refresh-token handling, frontend token storage, account enumeration, ownership checks, and admin authorization.
-
-Use `REVIEW`, not `PASS`, when provider-side settings, rate limits, cookie settings, reset-token expiry, admin-role evidence, or equivalent controls are absent from reviewed files.
-
-Safe retests include rejecting unauthenticated private requests, preventing user A from accessing user B's data, rejecting expired or reused reset/OTP tokens, exercising a safe rate-limit path, preventing account enumeration, omitting raw auth artifacts from logs, and rejecting non-admin users from admin routes.
-
-## Data Boundary
-
-- In prompt-only mode, the host Agent reads project content under its configured permissions and provider policy. Check that policy before using private code.
-- `vibespec-gate lite-review ... --no-adapters` reads local files, writes to the selected output directory, does not call an LLM provider, and does not execute optional scanner adapters.
-- Enabled adapters run installed third-party tools whose own data handling is outside this Skill's guarantee.
-- Generated reports and `evidence/` may contain paths, snippets, or sensitive context. Inspect and sanitize them manually before sharing; a `redacted` field is not a complete sanitization guarantee.
-
-## Safety Boundary
-
-- Do not edit a reviewed project until a human confirms the evidence and scope.
-- Do not auto-write suppressions, broaden permissions, remove validation, or add bypasses.
-- Do not ask an Agent to choose CAPTCHA providers, rate-limit thresholds, MFA policy, identity providers, recovery policy, or production-account changes without human confirmation.
-- Do not print full OTPs, reset tokens, JWTs, cookies, session IDs, authorization headers, or secrets.
-- Keep review output outside every real project used for read-only validation.
-- If an external output directory has not been approved, stop before creating the Lite files and ask for one.
-
-VibeSpec Gate is not a professional security certification, penetration test, legal review, compliance attestation, or guarantee of absolute security.
-
-## Optional Repository CLI Flow
-
-Install from a source checkout when repeatable local evidence is useful:
-
-```bash
-python -m pip install -e .
-vibespec-gate lite-review ./my-project --output ./lite_review --no-adapters
-```
-
-Without installation on macOS/Linux:
-
-```bash
-PYTHONPATH=src python -m vibespec_gate.cli lite-review ./my-project --output ./lite_review --no-adapters
-```
-
-Without installation on PowerShell:
+The source repository also contains a Python 3.10+ CLI for repeatable static checks and structured local evidence. It is not included in the installed Skill and does not replace the Agent's coverage judgment.
 
 ```powershell
 $env:PYTHONPATH = "src"
-py -3 -m vibespec_gate.cli lite-review .\my-project --output .\lite_review --no-adapters
+py -3 -m vibespec_gate.cli lite-review D:\path\to\project --output D:\reviews\project-review --no-adapters
 ```
 
-This optional Core-powered path is supporting infrastructure. It is not required for the default Lite package.
+The CLI requires explicit `--output` outside the project, and the target directory must not already exist.
+
+VibeSpec Gate is not a professional security certification, penetration test, legal review, compliance attestation, or guarantee of absolute security.

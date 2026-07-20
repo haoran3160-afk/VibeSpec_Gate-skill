@@ -6,35 +6,46 @@ import zipfile
 from pathlib import Path
 
 from scripts.build_lite_package_zip import ARCHIVE_ROOT, build_lite_package
-from scripts.verify_lite_package import REQUIRED_INCLUDE, check_package, check_source
+from scripts.verify_lite_package import REQUIRED_INCLUDE, SKILL_SOURCE, check_package, check_source
 
 
-def test_lite_package_source_docs_satisfy_manifest_contract():
+def test_lite_package_source_satisfies_skill_unit_contract():
     assert check_source(Path.cwd()) == []
 
 
-def test_lite_package_verifier_accepts_required_prompt_only_package(tmp_path):
+def test_repository_has_one_authoritative_skill_entry():
+    skill_files = [
+        path.relative_to(Path.cwd()).as_posix()
+        for path in Path.cwd().rglob("SKILL.md")
+        if not set(path.relative_to(Path.cwd()).parts) & {".git", "dist", "test output"}
+    ]
+
+    assert skill_files == ["skills/vibespec-gate/SKILL.md"]
+    assert not Path("agents/openai.yaml").exists()
+
+
+def test_lite_package_verifier_accepts_exact_runtime_package(tmp_path):
     _copy_required_package_files(tmp_path)
 
     assert check_package(tmp_path) == []
 
 
-def test_lite_package_user_docs_include_login_security_evidence_lane():
-    required_terms_by_file = {
-        "README.zh-CN.md": ("登录", "注册", "密码重置", "OTP", "session", "rate-limit", "admin"),
-        "examples/synthetic_review_example.md": ("ownership", "human confirmation", "retest"),
-        "default": ("login", "signup", "password reset", "OTP", "session", "rate-limit", "admin"),
-    }
-    for file_name in REQUIRED_INCLUDE:
-        if not file_name.endswith(".md"):
+def test_skill_routes_every_reference_and_template():
+    skill = (SKILL_SOURCE / "SKILL.md").read_text(encoding="utf-8")
+
+    for relative_name in REQUIRED_INCLUDE:
+        if relative_name in {"SKILL.md", "LICENSE", "agents/openai.yaml"}:
             continue
-        terms = required_terms_by_file.get(file_name, required_terms_by_file["default"])
-        text = (Path.cwd() / file_name).read_text(encoding="utf-8")
-        for term in terms:
-            assert term.lower() in text.lower(), f"{file_name} missing {term}"
+        assert relative_name in skill
 
 
-def test_lite_package_zip_contains_only_prompt_only_files(tmp_path):
+def test_agent_metadata_disables_implicit_invocation():
+    metadata = (SKILL_SOURCE / "agents/openai.yaml").read_text(encoding="utf-8")
+
+    assert "allow_implicit_invocation: false" in metadata
+
+
+def test_lite_package_zip_contains_only_runtime_skill_files():
     output_zip = Path.cwd() / "dist" / f"test-vibespec-gate-lite-{uuid.uuid4().hex}.zip"
     staging_dir = output_zip.with_suffix("")
 
@@ -42,16 +53,10 @@ def test_lite_package_zip_contains_only_prompt_only_files(tmp_path):
         result = build_lite_package(staging_dir, output_zip)
 
         assert result["files"] == list(REQUIRED_INCLUDE)
-        assert output_zip.exists()
         with zipfile.ZipFile(output_zip) as archive:
-            names = set(archive.namelist())
-        expected = {f"{ARCHIVE_ROOT}/{name}" for name in REQUIRED_INCLUDE}
-        assert names == expected
-        assert f"{ARCHIVE_ROOT}/LICENSE" in names
-        assert f"{ARCHIVE_ROOT}/README.md" in names
-        assert f"{ARCHIVE_ROOT}/README.zh-CN.md" in names
-        assert f"{ARCHIVE_ROOT}/agents/openai.yaml" in names
-        assert not any(name.startswith(("tests/", "scripts/", "test output/")) for name in names)
+            names = {name for name in archive.namelist() if not name.endswith("/")}
+        assert names == {f"{ARCHIVE_ROOT}/{name}" for name in REQUIRED_INCLUDE}
+        assert not any("README" in name or "CHANGELOG" in name for name in names)
     finally:
         if staging_dir.exists():
             shutil.rmtree(staging_dir)
@@ -59,75 +64,77 @@ def test_lite_package_zip_contains_only_prompt_only_files(tmp_path):
             output_zip.unlink()
 
 
-def test_lite_package_verifier_rejects_excluded_package_files(tmp_path):
+def test_lite_package_verifier_rejects_non_runtime_file(tmp_path):
     _copy_required_package_files(tmp_path)
-    excluded = tmp_path / "tests" / "test_internal.py"
-    excluded.parent.mkdir(parents=True)
-    excluded.write_text("# internal test\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text("Not part of the install unit.\n", encoding="utf-8")
 
     failures = check_package(tmp_path)
 
-    assert any("package contains non-manifest file: tests/test_internal.py" in failure for failure in failures)
-    assert any("package contains excluded file: tests/test_internal.py" in failure for failure in failures)
+    assert "package contains non-manifest file: README.md" in failures
 
 
-def test_lite_package_verifier_rejects_cli_first_readme(tmp_path):
+def test_source_verifier_uses_manifest_include_block_as_authority(tmp_path):
+    shutil.copytree(SKILL_SOURCE, tmp_path / SKILL_SOURCE)
+    manifest = tmp_path / "docs/design/lite_skill_package_manifest.md"
+    manifest.parent.mkdir(parents=True)
+    text = Path("docs/design/lite_skill_package_manifest.md").read_text(encoding="utf-8")
+    manifest.write_text(text.replace("assets/templates/retest-checklist.md", "README.md", 1), encoding="utf-8")
+
+    failures = check_source(tmp_path)
+
+    assert "missing Skill runtime file: README.md" in failures
+    assert "package contains non-manifest file: assets/templates/retest-checklist.md" in failures
+
+
+def test_lite_package_verifier_rejects_extra_frontmatter_field(tmp_path):
     _copy_required_package_files(tmp_path)
-    readme = tmp_path / "README.md"
-    readme.write_text(
-        readme.read_text(encoding="utf-8").replace(
-            "VibeSpec Gate runs through your coding Agent.",
-            "```powershell\npy -3 -m vibespec_gate.cli lite-review .\\my-project\n```\n\nVibeSpec Gate runs through your coding Agent.",
+    skill = tmp_path / "SKILL.md"
+    skill.write_text(
+        skill.read_text(encoding="utf-8").replace(
+            "description: Review launch security",
+            "metadata: unsupported\ndescription: Review launch security",
         ),
         encoding="utf-8",
     )
 
     failures = check_package(tmp_path)
 
-    assert any("README.md presents CLI command before the default Skill path" in failure for failure in failures)
+    assert "SKILL.md frontmatter must contain only the expected name and description fields" in failures
 
 
-def test_lite_package_has_install_data_and_translation_contracts():
-    readme = Path("README.md").read_text(encoding="utf-8")
-    chinese = Path("README.zh-CN.md").read_text(encoding="utf-8")
+def test_readmes_have_user_facing_structure_and_current_install_contract():
+    chinese = Path("README.md").read_text(encoding="utf-8")
+    english = Path("README.en.md").read_text(encoding="utf-8")
 
-    assert "vibespec-gate\\SKILL.md" in readme
-    assert "ILLUSTRATIVE EXAMPLE" in readme
-    assert "even when a report says sensitive values were redacted" in readme.lower()
-    assert "即使报告显示敏感值已经脱敏" in chinese
-    assert "README.en.md" not in REQUIRED_INCLUDE
-    assert "agents/openai.yaml" in REQUIRED_INCLUDE
+    assert chinese.index("## 输出示例") < chinese.index("## 安装")
+    assert chinese.index("## 能检查什么") < chinese.index("## 安装")
+    assert english.index("## Example Output") < english.index("## Install")
+    assert english.index("## What It Reviews") < english.index("## Install")
+    for text in (chinese, english):
+        assert "$HOME/.agents/skills/vibespec-gate" in text
+        assert "$CODEX_HOME/skills/vibespec-gate" in text
+        assert ".agents/skills/vibespec-gate" in text
+        assert "skills/vibespec-gate" in text
+        assert "/tree/master/skills/vibespec-gate" in text
+        assert "0.2.0rc1" in text
+        assert "PASS_WITH_WARNINGS" in text
+        assert "vibespec-gate-lite.zip" not in text
+    assert not Path("README.zh-CN.md").exists()
 
 
-def test_readmes_keep_internal_release_language_out_of_user_presentation():
-    banned_phrases = (
-        "release-candidate",
-        "status: rc",
-        "synthetic walkthrough",
-        "deterministic fixture",
-        "prompt-only",
-        "host agent",
-        "core-powered",
-        "validation and maturity",
-        "maintainer hardening",
-        "real external blind-user",
-        "llm_review_packet",
-        "候选发布状态",
-        "确定性 fixture",
-        "宿主 agent",
-        "验证与成熟度",
-        "当前成熟度",
-    )
-    for path in (Path("README.md"), Path("README.zh-CN.md")):
-        text = path.read_text(encoding="utf-8").lower()
-        for phrase in banned_phrases:
-            assert phrase not in text, f"{path} exposes internal phrase: {phrase}"
+def test_readmes_state_skill_cli_and_evidence_boundaries():
+    for path in (Path("README.md"), Path("README.en.md")):
+        text = path.read_text(encoding="utf-8")
+        for term in ("auth", "authorization", "secrets", "data_rules", "deployment", "agent_tools", "desktop_ipc"):
+            assert term in text
+        assert "--output" in text
+        assert "Python 3.10+" in text
+        assert "evals/runs/2026-07-20/README.md" in text
 
 
 def _copy_required_package_files(package_dir: Path) -> None:
-    root = Path.cwd()
     for file_name in REQUIRED_INCLUDE:
-        source = root / file_name
+        source = SKILL_SOURCE / file_name
         destination = package_dir / file_name
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)

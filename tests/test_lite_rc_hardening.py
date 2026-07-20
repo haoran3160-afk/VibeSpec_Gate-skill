@@ -50,7 +50,9 @@ def test_rc_candidate_package_is_manifest_clean_and_reproducible(tmp_path):
 
     assert check_package(candidate) == []
     assert compare_package_file_list(tmp_path)
-    assert "README.md" in (tmp_path / "package_file_list.txt").read_text(encoding="utf-8")
+    file_list = (tmp_path / "package_file_list.txt").read_text(encoding="utf-8")
+    assert "SKILL.md" in file_list
+    assert "README.md" not in file_list
 
 
 def test_rc_validation_matrix_covers_required_project_shapes(tmp_path):

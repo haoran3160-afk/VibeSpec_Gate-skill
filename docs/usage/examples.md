@@ -4,7 +4,7 @@ These examples show how the CLI supports the LLM-native VibeSpec Gate Skill.
 
 ## Ask For A Launch Security Review
 
-Use this in an authorized host Agent after installing the `vibespec-gate/` Skill directory or otherwise loading the repository-root `SKILL.md` contract:
+Use this in an authorized host Agent after installing the complete `skills/vibespec-gate/` Skill directory:
 
 ```text
 Review this project as VibeSpec Gate. Tell me whether it can safely launch, what could leak secrets or user data, and what an Agent should fix first.

@@ -5,7 +5,7 @@ This documentation is organized by user path.
 ## Start Here
 
 - [Lite quickstart](usage/lite_quickstart.md): shortest path for first-time Skill usage.
-- [Lite review prompt](../examples/lite_review_prompt.md): prompt-only Agent-native review request.
+- [Lite review prompt](../examples/lite_review_prompt.md): ready-to-use launch review request.
 - [Agent review cookbook](usage/agent_review_cookbook.md): how to use the four Lite outputs.
 
 ## Operators
@@ -15,13 +15,14 @@ This documentation is organized by user path.
 - [Verification](usage/verification.md)
 - [LLM review contract](usage/llm_review_contract.md)
 
-## Architecture And Productization
+## Design And Release Records
 
-- [Lite package manifest](design/lite_skill_package_manifest.md)
+- [Current Skill and product optimization plan](design/lite_skill_next_optimization_plan.md): canonical execution plan for decision integrity, Skill evaluation, packaging, README, and release.
+- [Current `0.2.0rc1` Lite package manifest](design/lite_skill_package_manifest.md)
 - [Lite release validation plan](design/lite_skill_release_validation_plan.md)
 - [Lite RC hardening plan](design/lite_skill_rc_hardening_plan.md)
 - [Model invocation strategy](design/model_invocation_strategy.md)
-- [Productization plan](design/lite_skill_productization_plan.md)
+- [Historical productization plan](design/lite_skill_productization_plan.md)
 
 ## Maintainers
 
@@ -36,4 +37,3 @@ This documentation is organized by user path.
 ## Generated Evidence
 
 Generated scan, review, and RC evidence belongs in ignored local folders such as `outputs/` and `test output/`. Do not commit raw generated evidence unless it has been deliberately converted into a curated maintainer document.
-

@@ -1,5 +1,7 @@
 # Lite Skill Package Manifest
 
+> Package contract for the `0.2.0rc1` Agent-native Skill install unit. It implements R3 in the [current Skill and product optimization plan](lite_skill_next_optimization_plan.md).
+
 Date: 2026-07-08
 
 This manifest defines the file boundary for a downloadable Lite VibeSpec Gate Skill package.
@@ -21,17 +23,17 @@ Maintainer-only infrastructure remains in the repository, but it is not part of 
 
 ## Package Mode
 
-The default Lite package is a **prompt-only, Agent-native Skill package**.
+The default Lite package is an **Agent-native Skill package**.
 
 This means a user can install or copy the package into an Agent environment and trigger the Skill by asking for a launch-blocking security review. The package must not assume that the user has installed the full Python CLI, repository test suite, calibration scripts, scorer, or release verifier.
 
 Default package flow:
 
 ```text
-download Lite package -> extract vibespec-gate/ -> read README/SKILL -> trigger Agent review -> receive four-file review shape
+download Lite package -> extract vibespec-gate/ -> install the directory -> explicitly trigger $vibespec-gate -> receive a chat-first review
 ```
 
-The full repository may also provide a **Core-powered runnable path**, but that path is an optional overlay, not the default Lite package.
+The full repository may also provide an **optional Python CLI**, but that path is separate from the default Skill package.
 
 Runnable overlay flow:
 
@@ -43,38 +45,29 @@ This distinction prevents a misleading package that looks lightweight but secret
 
 ## Include
 
-These files are required in the default prompt-only Lite package:
+These are the only files allowed in the default Agent-native Skill package:
 
 ```text
-LICENSE
 SKILL.md
-README.md
-README.zh-CN.md
+LICENSE
 agents/openai.yaml
-docs/usage/lite_quickstart.md
-examples/lite_review_prompt.md
-examples/synthetic_review_example.md
+references/review-protocol.md
+references/evidence-coverage.md
+assets/templates/launch-decision.md
+assets/templates/top-security-risks.md
+assets/templates/agent-fix-plan.md
+assets/templates/retest-checklist.md
 ```
-
-`README.md` is the canonical English GitHub and package entry page. `README.zh-CN.md` is the complete Simplified Chinese translation. `README.en.md` remains only as a repository compatibility redirect and is not part of the Lite package.
 
 The zip archive must contain exactly one top-level directory named `vibespec-gate/`. It must not place `SKILL.md`, README files, or any other package file directly at the archive root.
 
 `agents/openai.yaml` supplies Codex-facing UI metadata. Other hosts may consume `SKILL.md`, but the package must not claim their install path or runtime behavior is validated without host-specific evidence.
 
-`docs/usage/lite_quickstart.md` may mention the Core-powered CLI path, but it must label that path as optional repository usage. The first user path must still work as Agent-native instructions.
+`SKILL.md` routes both references and all four templates, and states when each resource is needed. `policy.allow_implicit_invocation` is `false`, so this high-impact review starts only through explicit invocation.
 
 ## Optional
 
-These files may be included when the package needs a slightly deeper usage path:
-
-```text
-docs/usage/agent_review_cookbook.md
-docs/usage/examples.md
-docs/usage/quickstart.md
-```
-
-Optional files must not require a first-time user to understand scorer hard failures, Phase 11 calibration, golden fixtures, host-agent comparison, or release verification before running the Lite path.
+The default Skill package has no optional files. README, Quickstart, Changelog, examples, tests, and maintainer documentation remain in the repository.
 
 ## Runnable Overlay
 
@@ -146,7 +139,7 @@ Every included user-facing file should use the same launch decision meanings:
 - `BLOCK`: do not launch yet; one or more findings currently block launch.
 - `REVIEW`: do not treat as launch-ready yet; human confirmation or missing evidence remains.
 - `PASS_WITH_WARNINGS`: no launch-blocking finding is present, but warnings or downgrade/suppression candidates need review.
-- `PASS`: no material launch risk was found in the reviewed evidence.
+- `PASS`: coverage is complete and no material risk or remaining warning was found in the reviewed evidence.
 
 ## Safety Boundary
 
@@ -158,16 +151,15 @@ Synthetic examples must be labeled as synthetic and must not be presented as rea
 
 ## Verification Contract
 
-The manifest is only useful if it can be checked. `scripts/verify_lite_package.py` should fail when:
+The manifest is only useful if it can be checked. `scripts/verify_lite_package.py` fails when:
 
-1. Any excluded path or pattern appears in the default Lite package.
-2. Any required include file is missing.
-3. `README.md`, `SKILL.md`, quickstart, and example prompt disagree on the four output file names.
-4. The package first path requires Phase outputs, calibration, scorer, quality matrix, release verifier, or fixtures.
-5. CLI commands are presented as mandatory for the default prompt-only package.
-6. The safety boundary is missing from either README or quickstart.
-7. The English and Chinese README section markers diverge.
-8. Install instructions omit the `vibespec-gate/SKILL.md` entry point or supported platform commands.
+1. Any non-manifest file appears in the package.
+2. Any required runtime file is missing.
+3. The repository has more than one authoritative `SKILL.md`.
+4. `SKILL.md` does not route every reference and template.
+5. The coverage reference omits a status or review surface.
+6. A template omits its required decision, evidence, repair-boundary, or retest fields.
+7. Agent metadata does not disable implicit invocation.
 
 The first version is `scripts/verify_lite_package.py`. It is a static check and does not need to validate security findings or run the full review engine.
 
@@ -189,17 +181,17 @@ Those materials support quality and repeatability, but they are not required for
 
 Verdict: pass with required constraints.
 
-The manifest now makes the most important product distinction explicit: default Lite package means prompt-only Agent-native Skill, while runnable CLI usage is a separate optional overlay. This resolves the main ambiguity in the previous plan.
+The manifest now makes the most important product distinction explicit: the default artifact is an Agent-native Skill, while CLI usage is a separate optional source-repository path.
 
 Remaining risks:
 
-1. Optional files can reintroduce internal language. Each optional include needs the same exposure review as required files.
-2. `scripts/build_lite_package_zip.py` should generate the downloadable artifact from this manifest instead of relying on manual copying.
+1. Host behavior still requires black-box evaluation; a clean package boundary proves structure, not review quality.
+2. Release availability must not be claimed until the archive and checksum are actually published.
 
 Next implementation recommendation:
 
 ```text
-1. Keep README, SKILL.md, lite_quickstart, and lite_review_prompt aligned with this manifest.
+1. Keep README installation instructions and the Skill/CLI capability table aligned with this manifest.
 2. Run the static verifier before packaging.
 3. Build the downloadable Lite package artifact with `scripts/build_lite_package_zip.py` only after the verifier passes.
 ```

@@ -75,4 +75,4 @@ The Lite path should not require users to read:
 
 ## Current Recommendation
 
-Keep the repository-root `SKILL.md` as the only authoritative Skill entry. The incomplete `skill/` compatibility directory was removed before GA because copying it alone produced a broken reference to the repository root.
+Keep `skills/vibespec-gate/SKILL.md` as the only authoritative Skill entry. Do not restore the old root or incomplete `skill/` compatibility entries because copying either one produces an invalid install unit.

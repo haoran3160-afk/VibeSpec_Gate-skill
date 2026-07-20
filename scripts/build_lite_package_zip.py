@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.verify_lite_package import REQUIRED_INCLUDE, check_package, check_source  # noqa: E402
+from scripts.verify_lite_package import REQUIRED_INCLUDE, SKILL_SOURCE, check_package, check_source  # noqa: E402
 
 
 DEFAULT_OUTPUT = ROOT / "dist" / "vibespec-gate-lite.zip"
@@ -19,7 +19,7 @@ ARCHIVE_ROOT = "vibespec-gate"
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build the prompt-only VibeSpec Gate Lite zip package.")
+    parser = argparse.ArgumentParser(description="Build the Agent-native VibeSpec Gate Skill zip package.")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="Zip file to write.")
     args = parser.parse_args(argv)
 
@@ -49,7 +49,7 @@ def build_lite_package(staging_dir: Path, output_zip: Path) -> dict[str, object]
     output_zip.parent.mkdir(parents=True, exist_ok=True)
 
     for relative_name in REQUIRED_INCLUDE:
-        source = ROOT / relative_name
+        source = ROOT / SKILL_SOURCE / relative_name
         destination = staging_dir / relative_name
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)

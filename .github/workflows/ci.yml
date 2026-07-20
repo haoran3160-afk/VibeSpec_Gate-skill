@@ -45,6 +45,9 @@ jobs:
       - name: Verify Lite package docs
         run: python scripts/verify_lite_package.py
 
+      - name: Smoke install Skill
+        run: python scripts/smoke_install_skill.py
+
       - name: Verify release metadata
         run: python scripts/verify_release_metadata.py
 
@@ -55,3 +58,4 @@ jobs:
         run: |
           python scripts/build_lite_package_zip.py
           python scripts/verify_release_metadata.py --archive dist/vibespec-gate-lite.zip
+          python scripts/smoke_install_skill.py --archive dist/vibespec-gate-lite.zip
