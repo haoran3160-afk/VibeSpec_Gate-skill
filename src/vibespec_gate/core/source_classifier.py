@@ -11,6 +11,7 @@ SCANNABLE_TEXT_EXTENSIONS = {
     ".tsx",
     ".py",
     ".json",
+    ".lock",
     ".toml",
     ".yaml",
     ".yml",
@@ -61,6 +62,44 @@ UNSUPPORTED_SECURITY_SOURCE_EXTENSIONS = {
     ".vue",
 }
 SCANNABLE_SPECIAL_NAMES = {"Dockerfile", "Procfile"}
+BENIGN_PROJECT_NAMES = {
+    ".ds_store",
+    ".editorconfig",
+    ".gitattributes",
+    ".gitignore",
+    "license",
+    "notice",
+    "thumbs.db",
+}
+BENIGN_ASSET_EXTENSIONS = {
+    ".7z",
+    ".avif",
+    ".bmp",
+    ".css",
+    ".eot",
+    ".gif",
+    ".gz",
+    ".ico",
+    ".jpeg",
+    ".jpg",
+    ".less",
+    ".mov",
+    ".mp3",
+    ".mp4",
+    ".otf",
+    ".pdf",
+    ".png",
+    ".sass",
+    ".scss",
+    ".tar",
+    ".ttf",
+    ".wav",
+    ".webm",
+    ".webp",
+    ".woff",
+    ".woff2",
+    ".zip",
+}
 
 
 GENERATED_SUFFIXES = (".min.js", ".map")
@@ -159,7 +198,12 @@ def is_scannable_text_path(path: Path) -> bool:
 
 
 def is_unsupported_security_source(path: Path) -> bool:
-    return path.suffix.lower() in UNSUPPORTED_SECURITY_SOURCE_EXTENSIONS
+    suffix = path.suffix.lower()
+    return suffix in UNSUPPORTED_SECURITY_SOURCE_EXTENSIONS or (
+        not is_scannable_text_path(path)
+        and suffix not in BENIGN_ASSET_EXTENSIONS
+        and path.name.lower() not in BENIGN_PROJECT_NAMES
+    )
 
 
 def _strip_line_suffix(path: str) -> str:

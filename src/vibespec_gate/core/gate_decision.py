@@ -6,6 +6,10 @@ from .risk_model import Finding, ProjectProfile, gate_relevant, security_score
 
 SENSITIVE_RISKS = {"payment", "medical", "financial", "enterprise", "minor", "sensitive_identity", "customer_data"}
 LOCAL_ONLY_TYPES = {"Desktop/Electron App", "CLI / Local Tool"}
+RUNTIME_SOURCE_TYPES = {"runtime", "config"}
+KNOWN_SOURCE_TYPES = RUNTIME_SOURCE_TYPES | {"docs", "test", "example", "generated", "vendor", "cache", "unknown"}
+KNOWN_CONFIDENCE = {"confirmed", "suspected", "manual_review"}
+KNOWN_SEVERITIES = {"P0", "P1", "P2", "P3"}
 
 
 def decide_gate(
@@ -26,22 +30,30 @@ def decide_gate(
     confirmed_runtime_p0 = [
         finding
         for finding in relevant_findings
-        if finding.severity == "P0" and finding.source_type == "runtime" and finding.confidence == "confirmed"
+        if finding.severity == "P0" and finding.source_type in RUNTIME_SOURCE_TYPES and finding.confidence == "confirmed"
     ]
     confirmed_runtime_p1 = [
         finding
         for finding in relevant_findings
-        if finding.severity == "P1" and finding.source_type == "runtime" and finding.confidence == "confirmed"
+        if finding.severity == "P1" and finding.source_type in RUNTIME_SOURCE_TYPES and finding.confidence == "confirmed"
     ]
     suspected_runtime_p1 = [
         finding
         for finding in relevant_findings
-        if finding.severity == "P1" and finding.source_type == "runtime" and finding.confidence in {"suspected", "manual_review"}
+        if finding.severity == "P1" and finding.source_type in RUNTIME_SOURCE_TYPES and finding.confidence in {"suspected", "manual_review"}
     ]
     ambiguous_runtime_p0 = [
         finding
         for finding in relevant_findings
-        if finding.severity == "P0" and finding.source_type == "runtime" and finding.confidence != "confirmed"
+        if finding.severity == "P0" and finding not in confirmed_runtime_p0
+    ]
+    invalid_metadata = [
+        finding
+        for finding in relevant_findings
+        if finding.source_type not in KNOWN_SOURCE_TYPES
+        or finding.source_type == "unknown"
+        or finding.confidence not in KNOWN_CONFIDENCE
+        or finding.severity not in KNOWN_SEVERITIES
     ]
 
     if confirmed_runtime_p0:
@@ -49,7 +61,10 @@ def decide_gate(
         reason = "Confirmed runtime P0 findings must be fixed before launch."
     elif ambiguous_runtime_p0:
         decision = "REVIEW"
-        reason = "Unconfirmed runtime P0 findings require manual review before launch."
+        reason = "Unconfirmed or non-runtime P0 findings require manual review before launch."
+    elif invalid_metadata:
+        decision = "REVIEW"
+        reason = "Finding metadata is incomplete or unknown and requires manual review before launch."
     elif confirmed_runtime_p1 and needs_expert and not local_only:
         decision = "BLOCK"
         reason = "Confirmed runtime P1 findings exist in a sensitive externally exposed project."

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from collections import Counter
 from pathlib import Path
 
@@ -23,8 +24,10 @@ def test_evaluation_cases_cover_phase2_minimum():
 def test_evaluation_cases(tmp_path):
     for case in _cases():
         expected = json.loads((case / "expected.json").read_text(encoding="utf-8"))
+        fixture = tmp_path / "fixtures" / case.relative_to(BASE)
+        shutil.copytree(case, fixture, ignore=shutil.ignore_patterns("expected.json"))
         output = tmp_path / case.relative_to(BASE)
-        summary = run_scan(str(case), str(output), include_adapters=False)
+        summary = run_scan(str(fixture), str(output), include_adapters=False)
         findings = json.loads((output / "findings.json").read_text(encoding="utf-8"))
         active = [item for item in findings if not item.get("suppressed")]
         suppressed = [item for item in findings if item.get("suppressed")]

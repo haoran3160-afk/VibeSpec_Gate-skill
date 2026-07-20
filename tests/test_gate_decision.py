@@ -1,6 +1,6 @@
 import pytest
 
-from vibespec_gate.core.coverage import REVIEW_SURFACES, EvidenceCoverage, SurfaceCoverage
+from vibespec_gate.core.coverage import REVIEW_SURFACES, EvidenceCoverage, SurfaceCoverage, coverage_from_dict
 from vibespec_gate.core.gate_decision import decide_gate
 from vibespec_gate.core.risk_model import Finding
 
@@ -41,6 +41,30 @@ def test_gate_keeps_confirmed_runtime_p0_blocking_when_coverage_is_truncated():
     assert summary["decision"] == "BLOCK"
 
 
+def test_gate_blocks_confirmed_config_p0():
+    finding = Finding(id="VSG-X", title="x", severity="P0", category="Secrets", source_type="config")
+
+    summary = decide_gate([finding], coverage=_coverage("complete"))
+
+    assert summary["decision"] == "BLOCK"
+
+
+def test_gate_reviews_p0_with_unknown_source_metadata():
+    finding = Finding(id="VSG-X", title="x", severity="P0", category="Secrets", source_type="unknown")
+
+    summary = decide_gate([finding], coverage=_coverage("complete"))
+
+    assert summary["decision"] == "REVIEW"
+
+
+def test_gate_reviews_finding_with_unknown_severity_metadata():
+    finding = Finding(id="VSG-X", title="x", severity="Critical", category="Secrets")
+
+    summary = decide_gate([finding], coverage=_coverage("complete"))
+
+    assert summary["decision"] == "REVIEW"
+
+
 @pytest.mark.parametrize("confidence", ["suspected", "manual_review"])
 def test_gate_requires_review_for_unconfirmed_runtime_p0(confidence):
     finding = Finding(id="VSG-X", title="x", severity="P0", category="Secrets", confidence=confidence)
@@ -58,6 +82,45 @@ def test_gate_rejects_complete_coverage_with_duplicate_or_inconsistent_inventory
     summary = decide_gate([], coverage=coverage)
 
     assert summary["decision"] == "REVIEW"
+
+
+def test_gate_rejects_blank_coverage_source_references():
+    payload = {
+        "coverage_status": "complete",
+        "surfaces": [
+            {"surface": surface, "status": "reviewed", "source_refs": [""], "reason": ""}
+            for surface in REVIEW_SURFACES
+        ],
+        "files_discovered": 1,
+        "files_inspected": 1,
+        "files_skipped": 0,
+    }
+
+    summary = decide_gate([], coverage=coverage_from_dict(payload))
+
+    assert summary["decision"] == "REVIEW"
+
+
+def test_gate_rechecks_coverage_references_after_mutation():
+    coverage = _coverage("complete")
+    coverage.surfaces[0].source_refs = [""]
+
+    assert decide_gate([], coverage=coverage)["decision"] == "REVIEW"
+
+
+def test_gate_rejects_non_list_coverage_source_references():
+    payload = _coverage("complete").to_dict()
+    payload["surfaces"][0]["source_refs"] = "tests/fixture:1"
+
+    assert decide_gate([], coverage=coverage_from_dict(payload))["decision"] == "REVIEW"
+
+
+@pytest.mark.parametrize("invalid_ref", [None, 1, {"path": "tests/fixture:1"}])
+def test_gate_rejects_non_string_coverage_source_references(invalid_ref):
+    payload = _coverage("complete").to_dict()
+    payload["surfaces"][0]["source_refs"] = [invalid_ref]
+
+    assert decide_gate([], coverage=coverage_from_dict(payload))["decision"] == "REVIEW"
 
 
 def _coverage(status: str) -> EvidenceCoverage:

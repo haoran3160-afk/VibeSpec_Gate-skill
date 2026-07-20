@@ -219,6 +219,22 @@ def test_lite_review_cli_rejects_missing_target_before_writing(tmp_path):
     assert not output.exists()
 
 
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows extended path syntax")
+def test_lite_review_cli_rejects_extended_path_alias_inside_project(tmp_path):
+    project = tmp_path / "project"
+    project.mkdir()
+    marker = project / "keep.txt"
+    marker.write_text("unchanged\n", encoding="utf-8")
+    output = Path("\\\\?\\" + str(project / "bundle"))
+
+    result = _run_lite_review(project, output)
+
+    assert result.returncode == 1
+    assert "must not overlap" in result.stdout
+    assert marker.read_text(encoding="utf-8") == "unchanged\n"
+    assert not (project / "bundle").exists()
+
+
 @pytest.mark.parametrize("relationship", ["equal", "inside", "contains"])
 def test_lite_review_cli_rejects_project_output_overlap_before_writing(tmp_path, relationship):
     if relationship == "contains":

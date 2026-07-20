@@ -68,10 +68,14 @@ def detect_profile(project_path: str, mode: str | None = None) -> ProjectProfile
             readme_text += "\n" + read_text(root / candidate, 50_000).lower()
     inspected_files = files[:200]
     combined_parts: list[str] = []
+    scannable_text_by_rel: dict[str, str] = {}
     unreadable_count = 0
     for path in inspected_files:
         try:
-            combined_parts.append(path.read_text(encoding="utf-8", errors="replace")[:20_000].lower())
+            text = path.read_text(encoding="utf-8", errors="replace")[:20_000].lower()
+            combined_parts.append(text)
+            if is_scannable_text_path(path):
+                scannable_text_by_rel[rel(path, root)] = text
         except OSError:
             unreadable_count += 1
     combined = "\n".join(combined_parts)
@@ -114,6 +118,7 @@ def detect_profile(project_path: str, mode: str | None = None) -> ProjectProfile
         rels=rels,
         inspected_rels=[rel(path, root) for path in inspected_files],
         scannable_rels=[rel(path, root) for path in inspected_files if is_scannable_text_path(path)],
+        scannable_text_by_rel=scannable_text_by_rel,
         unsupported_source_rels=[
             rel(path, root) for path in inspected_files if is_unsupported_security_source(path)
         ],
@@ -238,6 +243,12 @@ def _infer_project_type(
         return "CLI / Local Tool"
     if "stripe" in combined or "subscription" in combined or "payment" in data_risk:
         return "SaaS"
+    if any(
+        rel.startswith(("app/api/", "pages/api/", "api/", "routes/", "controllers/"))
+        or any(part in {"routes", "controllers"} for part in rel.lower().replace("\\", "/").split("/"))
+        for rel in rels
+    ):
+        return "Web App"
     if "auth" in data_risk or "database" in data_risk:
         return "Web App"
     if "package.json" in names or "index.html" in names:

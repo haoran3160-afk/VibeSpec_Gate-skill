@@ -1,1 +1,1 @@
-{"expected_profile":"Static Site","expected_gate":"REVIEW","must_find":["CORS appears overly broad"],"must_not_find":[]}
+{"expected_profile":"Web App","expected_gate":"REVIEW","must_find":["CORS appears overly broad"],"must_not_find":[]}

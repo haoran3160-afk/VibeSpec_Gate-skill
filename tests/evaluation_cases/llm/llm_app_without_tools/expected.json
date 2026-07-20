@@ -1,1 +1,1 @@
-{"expected_profile":"LLM App","expected_gate":"PASS_WITH_WARNINGS","must_find":["LLM calls may lack cost or rate limits"],"must_not_find":["Agent tools may have excessive authority"]}
+{"expected_profile":"LLM App","expected_gate":"REVIEW","must_find":["LLM calls may lack cost or rate limits"],"must_not_find":["Agent tools may have excessive authority"]}
