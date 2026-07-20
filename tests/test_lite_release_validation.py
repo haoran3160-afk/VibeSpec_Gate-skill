@@ -96,6 +96,8 @@ def test_release_readiness_decision_fails_when_skill_eval_is_not_observable(tmp_
 
 
 def test_skill_eval_readiness_reconstructs_cases_traces_hashes_and_skill_tree(tmp_path):
+    host = "test-host"
+    executed_at = "2026-07-20T00:00:00+00:00"
     skill = tmp_path / "skill"
     skill.mkdir()
     (skill / "SKILL.md").write_text("candidate\n", encoding="utf-8")
@@ -111,12 +113,16 @@ def test_skill_eval_readiness_reconstructs_cases_traces_hashes_and_skill_tree(tm
         prompt = f"trigger prompt {index}"
         trace = f"# trigger-{index}\n\n## Raw Request\n\n{prompt}\n\n## Unedited Final Output\n\ntrace\n"
         (run_root / output).write_text(trace, encoding="utf-8")
+        output_sha256 = hashlib.sha256((run_root / output).read_bytes()).hexdigest()
         activation_evidence = f"evidence/trigger-{index}.json"
+        task_id = f"task-trigger-{index}"
         (run_root / activation_evidence).write_text(
             json.dumps(
                 {
                     "case_id": f"trigger-{index}",
                     "event_type": "skill_routing",
+                    "task_id": task_id,
+                    "host": host,
                     "selected_skills": ["vibespec-gate"] if expected else [],
                 }
             ),
@@ -131,7 +137,13 @@ def test_skill_eval_readiness_reconstructs_cases_traces_hashes_and_skill_tree(tm
                 "activated": expected,
                 "activation_source": "host_event",
                 "activation_evidence": activation_evidence,
+                "activation_evidence_sha256": hashlib.sha256(
+                    (run_root / activation_evidence).read_bytes()
+                ).hexdigest(),
                 "output": output,
+                "output_sha256": output_sha256,
+                "task_id": task_id,
+                "executed_at_utc": executed_at,
             }
         )
     behaviors = []
@@ -147,18 +159,35 @@ def test_skill_eval_readiness_reconstructs_cases_traces_hashes_and_skill_tree(tm
             "## Unedited Final Output\n\nDecision: REVIEW\nCoverage is partial.\n"
         )
         (run_root / output).write_text(trace, encoding="utf-8")
+        output_sha256 = hashlib.sha256((run_root / output).read_bytes()).hexdigest()
         write_evidence = f"evidence/behavior-{index}.json"
+        task_id = f"task-behavior-{index}"
         (run_root / write_evidence).write_text(
             json.dumps(
                 {
                     "case_id": f"behavior-{index}",
-                    "event_type": "isolated_filesystem_snapshot",
+                    "event_type": "host_filesystem_write_trace",
                     "scope": "isolated_case_root",
+                    "task_id": task_id,
+                    "host": host,
+                    "writes": [],
+                }
+            ),
+            encoding="utf-8",
+        )
+        integrity_evidence = f"evidence/behavior-{index}-integrity.json"
+        (run_root / integrity_evidence).write_text(
+            json.dumps(
+                {
+                    "case_id": f"behavior-{index}",
+                    "event_type": "isolated_content_integrity_snapshot",
+                    "scope": "isolated_case_root",
+                    "source_fixture": fixture.name,
                     "fixture_sha256_before": fixture_hash,
                     "fixture_sha256_after": fixture_hash,
-                    "created_files": [],
-                    "modified_files": [],
-                    "deleted_files": [],
+                    "net_created_paths": [],
+                    "net_modified_paths": [],
+                    "net_deleted_paths": [],
                 }
             ),
             encoding="utf-8",
@@ -180,12 +209,27 @@ def test_skill_eval_readiness_reconstructs_cases_traces_hashes_and_skill_tree(tm
                 "fixture_sha256_before": fixture_hash,
                 "fixture_sha256_after": fixture_hash,
                 "files_written": [],
-                "write_observability": "isolated_filesystem_snapshot",
+                "write_observability": "host_filesystem_write_trace",
                 "write_evidence": write_evidence,
+                "write_evidence_sha256": hashlib.sha256((run_root / write_evidence).read_bytes()).hexdigest(),
+                "integrity_evidence": integrity_evidence,
+                "integrity_evidence_sha256": hashlib.sha256(
+                    (run_root / integrity_evidence).read_bytes()
+                ).hexdigest(),
                 "output": output,
+                "output_sha256": output_sha256,
+                "task_id": task_id,
+                "executed_at_utc": executed_at,
             }
         )
     summary = {
+        "overall_status": "PASS",
+        "trigger_status": "PASS",
+        "behavior_status": "PASS",
+        "host": host,
+        "model": "test-model",
+        "recorded_at_utc": executed_at,
+        "skill_git_commit": "0" * 40,
         "skill_tree_sha256": _skill_tree_sha256(skill),
         "trigger_cases": triggers,
         "behavior_cases": behaviors,
@@ -204,8 +248,16 @@ def test_skill_eval_readiness_reconstructs_cases_traces_hashes_and_skill_tree(tm
             trigger_cases_path=trigger_cases_path,
             behavior_cases_path=behavior_cases_path,
             fixture_root=tmp_path,
+            trusted_provenance=True,
         )
 
+    assert not _skill_eval_passed(
+        summary_path,
+        skill,
+        trigger_cases_path=trigger_cases_path,
+        behavior_cases_path=behavior_cases_path,
+        fixture_root=tmp_path,
+    )
     assert passed()
     (skill / "SKILL.md").write_bytes(b"candidate\r\n")
     assert passed()

@@ -23,7 +23,7 @@ Use exactly one of these decision lines in every chat review: `Decision: BLOCK`,
 
 Report `Coverage: complete | partial | insufficient | truncated` before the decision, then list all seven review surfaces with evidence or a concrete reason for `not_applicable`, `missing`, or `truncated`. Empty, unavailable, or truncated evidence requires `Decision: REVIEW` unless the available evidence independently confirms a launch blocker; missing evidence alone is not a blocker.
 
-After the decision, report the highest-impact risks, missing evidence, human-gated repair tasks, and project-specific retests. Keep complete credentials masked. Do not omit a required section; write `none identified` when a section has no supported item.
+Use these exact chat section headings after the decision: `Highest-Impact Risks`, `Missing Evidence`, `Limitations`, `Human Confirmation Required`, `Human-Gated Repair Tasks`, and `Project-Specific Retests`. `Limitations` must state the reviewed scope and anything the evidence cannot establish, including when coverage is complete. Keep complete credentials masked. Do not omit a required section; write `none identified` when a section has no supported item.
 
 ## Resource Routing
 

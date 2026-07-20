@@ -116,6 +116,12 @@ def _check_skill_unit(skill_dir: Path, required_include: tuple[str, ...]) -> lis
         "Decision: PASS",
         "Do not replace the token with synonyms",
         "list all seven review surfaces",
+        "`Highest-Impact Risks`",
+        "`Missing Evidence`",
+        "`Limitations`",
+        "`Human Confirmation Required`",
+        "`Human-Gated Repair Tasks`",
+        "`Project-Specific Retests`",
     ):
         if phrase not in skill:
             failures.append(f"SKILL.md missing chat output contract: {phrase}")
@@ -161,7 +167,7 @@ def _check_skill_unit(skill_dir: Path, required_include: tuple[str, ...]) -> lis
             failures.append(f"evidence-coverage.md missing coverage term: {phrase}")
 
     template_terms = {
-        "assets/templates/launch-decision.md": ("Decision", "Coverage status", "Missing evidence", "Safety Boundary"),
+        "assets/templates/launch-decision.md": ("Decision", "Coverage status", "Missing evidence", "Limitations", "Safety Boundary"),
         "assets/templates/top-security-risks.md": ("Severity", "Evidence", "Launch impact", "Human confirmation"),
         "assets/templates/agent-fix-plan.md": ("Human Confirmation Gate", "Allowed change scope", "Prohibited changes", "Verification"),
         "assets/templates/retest-checklist.md": ("Coverage", "Commands Or Checks", "Expected Result"),

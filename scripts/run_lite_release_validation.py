@@ -29,7 +29,7 @@ PRIMARY_OUTPUTS = (
     "agent_fix_plan.md",
     "retest_checklist.md",
 )
-SKILL_EVAL_SUMMARY = ROOT / "evals" / "runs" / "2026-07-20" / "summary.json"
+SKILL_EVAL_SUMMARY = ROOT / "evals" / "runs" / "2026-07-20-agent-simulation" / "summary.json"
 TRIGGER_CASES = ROOT / "evals" / "trigger_cases.yaml"
 BEHAVIOR_CASES = ROOT / "evals" / "behavior_cases.yaml"
 
@@ -581,7 +581,11 @@ def _skill_eval_passed(
     trigger_cases_path: Path = TRIGGER_CASES,
     behavior_cases_path: Path = BEHAVIOR_CASES,
     fixture_root: Path = ROOT,
+    trusted_provenance: bool = False,
 ) -> bool:
+    # Repository files can prove internal consistency, not that host events are authentic.
+    if not trusted_provenance:
+        return False
     if not path.exists():
         return False
     try:
@@ -592,6 +596,19 @@ def _skill_eval_passed(
         return False
     triggers = data.get("trigger_cases", [])
     behaviors = data.get("behavior_cases", [])
+    if (
+        data.get("overall_status") != "PASS"
+        or data.get("trigger_status") != "PASS"
+        or data.get("behavior_status") != "PASS"
+        or not isinstance(data.get("host"), str)
+        or not data["host"].strip()
+        or not isinstance(data.get("model"), str)
+        or not data["model"].strip()
+        or not isinstance(data.get("recorded_at_utc"), str)
+        or not data["recorded_at_utc"].strip()
+        or not re.fullmatch(r"[0-9a-f]{40}", str(data.get("skill_git_commit", "")))
+    ):
+        return False
     if not all(isinstance(items, list) for items in (triggers, behaviors, trigger_cases, behavior_cases)):
         return False
     if len(trigger_cases) != 10 or len(behavior_cases) != 8:
@@ -616,9 +633,12 @@ def _skill_eval_passed(
             item.get("status") != "PASS"
             or item.get("expected_trigger") is not case.get("expected_trigger")
             or item.get("activation_source") != "host_event"
+            or not _record_binding_valid(run_root, item, data, "activation_evidence")
             or not activation_event
             or activation_event.get("case_id") != case.get("id")
             or activation_event.get("event_type") != "skill_routing"
+            or activation_event.get("task_id") != item.get("task_id")
+            or activation_event.get("host") != data.get("host")
             or not isinstance(selected_skills, list)
             or item.get("activated") is not observed_activation
             or observed_activation is not case.get("expected_trigger")
@@ -631,7 +651,12 @@ def _skill_eval_passed(
         item = behavior_records[str(case["id"])]
         trace = _recorded_output(run_root, item)
         write_event = _recorded_json(run_root, item, "write_evidence")
+        integrity_event = _recorded_json(run_root, item, "integrity_evidence")
         if trace is None or item.get("status") != "PASS":
+            return False
+        if not _record_binding_valid(run_root, item, data, "write_evidence"):
+            return False
+        if not _record_binding_valid(run_root, item, data, "integrity_evidence"):
             return False
         if _record_section(trace, "Raw Request", "Unedited Final Output") != str(case.get("prompt", "")).strip():
             return False
@@ -654,18 +679,26 @@ def _skill_eval_passed(
         if (
             not current_hash
             or not write_event
+            or not integrity_event
             or write_event.get("case_id") != case.get("id")
-            or write_event.get("event_type") != "isolated_filesystem_snapshot"
+            or write_event.get("event_type") != "host_filesystem_write_trace"
             or write_event.get("scope") != "isolated_case_root"
-            or write_event.get("created_files") != []
-            or write_event.get("modified_files") != []
-            or write_event.get("deleted_files") != []
+            or write_event.get("task_id") != item.get("task_id")
+            or write_event.get("host") != data.get("host")
+            or write_event.get("writes") != []
+            or integrity_event.get("case_id") != case.get("id")
+            or integrity_event.get("event_type") != "isolated_content_integrity_snapshot"
+            or integrity_event.get("scope") != "isolated_case_root"
+            or integrity_event.get("source_fixture") != fixture_value.replace("\\", "/")
+            or integrity_event.get("net_created_paths") != []
+            or integrity_event.get("net_modified_paths") != []
+            or integrity_event.get("net_deleted_paths") != []
             or item.get("fixture_sha256_before") != current_hash
             or item.get("fixture_sha256_after") != current_hash
-            or write_event.get("fixture_sha256_before") != current_hash
-            or write_event.get("fixture_sha256_after") != current_hash
+            or integrity_event.get("fixture_sha256_before") != current_hash
+            or integrity_event.get("fixture_sha256_after") != current_hash
             or item.get("files_written") != []
-            or item.get("write_observability") != "isolated_filesystem_snapshot"
+            or item.get("write_observability") != "host_filesystem_write_trace"
         ):
             return False
 
@@ -698,6 +731,23 @@ def _recorded_json(run_root: Path, item: dict[str, Any], field: str) -> dict[str
     except (OSError, json.JSONDecodeError):
         return None
     return value if isinstance(value, dict) else None
+
+
+def _record_binding_valid(run_root: Path, item: dict[str, Any], data: dict[str, Any], evidence_field: str) -> bool:
+    if (
+        not isinstance(item.get("task_id"), str)
+        or not item["task_id"].strip()
+        or not isinstance(item.get("executed_at_utc"), str)
+        or not item["executed_at_utc"].strip()
+        or item.get("output_sha256") != _recorded_file_sha256(run_root, item.get("output"))
+    ):
+        return False
+    return item.get(f"{evidence_field}_sha256") == _recorded_file_sha256(run_root, item.get(evidence_field))
+
+
+def _recorded_file_sha256(run_root: Path, value: Any) -> str:
+    path = _recorded_path(run_root, value)
+    return hashlib.sha256(path.read_bytes()).hexdigest() if path else ""
 
 
 def _recorded_path(run_root: Path, value: Any) -> Path | None:

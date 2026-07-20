@@ -1,0 +1,12 @@
+{
+  "case_id": "behavior-empty-project",
+  "event_type": "isolated_content_integrity_comparison",
+  "scope": "isolated_case_root",
+  "fixture_path": "D:\\personal\\Vibespec_gate_skill\\test output\\skill_eval_isolated\\3580a3d\\behavior-empty-project\\fixture\\empty-project.fixture.json",
+  "fixture_sha256_before": "1d9a69f379c8ff756250b4ca7a321e4baaf903b8041166e8b438e8a10f147ff3",
+  "fixture_sha256_after": "1d9a69f379c8ff756250b4ca7a321e4baaf903b8041166e8b438e8a10f147ff3",
+  "net_created_paths": [],
+  "net_modified_paths": [],
+  "net_deleted_paths": [],
+  "observation_limit": "Before/after default-stream content comparison cannot detect transient write-and-restore activity, metadata changes, or alternate data streams."
+}

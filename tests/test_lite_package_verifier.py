@@ -46,6 +46,15 @@ def test_skill_requires_canonical_chat_decision_and_coverage_contract():
         assert f"Decision: {decision}" in skill
     assert "Do not replace the token with synonyms" in skill
     assert "list all seven review surfaces" in skill
+    for heading in (
+        "Highest-Impact Risks",
+        "Missing Evidence",
+        "Limitations",
+        "Human Confirmation Required",
+        "Human-Gated Repair Tasks",
+        "Project-Specific Retests",
+    ):
+        assert f"`{heading}`" in skill
 
 
 def test_agent_metadata_disables_implicit_invocation():

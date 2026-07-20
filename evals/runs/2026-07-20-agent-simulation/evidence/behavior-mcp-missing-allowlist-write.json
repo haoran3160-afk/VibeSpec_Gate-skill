@@ -1,0 +1,12 @@
+{
+  "case_id": "behavior-mcp-missing-allowlist",
+  "event_type": "isolated_content_integrity_comparison",
+  "scope": "isolated_case_root",
+  "fixture_path": "D:\\personal\\Vibespec_gate_skill\\test output\\skill_eval_isolated\\3580a3d\\behavior-mcp-missing-allowlist\\fixture\\server.py",
+  "fixture_sha256_before": "d502437861d9e4244cf2b67abe7f75dd769b6ada64d83a07b1ac9cfdabf10eda",
+  "fixture_sha256_after": "d502437861d9e4244cf2b67abe7f75dd769b6ada64d83a07b1ac9cfdabf10eda",
+  "net_created_paths": [],
+  "net_modified_paths": [],
+  "net_deleted_paths": [],
+  "observation_limit": "Before/after default-stream content comparison cannot detect transient write-and-restore activity, metadata changes, or alternate data streams."
+}

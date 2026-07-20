@@ -22,6 +22,10 @@ Decision: [BLOCK | REVIEW | PASS_WITH_WARNINGS | PASS]
 
 [List missing or truncated evidence, or state none.]
 
+## Limitations
+
+[State the reviewed scope and what this evidence cannot establish.]
+
 ## Human Confirmation Required
 
 [Decisions the user must confirm before repairs.]
