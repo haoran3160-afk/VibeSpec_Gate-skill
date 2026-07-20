@@ -22,10 +22,10 @@ Do not edit the reviewed project during the review. A later fix requires separat
 1. Read `references/review-protocol.md` before every review. Follow its evidence order, risk rules, decision precedence, and stop conditions.
 2. Read `references/evidence-coverage.md` before assigning a launch decision. Record all seven review surfaces, including reasoned `not_applicable` entries.
 3. When the user approves file output, copy and complete each template:
-   - `assets/templates/launch-decision.md`
-   - `assets/templates/top-security-risks.md`
-   - `assets/templates/agent-fix-plan.md`
-   - `assets/templates/retest-checklist.md`
+   - `assets/templates/launch-decision.md` -> `launch_decision.md`
+   - `assets/templates/top-security-risks.md` -> `top_security_risks.md`
+   - `assets/templates/agent-fix-plan.md` -> `agent_fix_plan.md`
+   - `assets/templates/retest-checklist.md` -> `retest_checklist.md`
 4. Store supporting machine-readable evidence under `evidence/` only when file output is approved. Treat it as potentially sensitive.
 
 ## Review Flow

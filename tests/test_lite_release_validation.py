@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
+import pytest
+
+import scripts.run_lite_release_validation as release_validation
 from scripts.run_lite_release_validation import (
     PRIMARY_OUTPUTS,
     _skill_eval_passed,
@@ -15,6 +19,7 @@ from scripts.run_lite_release_validation import (
     write_usability_notes,
 )
 from scripts.verify_lite_package import REQUIRED_INCLUDE, check_package
+from scripts.verify_skill_evals import main as verify_skill_evals_main
 
 
 def test_stage_candidate_package_uses_manifest_required_files(tmp_path):
@@ -46,7 +51,7 @@ def test_prompt_only_outputs_cover_blocker_and_low_risk_cases(tmp_path):
     assert "Decision: PASS" in (tmp_path / "prompt_only_case_4_low_risk_clean_project" / "launch_decision.md").read_text(encoding="utf-8")
 
 
-def test_release_readiness_decision_requires_cli_when_not_skipped(tmp_path):
+def test_release_readiness_decision_requires_cli_when_not_skipped(tmp_path, monkeypatch):
     write_prompt_only_outputs(tmp_path)
     write_usability_notes(tmp_path)
     write_release_notes(tmp_path)
@@ -58,47 +63,125 @@ def test_release_readiness_decision_requires_cli_when_not_skipped(tmp_path):
         "cli_smoke": {"returncode": 0},
     }
 
-    write_release_readiness_decision(tmp_path, command_results, review, skipped_cli=False)
+    monkeypatch.setattr(release_validation, "_skill_eval_passed", lambda _path: True)
+    ready = write_release_readiness_decision(tmp_path, command_results, review, skipped_cli=False)
 
     decision = (tmp_path / "release_readiness_decision.md").read_text(encoding="utf-8")
+    assert ready is True
     assert "Decision: READY_FOR_CONTROLLED_RC" in decision
     assert "prewritten examples are not counted" in decision
     assert "Real-user controlled trial: PENDING" in decision
     assert "professional security certification" in decision
 
 
-def test_skill_eval_readiness_verifies_activation_outputs_hashes_and_skill_tree(tmp_path):
+def test_release_readiness_decision_fails_when_skill_eval_is_not_observable(tmp_path, monkeypatch):
+    write_prompt_only_outputs(tmp_path)
+    write_usability_notes(tmp_path)
+    write_release_notes(tmp_path)
+    review = review_validation_outputs(tmp_path)
+    command_results = {
+        "package_verifier_source": {"returncode": 0},
+        "package_verifier_candidate": {"returncode": 0},
+        "pytest_lite_focused": {"returncode": 0},
+        "cli_smoke": {"returncode": 0},
+    }
+    monkeypatch.setattr(release_validation, "_skill_eval_passed", lambda _path: False)
+
+    ready = write_release_readiness_decision(tmp_path, command_results, review, skipped_cli=False)
+
+    assert ready is False
+    decision = (tmp_path / "release_readiness_decision.md").read_text(encoding="utf-8")
+    assert "Decision: NOT_RELEASE_READY" in decision
+    assert "FAIL: Fresh-task Skill trigger and behavior evaluations pass" in decision
+
+
+def test_skill_eval_readiness_reconstructs_cases_traces_hashes_and_skill_tree(tmp_path):
     skill = tmp_path / "skill"
     skill.mkdir()
     (skill / "SKILL.md").write_text("candidate\n", encoding="utf-8")
     run_root = tmp_path / "run"
     (run_root / "trigger").mkdir(parents=True)
     (run_root / "behavior").mkdir()
+    (run_root / "evidence").mkdir()
     triggers = []
+    trigger_cases = []
     for index in range(10):
         output = f"trigger/{index}.md"
         expected = index < 5
-        trace = "trace\n" if expected else "trace\nVibeSpec Gate activated: no\n"
+        prompt = f"trigger prompt {index}"
+        trace = f"# trigger-{index}\n\n## Raw Request\n\n{prompt}\n\n## Unedited Final Output\n\ntrace\n"
         (run_root / output).write_text(trace, encoding="utf-8")
+        activation_evidence = f"evidence/trigger-{index}.json"
+        (run_root / activation_evidence).write_text(
+            json.dumps(
+                {
+                    "case_id": f"trigger-{index}",
+                    "event_type": "skill_routing",
+                    "selected_skills": ["vibespec-gate"] if expected else [],
+                }
+            ),
+            encoding="utf-8",
+        )
+        trigger_cases.append({"id": f"trigger-{index}", "prompt": prompt, "expected_trigger": expected})
         triggers.append(
             {
+                "id": f"trigger-{index}",
                 "status": "PASS",
                 "expected_trigger": expected,
                 "activated": expected,
+                "activation_source": "host_event",
+                "activation_evidence": activation_evidence,
                 "output": output,
-                **({"activation_evidence": "VibeSpec Gate activated: no"} if not expected else {}),
             }
         )
     behaviors = []
+    behavior_cases = []
     for index in range(8):
         output = f"behavior/{index}.md"
-        (run_root / output).write_text("trace\n", encoding="utf-8")
+        prompt = f"behavior prompt {index}"
+        fixture = tmp_path / f"fixture-{index}.txt"
+        fixture.write_text(f"fixture {index}\n", encoding="utf-8")
+        fixture_hash = hashlib.sha256(fixture.read_bytes()).hexdigest()
+        trace = (
+            f"# behavior-{index}\n\n## Raw Request\n\n{prompt}\n\n"
+            "## Unedited Final Output\n\nDecision: REVIEW\nCoverage is partial.\n"
+        )
+        (run_root / output).write_text(trace, encoding="utf-8")
+        write_evidence = f"evidence/behavior-{index}.json"
+        (run_root / write_evidence).write_text(
+            json.dumps(
+                {
+                    "case_id": f"behavior-{index}",
+                    "event_type": "isolated_filesystem_snapshot",
+                    "scope": "isolated_case_root",
+                    "fixture_sha256_before": fixture_hash,
+                    "fixture_sha256_after": fixture_hash,
+                    "created_files": [],
+                    "modified_files": [],
+                    "deleted_files": [],
+                }
+            ),
+            encoding="utf-8",
+        )
+        behavior_cases.append(
+            {
+                "id": f"behavior-{index}",
+                "fixture": fixture.name,
+                "prompt": prompt,
+                "allowed_decisions": ["REVIEW"],
+                "forbidden_decisions": ["PASS", "PASS_WITH_WARNINGS"],
+                "required_terms": ["coverage"],
+            }
+        )
         behaviors.append(
             {
+                "id": f"behavior-{index}",
                 "status": "PASS",
-                "fixture_sha256_before": "same",
-                "fixture_sha256_after": "same",
+                "fixture_sha256_before": fixture_hash,
+                "fixture_sha256_after": fixture_hash,
                 "files_written": [],
+                "write_observability": "isolated_filesystem_snapshot",
+                "write_evidence": write_evidence,
                 "output": output,
             }
         )
@@ -109,11 +192,40 @@ def test_skill_eval_readiness_verifies_activation_outputs_hashes_and_skill_tree(
     }
     summary_path = run_root / "summary.json"
     summary_path.write_text(json.dumps(summary), encoding="utf-8")
+    trigger_cases_path = tmp_path / "trigger_cases.yaml"
+    behavior_cases_path = tmp_path / "behavior_cases.yaml"
+    trigger_cases_path.write_text(json.dumps({"cases": trigger_cases}), encoding="utf-8")
+    behavior_cases_path.write_text(json.dumps({"cases": behavior_cases}), encoding="utf-8")
 
-    assert _skill_eval_passed(summary_path, skill)
+    def passed() -> bool:
+        return _skill_eval_passed(
+            summary_path,
+            skill,
+            trigger_cases_path=trigger_cases_path,
+            behavior_cases_path=behavior_cases_path,
+            fixture_root=tmp_path,
+        )
+
+    assert passed()
     (skill / "SKILL.md").write_bytes(b"candidate\r\n")
-    assert _skill_eval_passed(summary_path, skill)
+    assert passed()
 
     summary["trigger_cases"][0]["activated"] = False
     summary_path.write_text(json.dumps(summary), encoding="utf-8")
-    assert not _skill_eval_passed(summary_path, skill)
+    assert not passed()
+
+
+@pytest.mark.parametrize(
+    ("rendered", "expected"),
+    [
+        ("**Launch Decision: `PASS`**", "PASS"),
+        ("- **Decision:** **BLOCK**", "BLOCK"),
+        ("Decision: REVIEW", "REVIEW"),
+    ],
+)
+def test_extract_decision_accepts_documented_markdown_variants(rendered, expected):
+    assert release_validation._extract_decision(rendered) == expected
+
+
+def test_checked_in_pending_skill_evals_fail_release_gate():
+    assert verify_skill_evals_main() == 1

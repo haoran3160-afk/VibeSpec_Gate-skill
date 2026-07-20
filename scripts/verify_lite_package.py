@@ -109,6 +109,15 @@ def _check_skill_unit(skill_dir: Path, required_include: tuple[str, ...]) -> lis
             continue
         if relative_name not in skill:
             failures.append(f"SKILL.md does not route runtime resource: {relative_name}")
+    template_destinations = {
+        "assets/templates/launch-decision.md": "launch_decision.md",
+        "assets/templates/top-security-risks.md": "top_security_risks.md",
+        "assets/templates/agent-fix-plan.md": "agent_fix_plan.md",
+        "assets/templates/retest-checklist.md": "retest_checklist.md",
+    }
+    for source, destination in template_destinations.items():
+        if f"`{source}` -> `{destination}`" not in skill:
+            failures.append(f"SKILL.md does not map {source} to {destination}")
 
     metadata = _read(skill_dir / "agents/openai.yaml")
     for phrase in (

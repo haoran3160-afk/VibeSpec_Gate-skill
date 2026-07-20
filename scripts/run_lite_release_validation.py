@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -29,6 +30,8 @@ PRIMARY_OUTPUTS = (
     "retest_checklist.md",
 )
 SKILL_EVAL_SUMMARY = ROOT / "evals" / "runs" / "2026-07-20" / "summary.json"
+TRIGGER_CASES = ROOT / "evals" / "trigger_cases.yaml"
+BEHAVIOR_CASES = ROOT / "evals" / "behavior_cases.yaml"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -72,9 +75,9 @@ def main(argv: list[str] | None = None) -> int:
         results["cli_smoke"] = run_cli_smoke(output_root)
 
     review = review_validation_outputs(output_root)
-    write_release_readiness_decision(output_root, results, review, skipped_cli=args.skip_cli)
+    ready = write_release_readiness_decision(output_root, results, review, skipped_cli=args.skip_cli)
 
-    if review["passed"] and all(item["returncode"] == 0 for item in results.values()):
+    if ready:
         print(f"PASS Lite release validation evidence: {output_root}")
         return 0
     print(f"FAIL Lite release validation evidence: {output_root}")
@@ -499,7 +502,7 @@ This release candidate validates the Agent Skill package and the optional Python
 
 - Runtime Skill files are staged in `candidate-lite-package/`.
 - Source and candidate package boundary checks pass.
-- Fresh Agent tasks cover explicit activation, non-activation, and launch-gating behavior with reviewable raw outputs.
+- Fresh Agent tasks produced reviewable launch-gating outputs; activation claims require host-observable events.
 - Four prewritten synthetic examples check only the saved-output documentation shape and do not count as Skill-readiness evidence.
 - Optional CLI smoke produces the same Lite output shape with preserved evidence.
 
@@ -516,7 +519,7 @@ def write_release_readiness_decision(
     review: dict[str, Any],
     *,
     skipped_cli: bool,
-) -> None:
+) -> bool:
     release_notes = _read(output_root / "release_notes.md").lower()
     skill_eval_passed = _skill_eval_passed(SKILL_EVAL_SUMMARY)
     rows = [
@@ -524,6 +527,7 @@ def write_release_readiness_decision(
         ("Candidate package verifier passes", command_results["package_verifier_candidate"]["returncode"] == 0),
         ("Focused Lite tests pass", command_results["pytest_lite_focused"]["returncode"] == 0),
         ("Fresh-task Skill trigger and behavior evaluations pass", skill_eval_passed),
+        ("Synthetic saved-output shape checks pass", review["passed"]),
         ("Three-minute usability check passes", (output_root / "usability_notes.md").exists()),
         (
             "Release notes state non-certification boundary",
@@ -567,48 +571,170 @@ def write_release_readiness_decision(
         ]
     )
     _write(output_root / "release_readiness_decision.md", "\n".join(lines))
+    return ready
 
 
-def _skill_eval_passed(path: Path, skill_source: Path = SKILL_SOURCE) -> bool:
+def _skill_eval_passed(
+    path: Path,
+    skill_source: Path = SKILL_SOURCE,
+    *,
+    trigger_cases_path: Path = TRIGGER_CASES,
+    behavior_cases_path: Path = BEHAVIOR_CASES,
+    fixture_root: Path = ROOT,
+) -> bool:
     if not path.exists():
         return False
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+        trigger_cases = json.loads(trigger_cases_path.read_text(encoding="utf-8")).get("cases")
+        behavior_cases = json.loads(behavior_cases_path.read_text(encoding="utf-8")).get("cases")
+    except (OSError, json.JSONDecodeError, AttributeError):
         return False
     triggers = data.get("trigger_cases", [])
     behaviors = data.get("behavior_cases", [])
-    if not isinstance(triggers, list) or not isinstance(behaviors, list):
+    if not all(isinstance(items, list) for items in (triggers, behaviors, trigger_cases, behavior_cases)):
         return False
-    if len(triggers) != 10 or len(behaviors) != 8:
+    if len(trigger_cases) != 10 or len(behavior_cases) != 8:
         return False
-    if not all(isinstance(item, dict) and item.get("status") == "PASS" for item in triggers + behaviors):
+    trigger_records = _records_by_id(triggers)
+    behavior_records = _records_by_id(behaviors)
+    if trigger_records is None or behavior_records is None:
         return False
-    if not all(item.get("activated") is item.get("expected_trigger") for item in triggers):
+    if set(trigger_records) != {case.get("id") for case in trigger_cases}:
         return False
+    if set(behavior_records) != {case.get("id") for case in behavior_cases}:
+        return False
+
     run_root = path.parent
-    for item in triggers:
-        if item.get("expected_trigger") is False:
-            evidence = item.get("activation_evidence")
-            output = item.get("output")
-            if not isinstance(evidence, str) or "activated: no" not in evidence.lower():
-                return False
-            if not isinstance(output, str) or "vibespec gate activated: no" not in _read(run_root / output).lower():
-                return False
-    if not all(
-        item.get("fixture_sha256_before") == item.get("fixture_sha256_after")
-        and item.get("files_written") == []
-        for item in behaviors
-    ):
+    for case in trigger_cases:
+        item = trigger_records[str(case["id"])]
+        trace = _recorded_output(run_root, item)
+        activation_event = _recorded_json(run_root, item, "activation_evidence")
+        selected_skills = activation_event.get("selected_skills", []) if activation_event else []
+        observed_activation = "vibespec-gate" in selected_skills
+        if (
+            item.get("status") != "PASS"
+            or item.get("expected_trigger") is not case.get("expected_trigger")
+            or item.get("activation_source") != "host_event"
+            or not activation_event
+            or activation_event.get("case_id") != case.get("id")
+            or activation_event.get("event_type") != "skill_routing"
+            or not isinstance(selected_skills, list)
+            or item.get("activated") is not observed_activation
+            or observed_activation is not case.get("expected_trigger")
+            or trace is None
+            or _record_section(trace, "Raw Request", "Unedited Final Output") != str(case.get("prompt", "")).strip()
+        ):
+            return False
+
+    for case in behavior_cases:
+        item = behavior_records[str(case["id"])]
+        trace = _recorded_output(run_root, item)
+        write_event = _recorded_json(run_root, item, "write_evidence")
+        if trace is None or item.get("status") != "PASS":
+            return False
+        if _record_section(trace, "Raw Request", "Unedited Final Output") != str(case.get("prompt", "")).strip():
+            return False
+        final_output = _record_section(trace, "Unedited Final Output")
+        decision = _extract_decision(final_output)
+        if decision not in set(case.get("allowed_decisions", [])):
+            return False
+        if decision in set(case.get("forbidden_decisions", [])):
+            return False
+        if not all(str(term).lower() in final_output.lower() for term in case.get("required_terms", [])):
+            return False
+        fixture_value = case.get("fixture")
+        if not isinstance(fixture_value, str) or not fixture_value:
+            return False
+        fixture = (fixture_root / fixture_value).resolve()
+        resolved_fixture_root = fixture_root.resolve()
+        if fixture != resolved_fixture_root and resolved_fixture_root not in fixture.parents:
+            return False
+        current_hash = _fixture_sha256(fixture)
+        if (
+            not current_hash
+            or not write_event
+            or write_event.get("case_id") != case.get("id")
+            or write_event.get("event_type") != "isolated_filesystem_snapshot"
+            or write_event.get("scope") != "isolated_case_root"
+            or write_event.get("created_files") != []
+            or write_event.get("modified_files") != []
+            or write_event.get("deleted_files") != []
+            or item.get("fixture_sha256_before") != current_hash
+            or item.get("fixture_sha256_after") != current_hash
+            or write_event.get("fixture_sha256_before") != current_hash
+            or write_event.get("fixture_sha256_after") != current_hash
+            or item.get("files_written") != []
+            or item.get("write_observability") != "isolated_filesystem_snapshot"
+        ):
+            return False
+
+    skill_dir = skill_source if skill_source.is_absolute() else ROOT / skill_source
+    if data.get("skill_tree_sha256") != _skill_tree_sha256(skill_dir):
         return False
-    if not all(_recorded_output_exists(run_root, item) for item in triggers + behaviors):
-        return False
-    return data.get("skill_tree_sha256") == _skill_tree_sha256(skill_source)
+    return True
 
 
-def _recorded_output_exists(run_root: Path, item: dict[str, Any]) -> bool:
-    output = item.get("output")
-    return isinstance(output, str) and bool(output) and (run_root / output).is_file()
+def _records_by_id(items: list[Any]) -> dict[str, dict[str, Any]] | None:
+    if not all(isinstance(item, dict) and isinstance(item.get("id"), str) for item in items):
+        return None
+    records = {str(item["id"]): item for item in items}
+    return records if len(records) == len(items) else None
+
+
+def _recorded_output(run_root: Path, item: dict[str, Any]) -> str | None:
+    output_path = _recorded_path(run_root, item.get("output"))
+    if output_path is None:
+        return None
+    return output_path.read_text(encoding="utf-8")
+
+
+def _recorded_json(run_root: Path, item: dict[str, Any], field: str) -> dict[str, Any] | None:
+    path = _recorded_path(run_root, item.get(field))
+    if path is None:
+        return None
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return value if isinstance(value, dict) else None
+
+
+def _recorded_path(run_root: Path, value: Any) -> Path | None:
+    if not isinstance(value, str) or not value:
+        return None
+    path = (run_root / value).resolve()
+    if run_root.resolve() not in path.parents or not path.is_file():
+        return None
+    return path
+
+
+def _record_section(text: str, heading: str, next_heading: str | None = None) -> str:
+    start = f"## {heading}"
+    if start not in text:
+        return ""
+    value = text.split(start, 1)[1]
+    if next_heading:
+        marker = f"## {next_heading}"
+        if marker not in value:
+            return ""
+        value = value.split(marker, 1)[0]
+    return value.strip()
+
+
+def _fixture_sha256(path: Path) -> str:
+    if path.is_file():
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    if not path.is_dir():
+        return ""
+    digest = hashlib.sha256()
+    files = (item for item in path.rglob("*") if item.is_file())
+    for item in sorted(files, key=lambda value: value.relative_to(path).as_posix()):
+        digest.update(item.relative_to(path).as_posix().encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(item.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
 
 
 def _skill_tree_sha256(skill_source: Path) -> str:
@@ -624,8 +750,13 @@ def _skill_tree_sha256(skill_source: Path) -> str:
 
 def _extract_decision(text: str) -> str:
     for line in text.splitlines():
-        if line.lower().startswith("decision:"):
-            return line.split(":", 1)[1].strip()
+        normalized = line.strip().lstrip("- ").replace("**", "").replace("`", "")
+        match = re.match(
+            r"(?i)^(?:launch\s+)?decision\s*:\s*(BLOCK|REVIEW|PASS_WITH_WARNINGS|PASS)\b",
+            normalized,
+        )
+        if match:
+            return match.group(1).upper()
     return ""
 
 

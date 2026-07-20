@@ -463,11 +463,18 @@ def write_actionability_review(output_root: Path) -> dict[str, Any]:
 
 
 def write_external_session_template(output_root: Path) -> None:
+    profiles = (
+        "non_security_builder",
+        "non_security_builder",
+        "coding_agent_developer",
+        "coding_agent_developer",
+        "security_reviewer",
+    )
     template = {
         "sessions": [
             {
-                "name": "participant_1",
-                "profile": "non_security_builder",
+                "name": f"participant_{index}",
+                "profile": profile,
                 "started": False,
                 "files": False,
                 "fix": False,
@@ -476,31 +483,8 @@ def write_external_session_template(output_root: Path) -> None:
                 "blind_edit_safe": False,
                 "notes": "Replace with observation notes. Use true only when supported by the session.",
                 "transcript": "Replace with a sanitized session transcript or trace.",
-            },
-            {
-                "name": "participant_2",
-                "profile": "coding_agent_developer",
-                "started": False,
-                "files": False,
-                "fix": False,
-                "retest": False,
-                "certification_safe": False,
-                "blind_edit_safe": False,
-                "notes": "Replace with observation notes.",
-                "transcript": "Replace with a sanitized session transcript or trace.",
-            },
-            {
-                "name": "participant_3",
-                "profile": "ai_agent_or_saas_project",
-                "started": False,
-                "files": False,
-                "fix": False,
-                "retest": False,
-                "certification_safe": False,
-                "blind_edit_safe": False,
-                "notes": "Replace with observation notes.",
-                "transcript": "Replace with a sanitized session transcript or trace.",
-            },
+            }
+            for index, profile in enumerate(profiles, start=1)
         ]
     }
     (output_root / "external_session_template.json").write_text(
@@ -578,11 +562,18 @@ Record confusion, unsafe interpretation, missing context, host Agent used, proje
 Set `started`, `files`, `fix`, `retest`, `certification_safe`, and `blind_edit_safe` to `true` only when the corresponding observation is supported by notes and a sanitized transcript or trace.
 """,
     )
+    example_profiles = (
+        "non_security_builder",
+        "non_security_builder",
+        "coding_agent_developer",
+        "coding_agent_developer",
+        "security_reviewer",
+    )
     example = {
         "sessions": [
             {
-                "name": "participant_non_security",
-                "profile": "non_security_builder",
+                "name": f"participant_{index}",
+                "profile": profile,
                 "started": True,
                 "files": True,
                 "fix": True,
@@ -591,31 +582,8 @@ Set `started`, `files`, `fix`, `retest`, `certification_safe`, and `blind_edit_s
                 "blind_edit_safe": True,
                 "notes": "Replace with observed evidence from the scorecard.",
                 "transcript": "Replace with a sanitized session transcript or trace.",
-            },
-            {
-                "name": "participant_agent_developer",
-                "profile": "coding_agent_developer",
-                "started": True,
-                "files": True,
-                "fix": True,
-                "retest": True,
-                "certification_safe": True,
-                "blind_edit_safe": True,
-                "notes": "Replace with observed evidence from the scorecard.",
-                "transcript": "Replace with a sanitized session transcript or trace.",
-            },
-            {
-                "name": "participant_saas_builder",
-                "profile": "ai_agent_or_saas_project",
-                "started": True,
-                "files": True,
-                "fix": True,
-                "retest": True,
-                "certification_safe": True,
-                "blind_edit_safe": True,
-                "notes": "Replace with observed evidence from the scorecard.",
-                "transcript": "Replace with a sanitized session transcript or trace.",
-            },
+            }
+            for index, profile in enumerate(example_profiles, start=1)
         ]
     }
     (materials / "pilot_sessions.example.json").write_text(json.dumps(example, indent=2) + "\n", encoding="utf-8")
@@ -780,13 +748,13 @@ def load_external_sessions(raw_sessions: list[str], session_files: list[Path]) -
 
 def write_pilot_usability_notes(output_root: Path, sessions: list[dict[str, Any]]) -> dict[str, Any]:
     parsed = sessions
-    required = 3
     real_sessions = [item for item in parsed if item.get("source") == "recorded_external"]
     synthetic_walkthroughs = [item for item in parsed if item.get("source") == "synthetic_walkthrough"]
     selected = real_sessions if real_sessions else synthetic_walkthroughs
     evidence_kind = "recorded_external" if real_sessions else "synthetic_walkthrough"
+    required = 5 if real_sessions else 4
     passed_sessions = [item for item in selected if _session_passes(item)]
-    profile_coverage = _profile_coverage(selected)
+    profile_coverage = _real_profile_coverage(selected) if real_sessions else _profile_coverage(selected)
     pass_rate = len(passed_sessions) / len(selected) if selected else 0.0
     safety_veto = any(not item["certification_safe"] or not item["blind_edit_safe"] for item in selected)
     evidence_complete = all(_session_evidence_complete(item) for item in selected) if selected else False
@@ -804,9 +772,9 @@ def write_pilot_usability_notes(output_root: Path, sessions: list[dict[str, Any]
         "",
         "Required participant profile:",
         "",
-        "- at least one non-security builder;",
-        "- at least one developer who uses coding Agents;",
-        "- at least one user with an AI/Agent or SaaS project.",
+        "- two non-security Vibe Coding builders;",
+        "- two developers who use coding Agents;",
+        "- one security reviewer.",
         "",
     ]
     if parsed:
@@ -831,7 +799,7 @@ def write_pilot_usability_notes(output_root: Path, sessions: list[dict[str, Any]
                 "",
                 "No real external or semi-external participant sessions have been recorded in this environment.",
                 "",
-                "Result: pending. Do not promote to controlled external pilot until at least 3 real sessions are recorded and threshold checks pass.",
+                "Result: pending. Do not promote to controlled external pilot until five real sessions with the required role quotas are recorded.",
             ]
         )
     lines.extend(
@@ -839,9 +807,7 @@ def write_pilot_usability_notes(output_root: Path, sessions: list[dict[str, Any]
             "",
             "## Profile Coverage",
             "",
-            f"- non-security builder: {profile_coverage['non_security_builder']}",
-            f"- coding-Agent developer: {profile_coverage['coding_agent_developer']}",
-            f"- AI/Agent or SaaS project user: {profile_coverage['ai_agent_or_saas_project']}",
+            *[f"- {profile}: {covered}" for profile, covered in profile_coverage.items()],
             "",
             "## Evidence Source",
             "",
@@ -867,6 +833,7 @@ def write_pilot_usability_notes(output_root: Path, sessions: list[dict[str, Any]
         "safety_veto": safety_veto,
         "evidence_complete": evidence_complete,
         "evidence_kind": evidence_kind,
+        "required_sessions": required,
     }
 
 
@@ -1275,6 +1242,16 @@ def _profile_coverage(sessions: list[dict[str, Any]]) -> dict[str, bool]:
         "non_security_builder": "non_security_builder" in profiles,
         "coding_agent_developer": "coding_agent_developer" in profiles,
         "ai_agent_or_saas_project": "ai_agent_or_saas_project" in profiles,
+        "security_reviewer": "security_reviewer" in profiles,
+    }
+
+
+def _real_profile_coverage(sessions: list[dict[str, Any]]) -> dict[str, bool]:
+    profiles = [str(item.get("profile", "")) for item in sessions]
+    return {
+        "non_security_builder (2 required)": profiles.count("non_security_builder") >= 2,
+        "coding_agent_developer (2 required)": profiles.count("coding_agent_developer") >= 2,
+        "security_reviewer (1 required)": profiles.count("security_reviewer") >= 1,
     }
 
 
@@ -1286,6 +1263,8 @@ def _infer_profile(name: str) -> str:
         return "coding_agent_developer"
     if "saas" in normalized or "ai_agent" in normalized:
         return "ai_agent_or_saas_project"
+    if "security" in normalized:
+        return "security_reviewer"
     return "unknown"
 
 

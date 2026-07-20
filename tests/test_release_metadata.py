@@ -12,7 +12,6 @@ from scripts.verify_release_metadata import release_tag_for, verify_release_meta
 
 def test_release_metadata_is_consistent():
     assert verify_release_metadata() == []
-    assert verify_release_metadata(tag="v0.2.0-rc.1") == []
     assert release_tag_for("0.2.0rc1") == "v0.2.0-rc.1"
     assert release_tag_for("1.0.0") == "v1.0.0"
 
@@ -74,6 +73,8 @@ def test_release_workflow_binds_tag_to_master_and_portable_checksum():
     assert "fetch-depth: 0" in workflow
     assert 'git merge-base --is-ancestor "${GITHUB_SHA}" origin/master' in workflow
     assert 'verify_release_metadata.py --tag "${GITHUB_REF_NAME}"' in workflow
+    assert "scripts/verify_skill_evals.py" in workflow
+    assert "skill-creator/scripts/quick_validate.py" in workflow
     assert "smoke_install_skill.py --archive dist/vibespec-gate-lite.zip" in workflow
     assert "(cd dist && sha256sum vibespec-gate-lite.zip > SHA256SUMS)" in workflow
     assert "sha256sum dist/vibespec-gate-lite.zip" not in workflow

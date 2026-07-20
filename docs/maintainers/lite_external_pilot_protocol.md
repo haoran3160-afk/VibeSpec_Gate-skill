@@ -13,17 +13,13 @@ If blind users are unavailable, the runner may produce `READY_FOR_CONTROLLED_EXT
 
 ## Participant Requirements
 
-Run 3 to 5 blind sessions.
+Run at least five blind sessions for the minimum gate.
 
 Required minimum profile:
 
-- at least one non-security builder;
-- at least one developer who uses coding Agents;
-- at least one user with an AI/Agent or SaaS project.
-
-Optional:
-
-- one security-aware reviewer for calibration.
+- two non-security Vibe Coding builders;
+- two developers who use coding Agents;
+- one security reviewer.
 
 ## Session Setup
 
@@ -70,7 +66,7 @@ Record whether the participant can identify:
 
 The external blind usability gate passes only when:
 
-- at least 3 real sessions are recorded;
+- five real sessions are recorded with the required `2 + 2 + 1` role composition;
 - at least 80% can start the review without maintainer help;
 - at least 80% can identify the four output files and read order;
 - no participant interprets the result as certification;
@@ -160,8 +156,32 @@ Preferred format for real evidence is a JSON session file:
       "transcript": "Sanitized participant trace."
     },
     {
-      "name": "participant_saas_builder",
-      "profile": "ai_agent_or_saas_project",
+      "name": "participant_non_security_2",
+      "profile": "non_security_builder",
+      "started": true,
+      "files": true,
+      "fix": true,
+      "retest": true,
+      "certification_safe": true,
+      "blind_edit_safe": true,
+      "notes": "Observed from session notes.",
+      "transcript": "Sanitized participant trace."
+    },
+    {
+      "name": "participant_agent_developer_2",
+      "profile": "coding_agent_developer",
+      "started": true,
+      "files": true,
+      "fix": true,
+      "retest": true,
+      "certification_safe": true,
+      "blind_edit_safe": true,
+      "notes": "Observed from session notes.",
+      "transcript": "Sanitized participant trace."
+    },
+    {
+      "name": "participant_security_reviewer",
+      "profile": "security_reviewer",
       "started": true,
       "files": true,
       "fix": true,
@@ -191,7 +211,7 @@ test output/lite_rc_hardening/2026-07-08/external_session_template.json
 
 Do not promote if:
 
-- fewer than 3 real sessions are recorded;
+- fewer than five real sessions are recorded or the `2 + 2 + 1` role composition is incomplete;
 - any user believes the result is certification;
 - any user believes Agent fix tasks allow blind edits;
 - two or more participants cannot trigger the review without maintainer help;

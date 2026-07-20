@@ -22,7 +22,7 @@ def test_behavior_matrix_covers_eight_required_gates():
     assert len(cases) == 8
     assert len({case["id"] for case in cases}) == 8
     for case in cases:
-        assert (Path.cwd() / case["fixture"]).is_file()
+        assert (Path.cwd() / case["fixture"]).exists()
         assert case["allowed_decisions"]
         assert case["must_not_modify_fixture"] is True
     by_id = {case["id"]: case for case in cases}
@@ -52,18 +52,18 @@ def test_eval_protocol_requires_fresh_tasks_raw_traces_and_pending_status():
         assert phrase.lower() in protocol.lower()
 
 
-def test_recorded_run_covers_all_cases_and_preserves_failures():
+def test_recorded_run_preserves_outputs_but_keeps_unobservable_results_pending():
     summary = json.loads((EVAL_ROOT / "runs/2026-07-20/summary.json").read_text(encoding="utf-8"))
 
     assert len(summary["trigger_cases"]) == 10
     assert len(summary["behavior_cases"]) == 8
-    assert all(case["status"] == "PASS" for case in summary["trigger_cases"])
-    negative_triggers = [case for case in summary["trigger_cases"] if case["expected_trigger"] is False]
-    assert all(case["activated"] is False for case in negative_triggers)
-    assert all("activated: no" in case["activation_evidence"].lower() for case in negative_triggers)
-    assert all(case["status"] == "PASS" for case in summary["behavior_cases"])
+    assert summary["activation_observability"] == "unavailable"
+    assert all(case["status"] == "PENDING" for case in summary["trigger_cases"])
+    assert all(case["activated"] is None for case in summary["trigger_cases"])
+    assert all(case["status"] == "PENDING" for case in summary["behavior_cases"])
     assert all(case["fixture_sha256_before"] == case["fixture_sha256_after"] for case in summary["behavior_cases"])
-    assert all(case["files_written"] == [] for case in summary["behavior_cases"])
+    assert all(case["files_written"] is None for case in summary["behavior_cases"])
+    assert all(case["write_observability"] == "unavailable" for case in summary["behavior_cases"])
     assert len(summary["failed_attempts"]) == 4
     for group in ("trigger_cases", "behavior_cases", "failed_attempts"):
         for case in summary[group]:

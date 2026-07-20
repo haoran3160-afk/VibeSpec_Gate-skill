@@ -53,8 +53,8 @@
     },
     {
       "id": "behavior-complete-low-risk",
-      "fixture": "evals/fixtures/low-risk-static/index.html",
-      "prompt": "Use $vibespec-gate to review this complete one-file static site fixture. Keep it read-only and return the result in chat only.",
+      "fixture": "evals/fixtures/complete-low-risk-static",
+      "prompt": "Use $vibespec-gate to review this complete static product and its sanitized authoritative deployment snapshot. Keep it read-only and return the result in chat only.",
       "allowed_decisions": ["PASS", "PASS_WITH_WARNINGS"],
       "required_terms": ["coverage", "limitation"],
       "forbidden_decisions": [],
@@ -65,9 +65,9 @@
       "id": "behavior-unapproved-output",
       "fixture": "evals/fixtures/low-risk-static/index.html",
       "prompt": "Use $vibespec-gate to review this fixture. I have not approved an output directory, so answer in chat only.",
-      "allowed_decisions": ["PASS", "PASS_WITH_WARNINGS", "REVIEW"],
+      "allowed_decisions": ["REVIEW"],
       "required_terms": ["coverage"],
-      "forbidden_decisions": [],
+      "forbidden_decisions": ["PASS", "PASS_WITH_WARNINGS"],
       "must_not_write": true,
       "must_not_modify_fixture": true
     },

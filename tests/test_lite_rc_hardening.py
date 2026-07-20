@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 
@@ -139,59 +140,22 @@ def test_rc_release_decision_is_no_go_until_external_sessions_exist(tmp_path):
 def test_rc_external_session_template_and_json_sessions_can_pass_threshold(tmp_path):
     write_external_session_template(tmp_path)
     session_file = tmp_path / "sessions.json"
-    session_file.write_text(
-        """
-{
-  "sessions": [
-    {
-      "name": "participant_non_security",
-      "profile": "non_security_builder",
-      "started": true,
-      "files": true,
-      "fix": true,
-      "retest": true,
-      "certification_safe": true,
-      "blind_edit_safe": true,
-      "notes": "Started from README and did not ask for maintainer docs.",
-      "transcript": "Sanitized participant trace."
-    },
-    {
-      "name": "participant_agent_developer",
-      "profile": "coding_agent_developer",
-      "started": true,
-      "files": true,
-      "fix": true,
-      "retest": true,
-      "certification_safe": true,
-      "blind_edit_safe": true,
-      "notes": "Understood bounded Agent fix tasks.",
-      "transcript": "Sanitized participant trace."
-    },
-    {
-      "name": "participant_saas_builder",
-      "profile": "ai_agent_or_saas_project",
-      "started": true,
-      "files": true,
-      "fix": true,
-      "retest": true,
-      "certification_safe": true,
-      "blind_edit_safe": true,
-      "notes": "Identified retest path and non-certification boundary.",
-      "transcript": "Sanitized participant trace."
-    }
-  ]
-}
-""".strip()
-        + "\n",
-        encoding="utf-8",
-    )
+    expected_sessions = [
+        _recorded_session("non_security_1", "non_security_builder"),
+        _recorded_session("non_security_2", "non_security_builder"),
+        _recorded_session("agent_developer_1", "coding_agent_developer"),
+        _recorded_session("agent_developer_2", "coding_agent_developer"),
+        _recorded_session("security_reviewer", "security_reviewer"),
+    ]
+    session_file.write_text(json.dumps({"sessions": expected_sessions}), encoding="utf-8")
 
     sessions = load_external_sessions([], [session_file])
     result = write_pilot_usability_notes(tmp_path, sessions)
 
     assert (tmp_path / "external_session_template.json").exists()
     assert result["passed"] is True
-    assert result["recorded_sessions"] == 3
+    assert result["recorded_sessions"] == 5
+    assert result["required_sessions"] == 5
     assert all(result["profile_coverage"].values())
 
 
@@ -214,7 +178,7 @@ def test_rc_session_safety_failure_is_an_all_participant_veto(tmp_path):
     sessions = [
         _recorded_session("non_security_builder", "non_security_builder"),
         _recorded_session("agent_developer", "coding_agent_developer"),
-        _recorded_session("saas_builder", "ai_agent_or_saas_project"),
+        _recorded_session("security_reviewer", "security_reviewer"),
         _recorded_session("extra_builder", "non_security_builder"),
         _recorded_session("unsafe_interpretation", "coding_agent_developer", certification_safe=False),
     ]
@@ -258,6 +222,8 @@ def test_rc_pilot_session_materials_are_generated_outside_candidate_package(tmp_
     assert (materials / "participant_brief.md").exists()
     assert (materials / "observer_scorecard.md").exists()
     assert (materials / "pilot_sessions.example.json").exists()
+    example = json.loads((materials / "pilot_sessions.example.json").read_text(encoding="utf-8"))
+    assert len(example["sessions"]) == 5
     assert not (candidate / "pilot_session_materials").exists()
     assert "certification" in (materials / "participant_brief.md").read_text(encoding="utf-8")
 
@@ -269,9 +235,11 @@ def test_rc_release_decision_can_promote_after_real_session_threshold(tmp_path):
     matrix = evaluate_matrix(tmp_path)
     actionability = write_actionability_review(tmp_path)
     sessions = [
-        _recorded_session("non_security_builder", "non_security_builder"),
-        _recorded_session("agent_developer", "coding_agent_developer"),
-        _recorded_session("saas_builder", "ai_agent_or_saas_project"),
+        _recorded_session("non_security_1", "non_security_builder"),
+        _recorded_session("non_security_2", "non_security_builder"),
+        _recorded_session("agent_developer_1", "coding_agent_developer"),
+        _recorded_session("agent_developer_2", "coding_agent_developer"),
+        _recorded_session("security_reviewer", "security_reviewer"),
     ]
     external = write_pilot_usability_notes(tmp_path, sessions)
     command_results = {
