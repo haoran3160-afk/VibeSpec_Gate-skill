@@ -144,6 +144,7 @@ def agent_review_decisions_json(summary_data: dict[str, object], decisions: list
             "agent_decision_count": summary_data["agent_decision_count"],
             "downgrade_candidate_count": summary_data["downgrade_candidate_count"],
             "suppression_candidate_count": summary_data["suppression_candidate_count"],
+            "coverage": summary_data["coverage"],
         },
         "decisions": decisions,
     }
@@ -166,6 +167,7 @@ def summary(
     downgrade_count = sum(1 for v in verdicts if v["recommended_action"] == "downgrade")
     return {
         "project_type": profile.project_type,
+        "coverage": profile.coverage.to_dict(),
         "total_findings": len(findings),
         "reviewed_findings": len(packets),
         "skipped_findings": skipped,
@@ -196,6 +198,9 @@ def summary_markdown(data: dict[str, object]) -> str:
         f"- Downgrade candidate count: {data['downgrade_candidate_count']}",
         f"- Suppression candidate count: {data['suppression_candidate_count']}",
         f"- Gate impact summary: {data['gate_impact_summary']}",
+        "",
+        "## Evidence Coverage",
+        *_coverage_dict_lines(data["coverage"]),
         "",
         "## Verdict Counts",
         *_dict_lines(data["verdict_counts"]),
@@ -340,3 +345,17 @@ def _dict_lines(value: object) -> list[str]:
     if not data:
         return ["- none"]
     return [f"- {key}: {count}" for key, count in data.items()]
+
+
+def _coverage_dict_lines(value: object) -> list[str]:
+    data = value if isinstance(value, dict) else {}
+    lines = [f"- Coverage status: {data.get('coverage_status', 'insufficient')}"]
+    surfaces = data.get("surfaces", [])
+    if not isinstance(surfaces, list):
+        return lines
+    for item in surfaces:
+        if not isinstance(item, dict):
+            continue
+        detail = ", ".join(str(ref) for ref in item.get("source_refs", [])) or str(item.get("reason", ""))
+        lines.append(f"- {item.get('surface', 'unknown')}: {item.get('status', 'missing')} - {detail}")
+    return lines

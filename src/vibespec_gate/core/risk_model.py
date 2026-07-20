@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
+from .coverage import EvidenceCoverage, insufficient_coverage
+
 
 SEVERITY_ORDER = {"P0": 0, "P1": 1, "P2": 2, "P3": 3, "Info": 4}
 SEVERITY_WEIGHTS = {"P0": 40, "P1": 20, "P2": 6, "P3": 1, "Info": 0}
@@ -49,6 +51,7 @@ class ProjectProfile:
     profile_score: int = 0
     profile_evidence: list[str] = field(default_factory=list)
     profile_scores: dict[str, int] = field(default_factory=dict)
+    coverage: EvidenceCoverage = field(default_factory=insufficient_coverage)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

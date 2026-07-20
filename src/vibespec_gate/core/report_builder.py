@@ -20,7 +20,7 @@ def write_reports(output_dir: Path, profile: ProjectProfile, findings: list[Find
     sorted_findings = sorted(findings, key=severity_sort_key)
     active = [f for f in sorted_findings if not f.suppressed]
     suppressed = [f for f in sorted_findings if f.suppressed]
-    gate = decide_gate(sorted_findings, profile)
+    gate = decide_gate(sorted_findings, profile, profile.coverage)
     (output_dir / "findings.json").write_text(
         json.dumps([f.to_dict() for f in sorted_findings], ensure_ascii=False, indent=2),
         encoding="utf-8",
@@ -48,7 +48,7 @@ def _user_report(profile: ProjectProfile, findings: list[Finding], suppressed: l
     lines = [
         "# VibeSpec Gate Beginner Security Report",
         "",
-        f"- Security score: {security_score(gate_findings)}/100",
+        f"- Security score: {gate['score']}/100" if gate["score"] is not None else "- Security score: N/A (evidence coverage incomplete)",
         f"- Launch gate: {gate['decision']}",
         f"- Reason: {gate['reason']}",
         f"- Project type: {profile.project_type}",
@@ -58,6 +58,9 @@ def _user_report(profile: ProjectProfile, findings: list[Finding], suppressed: l
         "",
         "## Project Profile Evidence",
         *_bullet_lines(profile.profile_evidence or profile.signals or ["No profile evidence recorded."]),
+        "",
+        "## Evidence Coverage",
+        *_coverage_lines(profile),
         "",
         "## Top Issues To Fix First",
     ]
@@ -94,6 +97,9 @@ def _developer_report(profile: ProjectProfile, findings: list[Finding], suppress
         "```json",
         json.dumps(profile.to_dict(), ensure_ascii=False, indent=2),
         "```",
+        "",
+        "## Evidence Coverage",
+        *_coverage_lines(profile),
         "",
         f"## Top {TOP_ACTIONABLE_LIMIT} Active Findings",
     ]
@@ -175,3 +181,15 @@ def _suppressed_section(suppressed: list[Finding]) -> list[str]:
 
 def _bullet_lines(items: list[str]) -> list[str]:
     return [f"- {item}" for item in items]
+
+
+def _coverage_lines(profile: ProjectProfile) -> list[str]:
+    coverage = profile.coverage
+    lines = [
+        f"- Coverage status: {coverage.coverage_status}",
+        f"- Files: {coverage.files_inspected} inspected / {coverage.files_discovered} discovered / {coverage.files_skipped} skipped",
+    ]
+    for item in coverage.surfaces:
+        detail = ", ".join(item.source_refs) if item.source_refs else item.reason
+        lines.append(f"- {item.surface}: {item.status} - {detail}")
+    return lines

@@ -17,3 +17,16 @@ def test_scan_writes_reports(tmp_path):
     ]:
         assert (output / name).exists()
     assert "sk-test-1234567890abcdef1234567890abcdef" not in (output / "vibespec_gate_report_developer.md").read_text(encoding="utf-8")
+    assert "## Evidence Coverage" in (output / "vibespec_gate_report_user.md").read_text(encoding="utf-8")
+    assert summary["coverage"]["coverage_status"] == "complete"
+
+
+def test_empty_project_scan_is_review_not_pass(tmp_path):
+    project = tmp_path / "empty-project"
+    output = tmp_path / "scan"
+    project.mkdir()
+
+    summary = run_scan(str(project), str(output), include_adapters=False)
+
+    assert summary["decision"] == "REVIEW"
+    assert summary["coverage_status"] == "insufficient"

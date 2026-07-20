@@ -4,6 +4,65 @@ from pathlib import Path
 import re
 
 
+SCANNABLE_TEXT_EXTENSIONS = {
+    ".js",
+    ".jsx",
+    ".ts",
+    ".tsx",
+    ".py",
+    ".json",
+    ".toml",
+    ".yaml",
+    ".yml",
+    ".md",
+    ".txt",
+    ".env",
+    ".sql",
+    ".rules",
+    ".mjs",
+    ".cjs",
+}
+UNSUPPORTED_SECURITY_SOURCE_EXTENSIONS = {
+    ".c",
+    ".cc",
+    ".clj",
+    ".cljs",
+    ".cmd",
+    ".cpp",
+    ".cs",
+    ".dart",
+    ".ex",
+    ".exs",
+    ".erl",
+    ".fs",
+    ".fsx",
+    ".go",
+    ".groovy",
+    ".h",
+    ".hcl",
+    ".hpp",
+    ".html",
+    ".java",
+    ".kt",
+    ".kts",
+    ".php",
+    ".pl",
+    ".ps1",
+    ".psm1",
+    ".rb",
+    ".r",
+    ".rs",
+    ".scala",
+    ".sh",
+    ".sol",
+    ".svelte",
+    ".swift",
+    ".tf",
+    ".vue",
+}
+SCANNABLE_SPECIAL_NAMES = {"Dockerfile", "Procfile"}
+
+
 GENERATED_SUFFIXES = (".min.js", ".map")
 TEST_SUFFIXES = (
     ".test.js",
@@ -89,6 +148,18 @@ def should_ignore_path(path: Path) -> bool:
     if name.endswith(GENERATED_SUFFIXES):
         return True
     return any(part.lower() in IGNORED_DIRS for part in path.parts)
+
+
+def is_scannable_text_path(path: Path) -> bool:
+    return (
+        path.suffix.lower() in SCANNABLE_TEXT_EXTENSIONS
+        or path.name.startswith(".env")
+        or path.name in SCANNABLE_SPECIAL_NAMES
+    )
+
+
+def is_unsupported_security_source(path: Path) -> bool:
+    return path.suffix.lower() in UNSUPPORTED_SECURITY_SOURCE_EXTENSIONS
 
 
 def _strip_line_suffix(path: str) -> str:

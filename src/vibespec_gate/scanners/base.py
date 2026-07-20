@@ -3,28 +3,8 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from vibespec_gate.core.source_classifier import should_ignore_path
+from vibespec_gate.core.source_classifier import is_scannable_text_path, should_ignore_path
 from vibespec_gate.core.risk_model import Finding, ProjectProfile
-
-
-TEXT_EXTENSIONS = {
-    ".js",
-    ".jsx",
-    ".ts",
-    ".tsx",
-    ".py",
-    ".json",
-    ".toml",
-    ".yaml",
-    ".yml",
-    ".md",
-    ".txt",
-    ".env",
-    ".sql",
-    ".rules",
-    ".mjs",
-    ".cjs",
-}
 
 
 class BaseScanner:
@@ -41,7 +21,7 @@ def iter_text_files(root: Path) -> list[Path]:
             continue
         if not path.is_file():
             continue
-        if path.suffix in TEXT_EXTENSIONS or path.name.startswith(".env") or path.name in {"Dockerfile", "Procfile"}:
+        if is_scannable_text_path(path):
             files.append(path)
     return sorted(files)
 

@@ -4,8 +4,9 @@ import json
 import re
 from pathlib import Path
 
+from .coverage import project_inventory_coverage
 from .risk_model import ProjectProfile
-from .source_classifier import IGNORED_DIRS, should_ignore_path
+from .source_classifier import is_scannable_text_path, is_unsupported_security_source, should_ignore_path
 
 
 def iter_project_files(root: Path) -> list[Path]:
@@ -62,10 +63,18 @@ def detect_profile(project_path: str, mode: str | None = None) -> ProjectProfile
         tech.add("Vercel")
 
     readme_text = ""
-    for candidate in ("README.md", "README.zh-CN.md", "package.json", "pyproject.toml"):
+    for candidate in ("README.md", "README.en.md", "package.json", "pyproject.toml"):
         if (root / candidate).exists():
             readme_text += "\n" + read_text(root / candidate, 50_000).lower()
-    combined = "\n".join(read_text(p, 20_000).lower() for p in files[:200])
+    inspected_files = files[:200]
+    combined_parts: list[str] = []
+    unreadable_count = 0
+    for path in inspected_files:
+        try:
+            combined_parts.append(path.read_text(encoding="utf-8", errors="replace")[:20_000].lower())
+        except OSError:
+            unreadable_count += 1
+    combined = "\n".join(combined_parts)
     keyword_map = {
         "stripe": "payment",
         "payment": "payment",
@@ -101,6 +110,18 @@ def detect_profile(project_path: str, mode: str | None = None) -> ProjectProfile
 
     launch_stage = "public_launch" if data_risk & {"payment", "customer_data", "auth"} else "demo_or_internal"
     risk_level = _risk_level(project_type, data_risk)
+    coverage = project_inventory_coverage(
+        rels=rels,
+        inspected_rels=[rel(path, root) for path in inspected_files],
+        scannable_rels=[rel(path, root) for path in inspected_files if is_scannable_text_path(path)],
+        unsupported_source_rels=[
+            rel(path, root) for path in inspected_files if is_unsupported_security_source(path)
+        ],
+        unreadable_count=unreadable_count,
+        project_type=project_type,
+        technologies=sorted(tech),
+        data_risk=sorted(data_risk),
+    )
 
     return ProjectProfile(
         path=str(root),
@@ -113,6 +134,7 @@ def detect_profile(project_path: str, mode: str | None = None) -> ProjectProfile
         profile_score=agent_score,
         profile_evidence=profile_evidence,
         profile_scores=profile_scores,
+        coverage=coverage,
     )
 
 

@@ -1,1 +1,1 @@
-{"expected_profile":"MCP / IPC Tool","expected_gate":"PASS","must_find":[],"must_not_find":["Agent tools may have excessive authority"]}
+{"expected_profile":"MCP / IPC Tool","expected_gate":"REVIEW","must_find":[],"must_not_find":["Agent tools may have excessive authority"]}
