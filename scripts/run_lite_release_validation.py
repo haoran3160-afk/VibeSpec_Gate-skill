@@ -6,6 +6,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 from pathlib import Path
@@ -29,7 +30,7 @@ PRIMARY_OUTPUTS = (
     "agent_fix_plan.md",
     "retest_checklist.md",
 )
-SKILL_EVAL_SUMMARY = ROOT / "evals" / "runs" / "2026-07-20-agent-simulation" / "summary.json"
+SKILL_EVAL_SUMMARY = ROOT / "evals" / "runs" / "2026-07-20-agent-simulation-v2" / "summary.json"
 TRIGGER_CASES = ROOT / "evals" / "trigger_cases.yaml"
 BEHAVIOR_CASES = ROOT / "evals" / "behavior_cases.yaml"
 
@@ -774,17 +775,92 @@ def _record_section(text: str, heading: str, next_heading: str | None = None) ->
 
 def _fixture_sha256(path: Path) -> str:
     if path.is_file():
-        return hashlib.sha256(path.read_bytes()).hexdigest()
+        content = _read_stable_fixture_file(path)
+        return hashlib.sha256(content).hexdigest() if content is not None else ""
     if not path.is_dir():
         return ""
+    files = _fixture_files_without_links(path)
+    if files is None:
+        return ""
     digest = hashlib.sha256()
-    files = (item for item in path.rglob("*") if item.is_file())
-    for item in sorted(files, key=lambda value: value.relative_to(path).as_posix()):
+    for item in files:
+        content = _read_stable_fixture_file(item)
+        if content is None:
+            return ""
         digest.update(item.relative_to(path).as_posix().encode("utf-8"))
         digest.update(b"\0")
-        digest.update(item.read_bytes())
+        digest.update(content)
         digest.update(b"\0")
     return digest.hexdigest()
+
+
+def _fixture_files_without_links(root: Path) -> list[Path] | None:
+    if _unsafe_fixture_entry(root):
+        return None
+    files: list[Path] = []
+    pending = [root]
+    while pending:
+        current = pending.pop()
+        if _unsafe_fixture_entry(current):
+            return None
+        try:
+            with os.scandir(current) as iterator:
+                entries = sorted(iterator, key=lambda entry: entry.name)
+        except OSError:
+            return None
+        for entry in entries:
+            item = Path(entry.path)
+            try:
+                # DirEntry.stat() reports st_nlink=0 for regular files on some Windows builds.
+                item_stat = os.lstat(item)
+            except OSError:
+                return None
+            if _unsafe_fixture_stat(item_stat) or entry.is_symlink():
+                return None
+            if stat.S_ISDIR(item_stat.st_mode):
+                pending.append(item)
+            elif stat.S_ISREG(item_stat.st_mode):
+                if item_stat.st_nlink != 1:
+                    return None
+                files.append(item)
+            else:
+                return None
+    return sorted(files, key=lambda item: item.relative_to(root).as_posix())
+
+
+def _read_stable_fixture_file(path: Path) -> bytes | None:
+    try:
+        before = os.stat(path, follow_symlinks=False)
+        if _unsafe_fixture_stat(before) or not stat.S_ISREG(before.st_mode) or before.st_nlink != 1:
+            return None
+        content = path.read_bytes()
+        after = os.stat(path, follow_symlinks=False)
+    except OSError:
+        return None
+    identity = lambda value: (
+        value.st_dev,
+        value.st_ino,
+        value.st_mode,
+        value.st_nlink,
+        value.st_size,
+        value.st_mtime_ns,
+    )
+    return content if identity(before) == identity(after) else None
+
+
+def _unsafe_fixture_entry(path: Path) -> bool:
+    try:
+        if path.is_symlink() or (hasattr(path, "is_junction") and path.is_junction()):
+            return True
+        return _unsafe_fixture_stat(os.lstat(path))
+    except OSError:
+        return True
+
+
+def _unsafe_fixture_stat(value: os.stat_result) -> bool:
+    reparse_flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+    file_attributes = getattr(value, "st_file_attributes", 0)
+    return stat.S_ISLNK(value.st_mode) or bool(reparse_flag and file_attributes & reparse_flag)
 
 
 def _skill_tree_sha256(skill_source: Path) -> str:

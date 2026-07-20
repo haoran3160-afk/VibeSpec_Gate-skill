@@ -142,8 +142,8 @@ py -3 -m vibespec_gate.cli lite-review D:\path\to\project --output D:\reviews\pr
 ## Validation And Boundaries
 
 - CI runs the complete tests, package verification, and archive verification on Ubuntu Python 3.10/3.12, Windows Python 3.12, and macOS Python 3.12.
-- Reviewable scenario records include explicit security-review requests, unrelated tasks, eight launch-decision cases, and read-only boundaries. [Review the validation records](evals/runs/2026-07-20/README.md).
-- These records come from controlled Agent scenarios; they are not independent user validation or a security-accuracy measurement.
+- Reviewable scenario records include explicit security-review requests, unrelated tasks, and eight launch-decision cases. [Review the validation records](evals/runs/2026-07-20-agent-simulation-v2/README.md).
+- These controlled Agent scenarios validate review output only. They do not prove that the host made no file writes or that the Skill activates automatically, and they are not independent user validation or a security-accuracy measurement.
 - Automated checks and scenario coverage cannot prove the absence of vulnerabilities or replace professional assessment.
 
 ## Project Resources

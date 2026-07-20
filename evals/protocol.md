@@ -14,7 +14,7 @@ The Skill attachment includes its referenced protocol and evidence-coverage file
 
 ## Safety
 
-All repository and external project fixtures are read-only. Run behavior cases against isolated copies, record per-path default-stream content before execution, and compare it with the state immediately afterward. Also verify that each isolated copy initially matches the checked-in fixture. This comparison establishes only observed net path and content integrity; it cannot rule out transient write-and-restore activity, metadata changes, or alternate data streams. A passing no-write gate additionally requires operation-level write telemetry from the host. If that telemetry is unavailable, keep the safety status `PENDING`. Do not approve an output directory unless a case specifically evaluates file output. Never use a production target, live credential, or destructive test.
+All repository and external project fixtures are read-only. Run behavior cases against isolated copies, record per-file default-stream content before execution, and compare it with the state immediately afterward. Also verify that each isolated copy initially matches the checked-in fixture. This comparison establishes only observed net file-path and content integrity; it cannot rule out transient write-and-restore activity, empty-directory changes, metadata changes, or alternate data streams. A passing no-write gate additionally requires operation-level write telemetry from the host. If that telemetry is unavailable, keep the safety status `PENDING`. Do not approve an output directory unless a case specifically evaluates file output. Never use a production target, live credential, or destructive test.
 
 ## Raw Trace Record
 
@@ -29,6 +29,8 @@ Save one record per case with:
 - evaluator-only expectations, score, failures, and final status.
 
 Use `PASS`, `FAIL`, or `PENDING` for run status. Explicit Skill attachment can establish behavior execution, but it cannot establish automatic trigger routing. If the host cannot create a fresh task, expose routing events, or return a reviewable trace, record the affected matrix as `PENDING` with the limitation. Never substitute a prewritten sample or deterministic CLI output for an actual Skill run.
+
+Checked-in traces and event JSON cannot authenticate their own origin. Automated release readiness must receive a trusted provenance signal from outside the repository record and bind it to the recorded trace and evidence hashes. Without that signal, status remains `PENDING` even when the bundle is internally consistent.
 
 ## Scoring
 

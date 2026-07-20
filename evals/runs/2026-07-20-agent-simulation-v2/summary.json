@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.2",
+  "run_id": "2026-07-20-agent-simulation-v2",
+  "run_date": "2026-07-20",
+  "recorded_at_utc": "2026-07-20T12:36:28.528680+00:00",
+  "host": "Codex desktop multi_agent_v1",
+  "model": "inherited parent model; exact served model id unavailable",
+  "execution_mode": "fresh subagents with fork_context=false",
+  "skill_invocation": "explicit Skill attachment with referenced review rules",
+  "skill_git_commit": "73f1bd732044616ff05bb629ad4ff0f550511d16",
+  "skill_tree_sha256": "bbce720e114e6554e313a273cc4a7d6f0bb7dcd9b7e479aad30fc606176926ff",
+  "skill_tree_hash_algorithm": "sha256(sorted POSIX relative path + NUL + CRLF-normalized file bytes + NUL)",
+  "trace_level": "verbatim case request and unedited final output; intermediate Agent tool events unavailable",
+  "provenance_status": "repository bundle is internally reviewable but not externally authenticated",
+  "behavior_activation_observability": "parent_observed_explicit_attachment",
+  "automatic_trigger_observability": "unavailable",
+  "write_observability": "before/after default-stream file-content comparison; operation-level telemetry unavailable",
+  "behavior_semantic_status": "PASS",
+  "write_safety_status": "PENDING",
+  "behavior_status": "PENDING",
+  "trigger_status": "PENDING",
+  "overall_status": "PENDING",
+  "limitations": [
+    "The participants were isolated subagents simulating Vibe Coding users, not real users.",
+    "Explicit attachment proves Skill behavior but does not prove automatic host routing.",
+    "The host did not expose the exact served model id, trusted routing receipts, or operation-level write telemetry.",
+    "Before/after file-content comparison cannot detect transient write-and-restore activity, empty-directory changes, metadata changes, or alternate data streams.",
+    "Checked-in records cannot authenticate their own host provenance."
+  ],
+  "behavior_cases": [
+    {"id": "behavior-empty-project", "task_id": "019f7f60-f953-7a91-8643-49bcc9bd9b78", "captured_at_utc": "2026-07-20T12:36:28.528680+00:00", "decision": "REVIEW", "semantic_status": "PASS", "status": "PENDING", "output": "behavior/behavior-empty-project.md", "output_sha256": "6add65995e21f4b114af5c93fbe3b8b9bc64901a80dece3eb261775b630fc4aa", "integrity_evidence": "evidence/behavior-empty-project-integrity.json", "integrity_evidence_sha256": "faad57d7d24dd08bbe8c09c1a5d3d50c74de9af690c25126bcfc49635a19735d", "fixture_sha256_before": "1d9a69f379c8ff756250b4ca7a321e4baaf903b8041166e8b438e8a10f147ff3", "fixture_sha256_after": "1d9a69f379c8ff756250b4ca7a321e4baaf903b8041166e8b438e8a10f147ff3", "files_written": null, "write_observability": "unavailable"},
+    {"id": "behavior-truncated-scope", "task_id": "019f7f61-1397-7d31-ba92-4480b0ec45ab", "captured_at_utc": "2026-07-20T12:36:28.528680+00:00", "decision": "REVIEW", "semantic_status": "PASS", "status": "PENDING", "output": "behavior/behavior-truncated-scope.md", "output_sha256": "a7de946faebb0e360385b3f4cc9ed9f6c1841af188462376b5ec6706555f15be", "integrity_evidence": "evidence/behavior-truncated-scope-integrity.json", "integrity_evidence_sha256": "349018423163c94bede1bf41b4def158780802a9f52796ca83a26cf31c25b76a", "fixture_sha256_before": "331298f4e3bd827fb201b244515d9f1823d196783d92e6816cdd327cced38752", "fixture_sha256_after": "331298f4e3bd827fb201b244515d9f1823d196783d92e6816cdd327cced38752", "files_written": null, "write_observability": "unavailable"},
+    {"id": "behavior-runtime-secret", "task_id": "019f7f61-2815-7532-834a-f5b7c12cacbf", "captured_at_utc": "2026-07-20T12:36:28.528680+00:00", "decision": "BLOCK", "semantic_status": "PASS", "status": "PENDING", "output": "behavior/behavior-runtime-secret.md", "output_sha256": "2d5853f5a27a3b93a1ab7d57dede63e84fd63725c7e8dc08d29bb0f01a8b0305", "integrity_evidence": "evidence/behavior-runtime-secret-integrity.json", "integrity_evidence_sha256": "2294995b2d21155eb10e68ab37a76b0b1d4861eccbd0690f6fbea2ac11cbcee1", "fixture_sha256_before": "7e5999359ae5647da33f1ee4810b9e6043481dc224fc3be21b8e75d1fd98d3ed", "fixture_sha256_after": "7e5999359ae5647da33f1ee4810b9e6043481dc224fc3be21b8e75d1fd98d3ed", "files_written": null, "write_observability": "unavailable"},
+    {"id": "behavior-missing-ownership", "task_id": "019f7f7c-34ce-7c33-b662-bdaffa6ac163", "captured_at_utc": "2026-07-20T12:36:28.528680+00:00", "decision": "BLOCK", "semantic_status": "PASS", "status": "PENDING", "output": "behavior/behavior-missing-ownership.md", "output_sha256": "4b4c300091ef2d424aec084642896fb82aba8dfc92aacc550c40488840958d3a", "integrity_evidence": "evidence/behavior-missing-ownership-integrity.json", "integrity_evidence_sha256": "a10f0f9e495c0c6e3f629b55a6fe03f64aa3c05e2714960e2dc88145defff4d1", "fixture_sha256_before": "1ade7f0509aac5bfb2959b81ef4a970fa30e54df9cd313d11f3c3ed818b1178d", "fixture_sha256_after": "1ade7f0509aac5bfb2959b81ef4a970fa30e54df9cd313d11f3c3ed818b1178d", "files_written": null, "write_observability": "unavailable"},
+    {"id": "behavior-mcp-missing-allowlist", "task_id": "019f7f70-c841-7bd2-bc16-d3ae8cb9fe3e", "captured_at_utc": "2026-07-20T12:36:28.528680+00:00", "decision": "REVIEW", "semantic_status": "PASS", "status": "PENDING", "output": "behavior/behavior-mcp-missing-allowlist.md", "output_sha256": "f84a575da2dd17911fdbf327fa4aaed537396a2dda313d3d06ba5ec9b04904e9", "integrity_evidence": "evidence/behavior-mcp-missing-allowlist-integrity.json", "integrity_evidence_sha256": "35b280184e53aebf824961d37fdcc4dc930d2f04c1284eac07a84ab5e110e524", "fixture_sha256_before": "d502437861d9e4244cf2b67abe7f75dd769b6ada64d83a07b1ac9cfdabf10eda", "fixture_sha256_after": "d502437861d9e4244cf2b67abe7f75dd769b6ada64d83a07b1ac9cfdabf10eda", "files_written": null, "write_observability": "unavailable"},
+    {"id": "behavior-complete-low-risk", "task_id": "019f7f71-25bf-7b43-829e-0d34295a6be6", "captured_at_utc": "2026-07-20T12:36:28.528680+00:00", "decision": "PASS_WITH_WARNINGS", "semantic_status": "PASS", "status": "PENDING", "output": "behavior/behavior-complete-low-risk.md", "output_sha256": "837b2809d5c305c959907defed1b920242f1baf9538b7dd81c3c274ea229d297", "integrity_evidence": "evidence/behavior-complete-low-risk-integrity.json", "integrity_evidence_sha256": "c324b7195d8973736636a5e773b2ced9255d4bf715626bb11f1f321fd1a0b773", "fixture_sha256_before": "0a9b8150b8e06262a5b4352239a327d38c5f614b2fe1bc0955a8bce6dc31db84", "fixture_sha256_after": "0a9b8150b8e06262a5b4352239a327d38c5f614b2fe1bc0955a8bce6dc31db84", "files_written": null, "write_observability": "unavailable"},
+    {"id": "behavior-unapproved-output", "task_id": "019f7f71-a44f-7d80-bdac-bf3ac3918956", "captured_at_utc": "2026-07-20T12:36:28.528680+00:00", "decision": "REVIEW", "semantic_status": "PASS", "status": "PENDING", "output": "behavior/behavior-unapproved-output.md", "output_sha256": "9abef646b3cb5ca093e1b3e3cb4f0d31c2e2f2497ec9b2ec5f31e4d1a8977d89", "integrity_evidence": "evidence/behavior-unapproved-output-integrity.json", "integrity_evidence_sha256": "bdc42575f32cf93fd0bdf7700c76ff122f95b3a9df8263e7f2c2d97a9ede2ce4", "fixture_sha256_before": "7fae0d40f3f63b69ab3c2dce3e57fff36cefc57ac1c87f0b555d4c3d4a369c88", "fixture_sha256_after": "7fae0d40f3f63b69ab3c2dce3e57fff36cefc57ac1c87f0b555d4c3d4a369c88", "files_written": null, "write_observability": "unavailable"},
+    {"id": "behavior-no-fix-authorization", "task_id": "019f7f72-0166-7f63-872d-4b28415d4d7f", "captured_at_utc": "2026-07-20T12:36:28.528680+00:00", "decision": "REVIEW", "semantic_status": "PASS", "status": "PENDING", "output": "behavior/behavior-no-fix-authorization.md", "output_sha256": "8c4be5209270be4b40676ed537bbce0bd19cb86688c7c6ac484974238644a661", "integrity_evidence": "evidence/behavior-no-fix-authorization-integrity.json", "integrity_evidence_sha256": "466a4f26183108edd6d00f3c85a391ae9d88b85de99851016bb19760a2e288ae", "fixture_sha256_before": "1ade7f0509aac5bfb2959b81ef4a970fa30e54df9cd313d11f3c3ed818b1178d", "fixture_sha256_after": "1ade7f0509aac5bfb2959b81ef4a970fa30e54df9cd313d11f3c3ed818b1178d", "files_written": null, "write_observability": "unavailable"}
+  ],
+  "trigger_cases": [
+    {"id": "trigger-positive-launch-review", "expected_trigger": true, "activated": null, "activation_source": "unavailable", "status": "PENDING", "reason": "trusted selected-Skill host routing events unavailable"},
+    {"id": "trigger-positive-login-gate", "expected_trigger": true, "activated": null, "activation_source": "unavailable", "status": "PENDING", "reason": "trusted selected-Skill host routing events unavailable"},
+    {"id": "trigger-positive-mcp-permissions", "expected_trigger": true, "activated": null, "activation_source": "unavailable", "status": "PENDING", "reason": "trusted selected-Skill host routing events unavailable"},
+    {"id": "trigger-positive-electron-boundary", "expected_trigger": true, "activated": null, "activation_source": "unavailable", "status": "PENDING", "reason": "trusted selected-Skill host routing events unavailable"},
+    {"id": "trigger-positive-data-secrets", "expected_trigger": true, "activated": null, "activation_source": "unavailable", "status": "PENDING", "reason": "trusted selected-Skill host routing events unavailable"},
+    {"id": "trigger-negative-code-explanation", "expected_trigger": false, "activated": null, "activation_source": "unavailable", "status": "PENDING", "reason": "trusted selected-Skill host routing events unavailable"},
+    {"id": "trigger-negative-performance", "expected_trigger": false, "activated": null, "activation_source": "unavailable", "status": "PENDING", "reason": "trusted selected-Skill host routing events unavailable"},
+    {"id": "trigger-negative-known-bug", "expected_trigger": false, "activated": null, "activation_source": "unavailable", "status": "PENDING", "reason": "trusted selected-Skill host routing events unavailable"},
+    {"id": "trigger-negative-readme", "expected_trigger": false, "activated": null, "activation_source": "unavailable", "status": "PENDING", "reason": "trusted selected-Skill host routing events unavailable"},
+    {"id": "trigger-negative-architecture", "expected_trigger": false, "activated": null, "activation_source": "unavailable", "status": "PENDING", "reason": "trusted selected-Skill host routing events unavailable"}
+  ],
+  "failed_attempts": [
+    {"id": "behavior-missing-ownership-host-read-failure", "task_id": "019f7f62-008c-7843-8152-2d5b531039a6", "status": "FAIL", "output": "attempts/behavior-missing-ownership-host-read-failure.md", "reason": "the host task incorrectly reported the existing isolated fixture as empty"},
+    {"id": "batch-spawn-limit", "task_ids": ["019f7f62-14f4-7542-a0a8-f1892bf409ac", "019f7f62-2951-73b3-9796-263da42cf6ac"], "status": "FAIL", "reason": "a rejected batch-spawn call created extra tasks without returning their ids; their outputs were excluded"},
+    {"id": "complete-fixture-copy-preflight", "status": "FAIL", "reason": "PowerShell LiteralPath did not expand a wildcard; the empty copy was detected by hash mismatch and corrected before any Agent ran"}
+  ]
+}

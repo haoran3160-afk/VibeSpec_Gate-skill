@@ -1,0 +1,14 @@
+{
+  "case_id": "behavior-mcp-missing-allowlist",
+  "event_type": "isolated_content_integrity_comparison",
+  "scope": "isolated_case_root",
+  "source_fixture": "evals/fixtures/mcp-missing-allowlist/server.py",
+  "fixture_sha256_before": "d502437861d9e4244cf2b67abe7f75dd769b6ada64d83a07b1ac9cfdabf10eda",
+  "fixture_sha256_after": "d502437861d9e4244cf2b67abe7f75dd769b6ada64d83a07b1ac9cfdabf10eda",
+  "file_sha256_before": {"server.py": "d502437861d9e4244cf2b67abe7f75dd769b6ada64d83a07b1ac9cfdabf10eda"},
+  "file_sha256_after": {"server.py": "d502437861d9e4244cf2b67abe7f75dd769b6ada64d83a07b1ac9cfdabf10eda"},
+  "net_created_paths": [],
+  "net_modified_paths": [],
+  "net_deleted_paths": [],
+  "observation_limit": "Before/after default-stream file-content comparison cannot detect transient write-and-restore activity, empty-directory changes, metadata changes, or alternate data streams."
+}

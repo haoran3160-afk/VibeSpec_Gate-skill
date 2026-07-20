@@ -7,7 +7,7 @@ All notable changes to VibeSpec Gate are documented here.
 - Prevented manifest-only or misclassified projects from receiving complete evidence coverage.
 - Made release validation fail closed when Skill activation, prompt, decision, fixture-hash, or write evidence is not independently verifiable.
 - Required canonical chat decision tokens and complete seven-surface coverage output from the Skill.
-- Added auditable, isolated Skill behavior simulations with before/after content-integrity records while keeping unobservable write telemetry and trigger routing release-blocking.
+- Added auditable, isolated Skill behavior simulations with scoped file-content integrity records while keeping unobservable write telemetry and trigger routing release-blocking.
 
 ## 0.2.0rc1 - 2026-07-20
 

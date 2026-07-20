@@ -142,8 +142,8 @@ py -3 -m vibespec_gate.cli lite-review D:\path\to\project --output D:\reviews\pr
 ## 验证与适用边界
 
 - CI 在 Ubuntu Python 3.10/3.12、Windows Python 3.12 和 macOS Python 3.12 上运行完整测试、包校验和归档校验。
-- 可复核的场景记录包括显式安全审查请求、无关任务、8 类上线判断和只读边界。[查看验证记录](evals/runs/2026-07-20/README.md)。
-- 这些记录来自受控 Agent 场景，不代表独立用户验证或安全准确率。
+- 可复核的场景记录包括显式安全审查请求、无关任务和 8 类上线判断。[查看验证记录](evals/runs/2026-07-20-agent-simulation-v2/README.md)。
+- 这些受控 Agent 场景只验证审查输出，不证明宿主从未写入文件或 Skill 会自动触发，也不代表独立用户验证或安全准确率。
 - 自动化和场景覆盖不能证明没有漏洞，也不能替代专业安全评估。
 
 ## 项目资源

@@ -148,7 +148,7 @@ def test_readmes_state_skill_cli_and_evidence_boundaries():
             assert term in text
         assert "--output" in text
         assert "Python 3.10+" in text
-        assert "evals/runs/2026-07-20/README.md" in text
+        assert "evals/runs/2026-07-20-agent-simulation-v2/README.md" in text
 
 
 def _copy_required_package_files(package_dir: Path) -> None:

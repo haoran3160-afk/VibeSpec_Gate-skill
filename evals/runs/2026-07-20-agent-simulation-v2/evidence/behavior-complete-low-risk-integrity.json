@@ -1,0 +1,14 @@
+{
+  "case_id": "behavior-complete-low-risk",
+  "event_type": "isolated_content_integrity_comparison",
+  "scope": "isolated_case_root",
+  "source_fixture": "evals/fixtures/complete-low-risk-static",
+  "fixture_sha256_before": "0a9b8150b8e06262a5b4352239a327d38c5f614b2fe1bc0955a8bce6dc31db84",
+  "fixture_sha256_after": "0a9b8150b8e06262a5b4352239a327d38c5f614b2fe1bc0955a8bce6dc31db84",
+  "file_sha256_before": {"deployment-evidence.json": "d702d74f3bd0e5c4d5e8de8976014dbb5f0676f831d595e86b43f302c78bbb15", "index.html": "b0b4ef1b07ee1cfec2d4d50b56486c8191b01ab4257765862783d807f697022b"},
+  "file_sha256_after": {"deployment-evidence.json": "d702d74f3bd0e5c4d5e8de8976014dbb5f0676f831d595e86b43f302c78bbb15", "index.html": "b0b4ef1b07ee1cfec2d4d50b56486c8191b01ab4257765862783d807f697022b"},
+  "net_created_paths": [],
+  "net_modified_paths": [],
+  "net_deleted_paths": [],
+  "observation_limit": "Before/after default-stream file-content comparison cannot detect transient write-and-restore activity, empty-directory changes, metadata changes, or alternate data streams."
+}

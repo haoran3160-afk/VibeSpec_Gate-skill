@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -265,6 +266,32 @@ def test_skill_eval_readiness_reconstructs_cases_traces_hashes_and_skill_tree(tm
     summary["trigger_cases"][0]["activated"] = False
     summary_path.write_text(json.dumps(summary), encoding="utf-8")
     assert not passed()
+
+
+def test_fixture_hash_rejects_symbolic_links(tmp_path):
+    outside = tmp_path / "outside.txt"
+    outside.write_text("outside\n", encoding="utf-8")
+    fixture = tmp_path / "fixture"
+    fixture.mkdir()
+    try:
+        (fixture / "linked.txt").symlink_to(outside)
+    except OSError as exc:
+        pytest.skip(f"symbolic links unavailable: {exc}")
+
+    assert release_validation._fixture_sha256(fixture) == ""
+
+
+def test_fixture_hash_rejects_hard_links(tmp_path):
+    outside = tmp_path / "outside.txt"
+    outside.write_text("outside\n", encoding="utf-8")
+    fixture = tmp_path / "fixture"
+    fixture.mkdir()
+    try:
+        os.link(outside, fixture / "linked.txt")
+    except OSError as exc:
+        pytest.skip(f"hard links unavailable: {exc}")
+
+    assert release_validation._fixture_sha256(fixture) == ""
 
 
 @pytest.mark.parametrize(
