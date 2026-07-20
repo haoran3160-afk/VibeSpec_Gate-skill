@@ -4,6 +4,7 @@ import shutil
 import zipfile
 from pathlib import Path
 
+import scripts.verify_release_metadata as release_metadata
 from scripts.build_lite_package_zip import ARCHIVE_ROOT, build_lite_package
 from scripts.verify_lite_package import REQUIRED_INCLUDE
 from scripts.verify_release_metadata import release_tag_for, verify_release_metadata
@@ -20,6 +21,19 @@ def test_release_metadata_rejects_mismatched_tag():
     failures = verify_release_metadata(tag="v0.1.0")
 
     assert any("does not match version tag" in failure for failure in failures)
+
+
+def test_release_metadata_rejects_tag_with_unreleased_changes(tmp_path, monkeypatch):
+    (tmp_path / "pyproject.toml").write_text('[project]\nversion = "0.2.0rc1"\n', encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text(
+        "# Changelog\n\n## Unreleased\n\n- Pending change.\n\n## 0.2.0rc1 - 2026-07-20\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(release_metadata, "ROOT", tmp_path)
+
+    failures = release_metadata.verify_release_metadata(tag="v0.2.0-rc.1")
+
+    assert "CHANGELOG.md still contains unreleased changes" in failures
 
 
 def test_release_metadata_accepts_single_root_lite_archive():
@@ -60,5 +74,6 @@ def test_release_workflow_binds_tag_to_master_and_portable_checksum():
     assert "fetch-depth: 0" in workflow
     assert 'git merge-base --is-ancestor "${GITHUB_SHA}" origin/master' in workflow
     assert 'verify_release_metadata.py --tag "${GITHUB_REF_NAME}"' in workflow
+    assert "smoke_install_skill.py --archive dist/vibespec-gate-lite.zip" in workflow
     assert "(cd dist && sha256sum vibespec-gate-lite.zip > SHA256SUMS)" in workflow
     assert "sha256sum dist/vibespec-gate-lite.zip" not in workflow

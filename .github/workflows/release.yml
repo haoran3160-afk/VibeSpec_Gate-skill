@@ -36,6 +36,7 @@ jobs:
       - name: Run release gates
         run: |
           python scripts/verify_lite_package.py
+          python scripts/smoke_install_skill.py
           python scripts/verify_release_metadata.py --tag "${GITHUB_REF_NAME}"
           python -m pytest -q -p no:cacheprovider
           python -m compileall -q src tests scripts
@@ -44,6 +45,7 @@ jobs:
         run: |
           python scripts/build_lite_package_zip.py
           python scripts/verify_release_metadata.py --tag "${GITHUB_REF_NAME}" --archive dist/vibespec-gate-lite.zip
+          python scripts/smoke_install_skill.py --archive dist/vibespec-gate-lite.zip
           (cd dist && sha256sum vibespec-gate-lite.zip > SHA256SUMS)
 
       - name: Publish GitHub Release

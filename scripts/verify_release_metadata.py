@@ -15,7 +15,7 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from scripts.build_lite_package_zip import ARCHIVE_ROOT  # noqa: E402
-from scripts.verify_lite_package import REQUIRED_INCLUDE  # noqa: E402
+from scripts.verify_lite_package import REQUIRED_INCLUDE, SKILL_SOURCE  # noqa: E402
 from vibespec_gate import __version__  # noqa: E402
 
 
@@ -45,6 +45,9 @@ def verify_release_metadata(tag: str | None = None, archive: Path | None = None)
         failures.append(f"CHANGELOG.md has no heading for {__version__}")
     if tag is not None and re.search(rf"^## {re.escape(__version__)}\s+-\s+Unreleased\s*$", changelog, re.MULTILINE):
         failures.append(f"CHANGELOG.md still marks {__version__} as Unreleased")
+    unreleased = re.search(r"^## Unreleased\s*(?P<body>.*?)(?=^## |\Z)", changelog, re.MULTILINE | re.DOTALL)
+    if tag is not None and unreleased and re.search(r"^- ", unreleased.group("body"), re.MULTILINE):
+        failures.append("CHANGELOG.md still contains unreleased changes")
 
     expected_tag = release_tag_for(__version__)
     if tag is not None and tag != expected_tag:
@@ -92,7 +95,7 @@ def _verify_archive(archive: Path) -> list[str]:
         failures.append(f"archive must contain one {ARCHIVE_ROOT}/ root directory")
     for relative_name in REQUIRED_INCLUDE:
         archive_name = f"{ARCHIVE_ROOT}/{relative_name}"
-        source = ROOT / relative_name
+        source = ROOT / SKILL_SOURCE / relative_name
         if archive_name in content and content[archive_name] != source.read_bytes():
             failures.append(f"archive content differs from source: {archive_name}")
     return failures
