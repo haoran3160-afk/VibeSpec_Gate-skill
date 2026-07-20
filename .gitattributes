@@ -4,3 +4,4 @@ evals/runs/** whitespace=-trailing-space
 # Keep hash-verified fixtures and evidence byte-identical across platform checkouts.
 evals/fixtures/** text eol=lf
 evals/runs/2026-07-20-agent-simulation-v2/** text eol=lf
+evals/runs/2026-07-20-agent-simulation-v3/** text eol=lf
