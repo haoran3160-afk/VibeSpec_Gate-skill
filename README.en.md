@@ -12,7 +12,7 @@ VibeSpec Gate reviews the authorized scope for authentication, authorization, us
 
 Insufficient, incomplete, or truncated evidence cannot produce `PASS` or `PASS_WITH_WARNINGS`: confirmed blocking evidence still produces `BLOCK`; otherwise the result is `REVIEW`. `PASS` means only that no material risk was found within an explicitly stated, complete review scope. It is not proof of security.
 
-> The current version is `0.2.0rc1`. It is suitable for assisted review and controlled trials, not as a substitute for a professional penetration test, security certification, legal opinion, or compliance audit.
+> The current version is a release candidate for assisted review and controlled use. It does not replace a professional penetration test, security certification, legal opinion, or compliance audit.
 
 ## Example Output
 
@@ -139,11 +139,11 @@ py -3 -m vibespec_gate.cli lite-review D:\path\to\project --output D:\reviews\pr
 
 `--output` is required, must not overlap the project directory, and must not already exist.
 
-## Validation And Maturity
+## Validation And Boundaries
 
 - CI runs the complete tests, package verification, and archive verification on Ubuntu Python 3.10/3.12, Windows Python 3.12, and macOS Python 3.12.
-- The Skill has been checked for explicit invocation, non-activation on unrelated work, and eight launch-decision and read-only boundaries. [The validation records are reviewable](evals/runs/2026-07-20/README.md).
-- These Agent scenarios are not real-user trials. A controlled real-user trial is still pending, so the project remains an RC and does not claim GA status.
+- Reviewable scenario records include explicit security-review requests, unrelated tasks, eight launch-decision cases, and read-only boundaries. [Review the validation records](evals/runs/2026-07-20/README.md).
+- These records come from controlled Agent scenarios; they are not independent user validation or a security-accuracy measurement.
 - Automated checks and scenario coverage cannot prove the absence of vulnerabilities or replace professional assessment.
 
 ## Project Resources

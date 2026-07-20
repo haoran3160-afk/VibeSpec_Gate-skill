@@ -4,6 +4,9 @@ All notable changes to VibeSpec Gate are documented here.
 
 ## Unreleased
 
+- Prevented manifest-only or misclassified projects from receiving complete evidence coverage.
+- Made release validation fail closed when Skill activation, prompt, decision, fixture-hash, or write evidence is not independently verifiable.
+
 ## 0.2.0rc1 - 2026-07-20
 
 Release-candidate productization update.
