@@ -613,10 +613,11 @@ def _recorded_output_exists(run_root: Path, item: dict[str, Any]) -> bool:
 
 def _skill_tree_sha256(skill_source: Path) -> str:
     digest = hashlib.sha256()
-    for source in sorted(path for path in skill_source.rglob("*") if path.is_file()):
+    sources = (path for path in skill_source.rglob("*") if path.is_file())
+    for source in sorted(sources, key=lambda path: path.relative_to(skill_source).as_posix()):
         digest.update(source.relative_to(skill_source).as_posix().encode("utf-8"))
         digest.update(b"\0")
-        digest.update(source.read_bytes())
+        digest.update(source.read_bytes().replace(b"\r\n", b"\n"))
         digest.update(b"\0")
     return digest.hexdigest()
 

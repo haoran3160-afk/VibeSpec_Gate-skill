@@ -4,8 +4,8 @@
   "host": "Codex multi_agent_v1",
   "model": "inherited-parent (exact model id not exposed by host tool)",
   "skill_git_head": "36357dbab3579fb22fc1e3ff1a699e43f9cb6170",
-  "skill_tree_sha256": "4f6c3b82925a3e0c6a04b9dc627ab0bd46250daca873c28e4f58bd0e7ebccbef",
-  "skill_tree_hash_algorithm": "sha256(sorted POSIX relative path + NUL + file bytes + NUL)",
+  "skill_tree_sha256": "1537eda8cb888f82490d2d675f9d846b2869d0f46feda92c5cda6456c24b92c2",
+  "skill_tree_hash_algorithm": "sha256(sorted POSIX relative path + NUL + CRLF-normalized file bytes + NUL)",
   "trace_level": "raw request and unedited final output; intermediate tool events unavailable from host",
   "behavior_cases": [
     {"id": "behavior-empty-project", "agent_id": "019f7d7d-e119-7333-a4e8-b4d6954a2e43", "decision": "REVIEW", "status": "PASS", "output": "behavior/behavior-empty-project.md", "fixture_sha256_before": "1d9a69f379c8ff756250b4ca7a321e4baaf903b8041166e8b438e8a10f147ff3", "fixture_sha256_after": "1d9a69f379c8ff756250b4ca7a321e4baaf903b8041166e8b438e8a10f147ff3", "files_written": []},

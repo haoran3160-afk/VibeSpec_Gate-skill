@@ -111,6 +111,8 @@ def test_skill_eval_readiness_verifies_activation_outputs_hashes_and_skill_tree(
     summary_path.write_text(json.dumps(summary), encoding="utf-8")
 
     assert _skill_eval_passed(summary_path, skill)
+    (skill / "SKILL.md").write_bytes(b"candidate\r\n")
+    assert _skill_eval_passed(summary_path, skill)
 
     summary["trigger_cases"][0]["activated"] = False
     summary_path.write_text(json.dumps(summary), encoding="utf-8")
