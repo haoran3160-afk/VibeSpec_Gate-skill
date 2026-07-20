@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "cases": [
+    {
+      "id": "trigger-positive-launch-review",
+      "prompt": "Use $vibespec-gate to review this vibe-coded product for launch-blocking security risks. Keep the project read-only and answer in chat.",
+      "expected_trigger": true
+    },
+    {
+      "id": "trigger-positive-login-gate",
+      "prompt": "Use $vibespec-gate to check whether this app's login, reset, OTP, sessions, and authorization are safe enough to launch. Do not edit files.",
+      "expected_trigger": true
+    },
+    {
+      "id": "trigger-positive-mcp-permissions",
+      "prompt": "Use $vibespec-gate to review this MCP server's tool permissions, command boundaries, and human confirmation gates before release.",
+      "expected_trigger": true
+    },
+    {
+      "id": "trigger-positive-electron-boundary",
+      "prompt": "Use $vibespec-gate for a pre-launch review of this Electron app's preload, IPC, filesystem, and shell boundaries.",
+      "expected_trigger": true
+    },
+    {
+      "id": "trigger-positive-data-secrets",
+      "prompt": "Use $vibespec-gate to inspect this SaaS project for leaked secrets, unsafe database rules, and cross-tenant data exposure before launch.",
+      "expected_trigger": true
+    },
+    {
+      "id": "trigger-negative-code-explanation",
+      "prompt": "Explain how the request router in this project works. Do not perform a security review.",
+      "expected_trigger": false
+    },
+    {
+      "id": "trigger-negative-performance",
+      "prompt": "Profile this list rendering code and suggest performance improvements.",
+      "expected_trigger": false
+    },
+    {
+      "id": "trigger-negative-known-bug",
+      "prompt": "Fix the off-by-one bug in the pagination helper and run its unit test.",
+      "expected_trigger": false
+    },
+    {
+      "id": "trigger-negative-readme",
+      "prompt": "Rewrite the README installation section for clarity.",
+      "expected_trigger": false
+    },
+    {
+      "id": "trigger-negative-architecture",
+      "prompt": "Compare a modular monolith and microservices for this small application.",
+      "expected_trigger": false
+    }
+  ]
+}

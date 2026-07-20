@@ -1,0 +1,2 @@
+# Preserve captured Agent output byte-for-byte while keeping source whitespace checks strict.
+evals/runs/** whitespace=-trailing-space

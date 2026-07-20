@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from scripts.run_lite_release_validation import (
     PRIMARY_OUTPUTS,
+    _skill_eval_passed,
+    _skill_tree_sha256,
     review_validation_outputs,
     stage_candidate_package,
     write_prompt_only_outputs,
@@ -58,5 +61,57 @@ def test_release_readiness_decision_requires_cli_when_not_skipped(tmp_path):
     write_release_readiness_decision(tmp_path, command_results, review, skipped_cli=False)
 
     decision = (tmp_path / "release_readiness_decision.md").read_text(encoding="utf-8")
-    assert "Decision: READY_FOR_RELEASE_CANDIDATE" in decision
+    assert "Decision: READY_FOR_CONTROLLED_RC" in decision
+    assert "prewritten examples are not counted" in decision
+    assert "Real-user controlled trial: PENDING" in decision
     assert "professional security certification" in decision
+
+
+def test_skill_eval_readiness_verifies_activation_outputs_hashes_and_skill_tree(tmp_path):
+    skill = tmp_path / "skill"
+    skill.mkdir()
+    (skill / "SKILL.md").write_text("candidate\n", encoding="utf-8")
+    run_root = tmp_path / "run"
+    (run_root / "trigger").mkdir(parents=True)
+    (run_root / "behavior").mkdir()
+    triggers = []
+    for index in range(10):
+        output = f"trigger/{index}.md"
+        expected = index < 5
+        trace = "trace\n" if expected else "trace\nVibeSpec Gate activated: no\n"
+        (run_root / output).write_text(trace, encoding="utf-8")
+        triggers.append(
+            {
+                "status": "PASS",
+                "expected_trigger": expected,
+                "activated": expected,
+                "output": output,
+                **({"activation_evidence": "VibeSpec Gate activated: no"} if not expected else {}),
+            }
+        )
+    behaviors = []
+    for index in range(8):
+        output = f"behavior/{index}.md"
+        (run_root / output).write_text("trace\n", encoding="utf-8")
+        behaviors.append(
+            {
+                "status": "PASS",
+                "fixture_sha256_before": "same",
+                "fixture_sha256_after": "same",
+                "files_written": [],
+                "output": output,
+            }
+        )
+    summary = {
+        "skill_tree_sha256": _skill_tree_sha256(skill),
+        "trigger_cases": triggers,
+        "behavior_cases": behaviors,
+    }
+    summary_path = run_root / "summary.json"
+    summary_path.write_text(json.dumps(summary), encoding="utf-8")
+
+    assert _skill_eval_passed(summary_path, skill)
+
+    summary["trigger_cases"][0]["activated"] = False
+    summary_path.write_text(json.dumps(summary), encoding="utf-8")
+    assert not _skill_eval_passed(summary_path, skill)

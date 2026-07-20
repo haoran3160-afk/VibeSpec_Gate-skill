@@ -1,0 +1,7 @@
+{
+  "fixture_type": "truncated_inventory",
+  "files_discovered": 201,
+  "files_inspected": 200,
+  "files_skipped": 1,
+  "unavailable_range": "file-200.txt"
+}

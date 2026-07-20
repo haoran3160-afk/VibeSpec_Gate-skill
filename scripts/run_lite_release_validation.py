@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -15,7 +16,7 @@ SRC = ROOT / "src"
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.verify_lite_package import REQUIRED_INCLUDE  # noqa: E402
+from scripts.verify_lite_package import REQUIRED_INCLUDE, SKILL_SOURCE  # noqa: E402
 
 
 DEFAULT_DATE = "2026-07-08"
@@ -27,12 +28,13 @@ PRIMARY_OUTPUTS = (
     "agent_fix_plan.md",
     "retest_checklist.md",
 )
+SKILL_EVAL_SUMMARY = ROOT / "evals" / "runs" / "2026-07-20" / "summary.json"
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run the Lite Skill release validation sprint.")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_ROOT)
-    parser.add_argument("--skip-cli", action="store_true", help="Skip the optional Core-powered CLI smoke.")
+    parser.add_argument("--skip-cli", action="store_true", help="Skip the optional Python CLI smoke.")
     args = parser.parse_args(argv)
 
     output_root = args.output.resolve()
@@ -92,7 +94,7 @@ def reset_output_root(output_root: Path) -> None:
 def stage_candidate_package(output_root: Path) -> Path:
     candidate = output_root / "candidate-lite-package"
     for file_name in REQUIRED_INCLUDE:
-        source = ROOT / file_name
+        source = ROOT / SKILL_SOURCE / file_name
         destination = candidate / file_name
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, destination)
@@ -471,7 +473,7 @@ Three-minute questions:
 1. When should I use the Skill?
    - Use it before launch when an AI-built product may leak secrets, expose user data, ship broken auth, or give an Agent/tool too much authority.
 2. How do I trigger it?
-   - Ask the host Agent to review the project with `examples/lite_review_prompt.md`.
+   - Explicitly ask the coding Agent to use `$vibespec-gate` for a launch security review.
 3. What files do I read first?
    - `launch_decision.md`, `top_security_risks.md`, `agent_fix_plan.md`, and `retest_checklist.md`.
 4. What does `BLOCK` mean?
@@ -481,7 +483,7 @@ Three-minute questions:
 6. How do I retest?
    - Follow project-specific checks in `retest_checklist.md` and confirm launch status changes after evidence supports the fix.
 
-Result: pass. The reviewer did not need Phase, scorer, calibration, fixture, or release-verifier concepts. The CLI path is identifiable as optional repository infrastructure.
+Result: pass. The installed Skill routes its review protocol, coverage rules, and output templates without repository documentation. The CLI is identifiable as optional repository infrastructure.
 """,
     )
 
@@ -491,13 +493,14 @@ def write_release_notes(output_root: Path) -> None:
         output_root / "release_notes.md",
         """# Lite Skill Release Candidate Notes
 
-This release candidate validates the prompt-only Lite package path and the optional Core-powered repository overlay.
+This release candidate validates the Agent Skill package and the optional Python CLI.
 
 ## Validated Scope
 
-- Prompt-only Agent-native package files are staged in `candidate-lite-package/`.
+- Runtime Skill files are staged in `candidate-lite-package/`.
 - Source and candidate package boundary checks pass.
-- Four prompt-only demo reviews produce `launch_decision.md`, `top_security_risks.md`, `agent_fix_plan.md`, and `retest_checklist.md`.
+- Fresh Agent tasks cover explicit activation, non-activation, and launch-gating behavior with reviewable raw outputs.
+- Four prewritten synthetic examples check only the saved-output documentation shape and do not count as Skill-readiness evidence.
 - Optional CLI smoke produces the same Lite output shape with preserved evidence.
 
 ## Boundary
@@ -515,15 +518,12 @@ def write_release_readiness_decision(
     skipped_cli: bool,
 ) -> None:
     release_notes = _read(output_root / "release_notes.md").lower()
+    skill_eval_passed = _skill_eval_passed(SKILL_EVAL_SUMMARY)
     rows = [
         ("Source package verifier passes", command_results["package_verifier_source"]["returncode"] == 0),
         ("Candidate package verifier passes", command_results["package_verifier_candidate"]["returncode"] == 0),
         ("Focused Lite tests pass", command_results["pytest_lite_focused"]["returncode"] == 0),
-        ("Prompt-only review produces four-file shape on four demo projects", review["passed"]),
-        ("Expected blocker is BLOCK or REVIEW", _extract_decision(_read(output_root / "prompt_only_case_1_secret_leak_web_app" / "launch_decision.md")) in {"BLOCK", "REVIEW"}),
-        ("Low-risk case avoids unsupported BLOCK", _extract_decision(_read(output_root / "prompt_only_case_4_low_risk_clean_project" / "launch_decision.md")) != "BLOCK"),
-        ("Fix plans contain bounded Agent tasks and human confirmation", review["passed"]),
-        ("Retest checklists contain project-specific checks", review["passed"]),
+        ("Fresh-task Skill trigger and behavior evaluations pass", skill_eval_passed),
         ("Three-minute usability check passes", (output_root / "usability_notes.md").exists()),
         (
             "Release notes state non-certification boundary",
@@ -534,14 +534,15 @@ def write_release_readiness_decision(
         ),
     ]
     if not skipped_cli:
-        rows.insert(3, ("Optional Core-powered CLI smoke passes", command_results["cli_smoke"]["returncode"] == 0))
+        rows.insert(3, ("Optional Python CLI smoke passes", command_results["cli_smoke"]["returncode"] == 0))
     ready = all(passed for _, passed in rows) and not skipped_cli
     lines = [
         "# Lite Release Readiness Decision",
         "",
-        f"Decision: {'READY_FOR_RELEASE_CANDIDATE' if ready else 'NOT_RELEASE_READY'}",
+        f"Decision: {'READY_FOR_CONTROLLED_RC' if ready else 'NOT_RELEASE_READY'}",
         "",
         "This validation does not make VibeSpec Gate a professional security certification, penetration test, legal review, or compliance attestation.",
+        "Real-user controlled trial: PENDING. Agent evaluation does not count as real-user evidence.",
         "",
         "## Gates",
         "",
@@ -554,7 +555,9 @@ def write_release_readiness_decision(
     lines.extend(
         [
             "",
-            "## Reviewed Cases",
+            "## Synthetic Documentation Examples",
+            "",
+            "These prewritten examples are not counted as Skill-readiness evidence:",
             "",
             "- `prompt_only_case_1_secret_leak_web_app`: vulnerable Next/Supabase fixture, expected blocker.",
             "- `prompt_only_case_2_missing_auth_or_ownership_check`: vulnerable orders route, expected blocker or review.",
@@ -564,6 +567,58 @@ def write_release_readiness_decision(
         ]
     )
     _write(output_root / "release_readiness_decision.md", "\n".join(lines))
+
+
+def _skill_eval_passed(path: Path, skill_source: Path = SKILL_SOURCE) -> bool:
+    if not path.exists():
+        return False
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    triggers = data.get("trigger_cases", [])
+    behaviors = data.get("behavior_cases", [])
+    if not isinstance(triggers, list) or not isinstance(behaviors, list):
+        return False
+    if len(triggers) != 10 or len(behaviors) != 8:
+        return False
+    if not all(isinstance(item, dict) and item.get("status") == "PASS" for item in triggers + behaviors):
+        return False
+    if not all(item.get("activated") is item.get("expected_trigger") for item in triggers):
+        return False
+    run_root = path.parent
+    for item in triggers:
+        if item.get("expected_trigger") is False:
+            evidence = item.get("activation_evidence")
+            output = item.get("output")
+            if not isinstance(evidence, str) or "activated: no" not in evidence.lower():
+                return False
+            if not isinstance(output, str) or "vibespec gate activated: no" not in _read(run_root / output).lower():
+                return False
+    if not all(
+        item.get("fixture_sha256_before") == item.get("fixture_sha256_after")
+        and item.get("files_written") == []
+        for item in behaviors
+    ):
+        return False
+    if not all(_recorded_output_exists(run_root, item) for item in triggers + behaviors):
+        return False
+    return data.get("skill_tree_sha256") == _skill_tree_sha256(skill_source)
+
+
+def _recorded_output_exists(run_root: Path, item: dict[str, Any]) -> bool:
+    output = item.get("output")
+    return isinstance(output, str) and bool(output) and (run_root / output).is_file()
+
+
+def _skill_tree_sha256(skill_source: Path) -> str:
+    digest = hashlib.sha256()
+    for source in sorted(path for path in skill_source.rglob("*") if path.is_file()):
+        digest.update(source.relative_to(skill_source).as_posix().encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(source.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
 
 
 def _extract_decision(text: str) -> str:
