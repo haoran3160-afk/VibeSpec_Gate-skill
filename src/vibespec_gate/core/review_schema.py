@@ -5,6 +5,8 @@ import re
 from pathlib import Path
 from typing import Any
 
+from .coverage import coverage_from_dict
+
 
 SEVERITIES = {"P0", "P1", "P2", "P3", "Info"}
 SOURCE_TYPES = {"runtime", "test", "docs", "example", "generated", "vendor", "cache", "unknown"}
@@ -55,6 +57,7 @@ def validate_review_output_dir(output_dir: str | Path) -> dict[str, int]:
     if len(packets) != len(verdicts):
         raise SchemaValidationError("ai_review.json and review_packets.json must have the same length")
     validate_llm_review_packet(llm_packet, len(packets))
+    _validate_coverage_matches_review_packet(decision_output, llm_packet)
     if len(decisions) != len(verdicts):
         raise SchemaValidationError("agent_review_decisions.json must cover every reviewed finding")
 
@@ -301,6 +304,19 @@ def _validate_decision_output_summary(
         actual = summary.get(key)
         if actual != count:
             raise SchemaValidationError(f"agent_review_decisions.summary.{key} expected {count}, found {actual}")
+
+
+def _validate_coverage_matches_review_packet(
+    decision_output: dict[str, Any], llm_packet: dict[str, Any]
+) -> None:
+    coverage = decision_output["summary"].get("coverage")
+    if coverage is not None and coverage_from_dict(coverage).to_dict() != coverage:
+        raise SchemaValidationError("agent_review_decisions.summary.coverage is invalid")
+    packet_coverage = llm_packet["project_profile"].get("coverage")
+    if packet_coverage is not None and coverage_from_dict(packet_coverage).to_dict() != packet_coverage:
+        raise SchemaValidationError("llm_review_packet.project_profile.coverage is invalid")
+    if coverage is not None and packet_coverage is not None and coverage != packet_coverage:
+        raise SchemaValidationError("agent_review_decisions.summary.coverage must match llm_review_packet project coverage")
 
 
 def _require_dict(value: Any, path: str) -> None:

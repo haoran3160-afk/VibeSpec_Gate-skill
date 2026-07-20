@@ -19,7 +19,7 @@ def main(argv: list[str] | None = None) -> int:
         print("usage: py -3 scripts\\build_lite_review_bundle.py <review_output_dir> [bundle_dir]", file=sys.stderr)
         return 2
     review_output = Path(args[0])
-    bundle_dir = Path(args[1]) if len(args) == 2 else review_output / "lite_review"
+    bundle_dir = Path(args[1]) if len(args) == 2 else None
     try:
         result = build_lite_review_bundle(review_output, bundle_dir)
     except Exception as exc:  # noqa: BLE001 - CLI should report validation/shape failures directly.

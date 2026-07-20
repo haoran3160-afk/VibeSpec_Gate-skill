@@ -2,9 +2,13 @@
 
 import json
 import shutil
+import tempfile
 from pathlib import Path
 from typing import Any
 
+from .coverage import EvidenceCoverage, coverage_from_dict
+from .path_safety import require_disjoint_paths
+from .review_schema import validate_review_output_dir
 
 EVIDENCE_FILES = (
     "llm_review_packet.json",
@@ -19,40 +23,56 @@ EVIDENCE_FILES = (
 
 def build_lite_review_bundle(review_output: Path, bundle_dir: Path | None = None) -> dict[str, object]:
     review_output = review_output.resolve()
-    bundle_dir = (bundle_dir or review_output / "lite_review").resolve()
-    if review_output == bundle_dir:
-        raise ValueError("bundle_dir must be separate from review_output")
+    default_bundle = review_output.with_name(f"{review_output.name}-lite-review")
+    review_output, bundle_dir = require_disjoint_paths(
+        review_output,
+        bundle_dir or default_bundle,
+        first_label="review input",
+        second_label="bundle output",
+    )
+    validate_review_output_dir(review_output)
+    if bundle_dir.exists():
+        raise ValueError(f"bundle output already exists: {bundle_dir}")
     decisions_path = review_output / "agent_review_decisions.json"
-    if not decisions_path.exists():
-        raise FileNotFoundError(decisions_path)
     decisions_payload = _load_json(decisions_path)
     decisions = _decisions(decisions_payload)
     summary = decisions_payload.get("summary", {}) if isinstance(decisions_payload, dict) else {}
-    launch_decision = _launch_decision(decisions)
-    bundle_dir.mkdir(parents=True, exist_ok=True)
-    evidence_dir = bundle_dir / "evidence"
-    evidence_dir.mkdir(parents=True, exist_ok=True)
-    _write(bundle_dir / "launch_decision.md", render_launch_decision(launch_decision, summary, decisions))
-    _write(bundle_dir / "top_security_risks.md", render_top_security_risks(decisions))
-    _write(bundle_dir / "agent_fix_plan.md", render_agent_fix_plan(decisions))
-    _write(bundle_dir / "retest_checklist.md", render_retest_checklist(decisions))
-    copied = _copy_evidence(review_output, evidence_dir)
+    coverage = coverage_from_dict(summary.get("coverage"))
+    launch_decision = _launch_decision(decisions, coverage)
+    bundle_dir.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="vibespec-gate-bundle-", dir=bundle_dir.parent) as temporary:
+        staging = Path(temporary) / "bundle"
+        staging.mkdir()
+        evidence_dir = staging / "evidence"
+        evidence_dir.mkdir()
+        _write(staging / "launch_decision.md", render_launch_decision(launch_decision, summary, decisions, coverage))
+        _write(staging / "top_security_risks.md", render_top_security_risks(decisions))
+        _write(staging / "agent_fix_plan.md", render_agent_fix_plan(decisions))
+        _write(staging / "retest_checklist.md", render_retest_checklist(decisions))
+        copied = _copy_evidence(review_output, evidence_dir)
+        staging.rename(bundle_dir)
     return {
         "schema_version": "1.0",
         "review_output": str(review_output),
         "bundle_dir": str(bundle_dir),
         "launch_decision": launch_decision,
+        "coverage": coverage.to_dict(),
         "primary_outputs": [
             str(bundle_dir / "launch_decision.md"),
             str(bundle_dir / "top_security_risks.md"),
             str(bundle_dir / "agent_fix_plan.md"),
             str(bundle_dir / "retest_checklist.md"),
         ],
-        "evidence_files": copied,
+        "evidence_files": [str(bundle_dir / "evidence" / name) for name in copied],
     }
 
 
-def render_launch_decision(launch_decision: str, summary: dict[str, Any], decisions: list[dict[str, Any]]) -> str:
+def render_launch_decision(
+    launch_decision: str,
+    summary: dict[str, Any],
+    decisions: list[dict[str, Any]],
+    coverage: EvidenceCoverage,
+) -> str:
     blocking = [item for item in decisions if item.get("blocks_launch")]
     must_review = [item for item in decisions if item.get("must_review")]
     lines = [
@@ -62,7 +82,7 @@ def render_launch_decision(launch_decision: str, summary: dict[str, Any], decisi
         "",
         "## Can I launch?",
         "",
-        _decision_explanation(launch_decision, len(blocking), len(must_review)),
+        _decision_explanation(launch_decision, len(blocking), len(must_review), coverage),
         "",
         "## Review Snapshot",
         "",
@@ -71,9 +91,24 @@ def render_launch_decision(launch_decision: str, summary: dict[str, Any], decisi
         f"- Launch-blocking findings: {len(blocking)}",
         f"- Human confirmation items: {len(must_review)}",
         "",
+        "## Evidence Coverage",
+        "",
+        f"- Coverage status: {coverage.coverage_status}",
+        f"- Files inspected: {coverage.files_inspected} of {coverage.files_discovered}",
+    ]
+    for item in coverage.surfaces:
+        detail = ", ".join(item.source_refs) if item.source_refs else item.reason
+        lines.append(f"- {item.surface}: {item.status} - {detail}")
+    missing = coverage.missing_evidence()
+    if missing:
+        lines.extend(["", "### Missing evidence", "", *[f"- {item}" for item in missing]])
+    lines.extend(
+        [
+        "",
         "## Human Confirmation Required",
         "",
-    ]
+        ]
+    )
     if must_review:
         lines.append("A human should confirm the listed evidence before any coding Agent edits the project.")
     else:
@@ -199,29 +234,38 @@ def _copy_evidence(review_output: Path, evidence_dir: Path) -> list[str]:
         if source.exists():
             destination = evidence_dir / name
             shutil.copy2(source, destination)
-            copied.append(str(destination))
+            copied.append(destination.name)
     raw = evidence_dir / "raw_findings.json"
     ai_review = review_output / "ai_review.json"
     if ai_review.exists():
         shutil.copy2(ai_review, raw)
-        copied.append(str(raw))
+        copied.append(raw.name)
     return copied
 
 
-def _launch_decision(decisions: list[dict[str, Any]]) -> str:
+def _launch_decision(decisions: list[dict[str, Any]], coverage: EvidenceCoverage) -> str:
     if any(item.get("blocks_launch") for item in decisions):
         return "BLOCK"
     if any(item.get("must_review") for item in decisions):
+        return "REVIEW"
+    if not coverage.allows_pass():
         return "REVIEW"
     if any(item.get("recommended_action") in {"downgrade", "suppress"} for item in decisions):
         return "PASS_WITH_WARNINGS"
     return "PASS"
 
 
-def _decision_explanation(decision: str, blocking_count: int, must_review_count: int) -> str:
+def _decision_explanation(
+    decision: str,
+    blocking_count: int,
+    must_review_count: int,
+    coverage: EvidenceCoverage,
+) -> str:
     if decision == "BLOCK":
         return f"Do not launch yet. {blocking_count} finding(s) currently block launch and need human confirmation before fixes."
     if decision == "REVIEW":
+        if not coverage.allows_pass():
+            return "Do not treat this as launch-ready yet. Evidence coverage is incomplete and must be reviewed."
         return f"Do not treat this as launch-ready yet. {must_review_count} finding(s) need human review."
     if decision == "PASS_WITH_WARNINGS":
         return "No launch-blocking findings are present, but warning/downgrade/suppression candidates should be reviewed."
@@ -241,7 +285,7 @@ def _decisions(payload: dict[str, Any]) -> list[dict[str, Any]]:
     decisions = payload.get("decisions")
     if not isinstance(decisions, list):
         raise ValueError("agent_review_decisions.json must contain a decisions list")
-    return [item for item in decisions if isinstance(item, dict)]
+    return decisions
 
 
 def _load_json(path: Path) -> dict[str, Any]:

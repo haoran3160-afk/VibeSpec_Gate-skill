@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
+import tempfile
 from pathlib import Path
 
 from .core.gate_decision import decide_gate
 from .core.llm_output_schema import validate_llm_review_outputs
 from .core.lite_review_bundle import build_lite_review_bundle
 from .core.loop_runner import run_loop
+from .core.path_safety import require_disjoint_paths
 from .core.project_intake import detect_profile
 from .core.report_builder import load_findings, write_reports
 from .core.review_runner import run_review
@@ -73,7 +76,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     lite_review = sub.add_parser("lite-review", help="Build a Lite launch-review bundle from a project or existing review output.")
     lite_review.add_argument("target", help="Project directory, or an existing review output directory.")
-    lite_review.add_argument("--output", default=None, help="Bundle directory. Defaults to outputs-lite for projects or <review_output>/lite_review.")
+    lite_review.add_argument("--output", default=None, help="Bundle directory. Required for project targets; must not overlap the input.")
     lite_review.add_argument("--mode", choices=mode_choices, default=None)
     lite_review.add_argument("--no-adapters", action="store_true", help="Skip external tool adapter status checks during project scans.")
     lite_review.add_argument("--suppressions", default=None, help="Path to vibespec_gate.suppressions.json for project scans.")
@@ -150,36 +153,65 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "lite-review":
         try:
-            target = Path(args.target)
+            target = Path(args.target).resolve()
+            if not target.is_dir():
+                raise ValueError("lite-review target must be an existing directory")
             if (target / "agent_review_decisions.json").exists():
                 result = build_lite_review_bundle(
                     target,
                     Path(args.output) if args.output else None,
                 )
             else:
-                bundle_dir = Path(args.output or "outputs-lite")
-                scan_output = bundle_dir / "evidence" / "scan"
-                review_output = bundle_dir / "evidence" / "review_output"
-                scan_summary = run_scan(
-                    str(target),
-                    str(scan_output),
-                    args.mode,
-                    include_adapters=not args.no_adapters,
-                    suppression_file=args.suppressions,
+                if not args.output:
+                    raise ValueError("--output is required when lite-review targets a project directory")
+                target, bundle_dir = require_disjoint_paths(
+                    target,
+                    args.output,
+                    first_label="project",
+                    second_label="output",
                 )
-                review_summary = run_review(
-                    str(scan_output / "findings.json"),
-                    str(target),
-                    str(review_output),
-                    max_snippet_lines=args.max_snippet_lines,
-                    include_p2=not args.p1_only,
-                    offline=True,
-                    reviewer_rule_based=True,
-                )
+                if bundle_dir.exists():
+                    raise ValueError(f"output already exists: {bundle_dir}")
+                bundle_dir.parent.mkdir(parents=True, exist_ok=True)
+                with tempfile.TemporaryDirectory(prefix="vibespec-gate-lite-", dir=bundle_dir.parent) as temporary:
+                    staging = Path(temporary)
+                    scan_output = staging / "scan"
+                    review_output = staging / "review_output"
+                    scan_summary = run_scan(
+                        str(target),
+                        str(scan_output),
+                        args.mode,
+                        include_adapters=not args.no_adapters,
+                        suppression_file=args.suppressions,
+                    )
+                    review_summary = run_review(
+                        str(scan_output / "findings.json"),
+                        str(target),
+                        str(review_output),
+                        max_snippet_lines=args.max_snippet_lines,
+                        include_p2=not args.p1_only,
+                        offline=True,
+                        reviewer_rule_based=True,
+                    )
+                    staging_bundle = staging / "bundle"
+                    lite_result = build_lite_review_bundle(review_output, staging_bundle)
+                    evidence_dir = staging_bundle / "evidence"
+                    shutil.copytree(scan_output, evidence_dir / "scan")
+                    shutil.copytree(review_output, evidence_dir / "review_output")
+                    bundle_dir.parent.mkdir(parents=True, exist_ok=True)
+                    staging_bundle.rename(bundle_dir)
+                    lite_result["bundle_dir"] = str(bundle_dir)
+                    lite_result["primary_outputs"] = [
+                        str(bundle_dir / Path(path).name) for path in lite_result["primary_outputs"]
+                    ]
+                    lite_result["evidence_files"] = [
+                        str(bundle_dir / "evidence" / Path(path).name) for path in lite_result["evidence_files"]
+                    ]
+                    lite_result["review_output"] = str(bundle_dir / "evidence" / "review_output")
                 result = {
                     "scan": scan_summary,
                     "review": review_summary,
-                    "lite": build_lite_review_bundle(review_output, bundle_dir),
+                    "lite": lite_result,
                 }
         except Exception as exc:  # noqa: BLE001 - CLI should report validation/shape failures directly.
             print(json.dumps({"error": str(exc)}, ensure_ascii=False, indent=2))
