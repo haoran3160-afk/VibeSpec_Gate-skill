@@ -83,7 +83,7 @@ cp -R skills/vibespec-gate "$HOME/.agents/skills/vibespec-gate"
 test -f "$HOME/.agents/skills/vibespec-gate/SKILL.md"
 ```
 
-GitHub Release 安装暂不可用；发布页提供 ZIP 和校验文件后才会开放该路径。
+也可以从 [`v0.2.0-rc.1` Release](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/releases/tag/v0.2.0-rc.1) 下载 [`vibespec-gate-lite.zip`](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/releases/download/v0.2.0-rc.1/vibespec-gate-lite.zip) 和 [`SHA256SUMS`](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/releases/download/v0.2.0-rc.1/SHA256SUMS)。校验后解压 ZIP，并安装其中完整的 `vibespec-gate/` 目录。
 
 ## 60 秒开始审查
 

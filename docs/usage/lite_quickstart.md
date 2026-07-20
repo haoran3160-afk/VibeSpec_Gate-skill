@@ -33,6 +33,8 @@ test -f "$HOME/.agents/skills/vibespec-gate/SKILL.md"
 
 Copy the complete directory so both references and all four output templates remain available.
 
+The [`v0.2.0-rc.1` Release](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/releases/tag/v0.2.0-rc.1) also provides [`vibespec-gate-lite.zip`](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/releases/download/v0.2.0-rc.1/vibespec-gate-lite.zip) and [`SHA256SUMS`](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/releases/download/v0.2.0-rc.1/SHA256SUMS). Verify the checksum before installing the extracted `vibespec-gate/` directory.
+
 ## Start In Chat
 
 Open the product repository in a new Agent task and ask:
