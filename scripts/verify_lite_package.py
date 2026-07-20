@@ -109,6 +109,16 @@ def _check_skill_unit(skill_dir: Path, required_include: tuple[str, ...]) -> lis
             continue
         if relative_name not in skill:
             failures.append(f"SKILL.md does not route runtime resource: {relative_name}")
+    for phrase in (
+        "Decision: BLOCK",
+        "Decision: REVIEW",
+        "Decision: PASS_WITH_WARNINGS",
+        "Decision: PASS",
+        "Do not replace the token with synonyms",
+        "list all seven review surfaces",
+    ):
+        if phrase not in skill:
+            failures.append(f"SKILL.md missing chat output contract: {phrase}")
     template_destinations = {
         "assets/templates/launch-decision.md": "launch_decision.md",
         "assets/templates/top-security-risks.md": "top_security_risks.md",

@@ -39,6 +39,15 @@ def test_skill_routes_every_reference_and_template():
         assert relative_name in skill
 
 
+def test_skill_requires_canonical_chat_decision_and_coverage_contract():
+    skill = (SKILL_SOURCE / "SKILL.md").read_text(encoding="utf-8")
+
+    for decision in ("BLOCK", "REVIEW", "PASS_WITH_WARNINGS", "PASS"):
+        assert f"Decision: {decision}" in skill
+    assert "Do not replace the token with synonyms" in skill
+    assert "list all seven review surfaces" in skill
+
+
 def test_agent_metadata_disables_implicit_invocation():
     metadata = (SKILL_SOURCE / "agents/openai.yaml").read_text(encoding="utf-8")
 

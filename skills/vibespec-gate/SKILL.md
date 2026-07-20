@@ -17,6 +17,14 @@ Default to a chat-first result. Create files only when the user explicitly asks 
 
 Do not edit the reviewed project during the review. A later fix requires separate authorization after the user confirms the evidence and scope.
 
+## Chat Output Contract
+
+Use exactly one of these decision lines in every chat review: `Decision: BLOCK`, `Decision: REVIEW`, `Decision: PASS_WITH_WARNINGS`, or `Decision: PASS`. Do not replace the token with synonyms such as `FAIL`, `NO-GO`, `Blocked`, or `Launch Readiness`.
+
+Report `Coverage: complete | partial | insufficient | truncated` before the decision, then list all seven review surfaces with evidence or a concrete reason for `not_applicable`, `missing`, or `truncated`. Empty, unavailable, or truncated evidence requires `Decision: REVIEW` unless the available evidence independently confirms a launch blocker; missing evidence alone is not a blocker.
+
+After the decision, report the highest-impact risks, missing evidence, human-gated repair tasks, and project-specific retests. Keep complete credentials masked. Do not omit a required section; write `none identified` when a section has no supported item.
+
 ## Resource Routing
 
 1. Read `references/review-protocol.md` before every review. Follow its evidence order, risk rules, decision precedence, and stop conditions.
