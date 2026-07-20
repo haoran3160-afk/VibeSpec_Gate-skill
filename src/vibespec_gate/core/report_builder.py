@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from .gate_decision import decide_gate
+from .path_safety import require_disjoint_paths
 from .risk_model import Finding, ProjectProfile, finding_from_dict, gate_relevant, security_score, severity_sort_key
 
 
@@ -16,6 +17,12 @@ TOP_ACTIONABLE_LIMIT = 20
 
 
 def write_reports(output_dir: Path, profile: ProjectProfile, findings: list[Finding]) -> dict[str, object]:
+    _, output_dir = require_disjoint_paths(
+        profile.path,
+        output_dir,
+        first_label="project",
+        second_label="output",
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
     sorted_findings = sorted(findings, key=severity_sort_key)
     active = [f for f in sorted_findings if not f.suppressed]

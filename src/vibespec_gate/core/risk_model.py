@@ -93,14 +93,15 @@ def security_score(findings: list[Finding]) -> int:
 
 
 def normalize_severity(value: str) -> str:
-    return value if value in SEVERITY_ORDER else "Info"
+    normalized = value.strip()
+    return normalized or "unknown"
 
 
 def finding_from_dict(data: dict[str, Any]) -> Finding:
     return Finding(
         id=str(data.get("id", "")),
         title=str(data.get("title", "")),
-        severity=normalize_severity(str(data.get("severity", "Info"))),
+        severity=normalize_severity(str(data.get("severity", "unknown"))),
         category=str(data.get("category", "Config")),
         affected_files=list(data.get("affected_files", [])),
         evidence=str(data.get("evidence", "")),

@@ -1,7 +1,6 @@
 ﻿from __future__ import annotations
 
-from pathlib import Path
-
+from .path_safety import require_disjoint_paths
 from .report_builder import load_findings, write_reports
 from .scan_runner import run_scan
 
@@ -14,16 +13,28 @@ def run_loop(
     include_adapters: bool = True,
     suppression_file: str | None = None,
 ) -> dict[str, object]:
-    gate = run_scan(project_path, output_dir, mode, include_adapters=include_adapters, suppression_file=suppression_file)
-    current = load_findings(Path(output_dir) / "findings.json")
-    previous = load_findings(Path(previous_findings))
+    project, output = require_disjoint_paths(
+        project_path,
+        output_dir,
+        first_label="project",
+        second_label="output",
+    )
+    previous_path, output = require_disjoint_paths(
+        previous_findings,
+        output,
+        first_label="previous findings input",
+        second_label="output",
+    )
+    gate = run_scan(str(project), str(output), mode, include_adapters=include_adapters, suppression_file=suppression_file)
+    current = load_findings(output / "findings.json")
+    previous = load_findings(previous_path)
     previous_keys = {_key(f) for f in previous if _loop_relevant(f)}
     current_keys = {_key(f) for f in current if _loop_relevant(f)}
     fixed = sorted(previous_keys - current_keys)
     new = sorted(current_keys - previous_keys)
     persisted = sorted(previous_keys & current_keys)
     review = _loop_review(len(previous), len(current), fixed, new, persisted, str(gate["decision"]))
-    (Path(output_dir) / "loop_review.md").write_text(review, encoding="utf-8")
+    (output / "loop_review.md").write_text(review, encoding="utf-8")
     return gate
 
 

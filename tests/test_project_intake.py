@@ -66,6 +66,23 @@ def test_detect_profile_records_file_inventory_truncation(tmp_path):
     assert all(surface.status == "truncated" for surface in profile.coverage.surfaces)
 
 
+def test_detect_profile_records_security_file_content_truncation(tmp_path):
+    source = tmp_path / "src" / "app.ts"
+    source.parent.mkdir()
+    source.write_text("export const padding = '" + ("x" * 20_100) + "'\n", encoding="utf-8")
+    (tmp_path / "package.json").write_text("{}\n", encoding="utf-8")
+
+    profile = detect_profile(str(tmp_path), "demo")
+
+    assert profile.coverage.coverage_status == "truncated"
+    assert profile.coverage.files_discovered == 2
+    assert profile.coverage.files_inspected == 1
+    assert profile.coverage.files_skipped == 1
+    assert "src/app.ts" in profile.coverage.reason
+    assert all(surface.status == "truncated" for surface in profile.coverage.surfaces)
+    assert decide_gate([], profile=profile)["decision"] == "REVIEW"
+
+
 def test_unsupported_security_source_prevents_pass(tmp_path):
     (tmp_path / "package.json").write_text("{}\n", encoding="utf-8")
     (tmp_path / "server.go").write_text('const token = "sk-test-not-scanned"\n', encoding="utf-8")

@@ -136,8 +136,17 @@ def test_readmes_have_user_facing_structure_and_current_install_contract():
         assert "/tree/master/skills/vibespec-gate" in text
         assert "0.2.0rc1" in text
         assert "PASS_WITH_WARNINGS" in text
-        assert "/releases/download/v0.2.0-rc.1/vibespec-gate-lite.zip" in text
-        assert "/releases/download/v0.2.0-rc.1/SHA256SUMS" in text
+        assert "/releases/download/v0.2.0-rc.1/vibespec-gate-lite.zip" not in text
+        assert "/releases/download/v0.2.0-rc.1/SHA256SUMS" not in text
+    assert "宿主路由" not in chinese
+    assert "仍待可信验证" not in chinese
+    assert "host-routing" not in english
+    assert "await trusted validation" not in english
+    assert "重启 Codex" in chinese
+    assert "restart Codex" in english
+    quickstart = Path("docs/usage/lite_quickstart.md").read_text(encoding="utf-8")
+    assert "Restart Codex" in quickstart
+    assert "/releases/download/v0.2.0-rc.1/" not in quickstart
     assert not Path("README.zh-CN.md").exists()
 
 
@@ -148,7 +157,7 @@ def test_readmes_state_skill_cli_and_evidence_boundaries():
             assert term in text
         assert "--output" in text
         assert "Python 3.10+" in text
-        assert "evals/runs/2026-07-20-agent-simulation-v2/README.md" in text
+        assert "evals/runs/" not in text
 
 
 def _copy_required_package_files(package_dir: Path) -> None:

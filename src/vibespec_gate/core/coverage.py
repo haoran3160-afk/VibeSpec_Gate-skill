@@ -194,19 +194,24 @@ def project_inventory_coverage(
     scannable_rels: list[str],
     scannable_text_by_rel: dict[str, str],
     unsupported_source_rels: list[str],
+    content_truncated_rels: list[str],
     unreadable_count: int,
     project_type: str,
     technologies: list[str],
     data_risk: list[str],
 ) -> EvidenceCoverage:
     discovered = len(rels)
-    inspected = len(inspected_rels) - unreadable_count - len(unsupported_source_rels)
+    inspected = len(inspected_rels) - unreadable_count - len(unsupported_source_rels) - len(content_truncated_rels)
     skipped = discovered - inspected
     if discovered == 0:
         return insufficient_coverage("No project files were available to review.")
 
     if discovered > len(inspected_rels):
         reason = f"Only the first {len(inspected_rels)} of {discovered} files were inspected for project context."
+        return _incomplete_inventory_coverage("truncated", "truncated", reason, discovered, inspected, skipped)
+    elif content_truncated_rels:
+        preview = ", ".join(content_truncated_rels[:5])
+        reason = f"Only the first 20,000 characters were inspected in security-relevant file(s): {preview}."
         return _incomplete_inventory_coverage("truncated", "truncated", reason, discovered, inspected, skipped)
     elif unreadable_count:
         reason = f"{unreadable_count} project file(s) could not be read."

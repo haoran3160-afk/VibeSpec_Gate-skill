@@ -37,14 +37,14 @@ def build_parser() -> argparse.ArgumentParser:
         "mcp",
     ]
     scan.add_argument("--mode", choices=mode_choices, default=None)
-    scan.add_argument("--output", default="outputs")
+    scan.add_argument("--output", default="outputs", help="Report directory; must not overlap any input path.")
     scan.add_argument("--no-adapters", action="store_true", help="Skip external tool adapter status checks.")
     scan.add_argument("--suppressions", default=None, help="Path to vibespec_gate.suppressions.json.")
 
     report = sub.add_parser("report", help="Rebuild reports from findings.json.")
     report.add_argument("findings")
     report.add_argument("--project", default=".")
-    report.add_argument("--output", default="outputs")
+    report.add_argument("--output", default="outputs", help="Report directory; must not overlap any input path.")
 
     gate = sub.add_parser("gate", help="Print gate decision from findings.json.")
     gate.add_argument("findings")
@@ -54,14 +54,14 @@ def build_parser() -> argparse.ArgumentParser:
     loop.add_argument("project")
     loop.add_argument("--previous", required=True)
     loop.add_argument("--mode", choices=mode_choices, default=None)
-    loop.add_argument("--output", default="outputs")
+    loop.add_argument("--output", default="outputs", help="Report directory; must not overlap any input path.")
     loop.add_argument("--no-adapters", action="store_true", help="Skip external tool adapter status checks.")
     loop.add_argument("--suppressions", default=None, help="Path to vibespec_gate.suppressions.json.")
 
     review = sub.add_parser("review", help="Build offline AI-assisted review packets and a human review queue.")
     review.add_argument("findings")
     review.add_argument("--project", required=True)
-    review.add_argument("--output", required=True)
+    review.add_argument("--output", required=True, help="Review directory; must not overlap any input path.")
     review.add_argument("--max-snippet-lines", type=int, default=80)
     review.add_argument("--include-p2", action="store_true", help="Include P2 findings in addition to P0/P1.")
     review.add_argument("--offline", action="store_true", default=True, help="Offline mode; external APIs are never called.")
@@ -98,9 +98,15 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return 0
     if args.command == "report":
-        findings = load_findings(Path(args.findings))
+        findings_path, output = require_disjoint_paths(
+            args.findings,
+            args.output,
+            first_label="findings input",
+            second_label="output",
+        )
+        findings = load_findings(findings_path)
         profile = detect_profile(args.project)
-        summary = write_reports(Path(args.output), profile, findings)
+        summary = write_reports(output, profile, findings)
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return 0
     if args.command == "gate":
@@ -170,6 +176,15 @@ def main(argv: list[str] | None = None) -> int:
                     first_label="project",
                     second_label="output",
                 )
+                suppression_file = args.suppressions
+                if suppression_file:
+                    suppression_path, bundle_dir = require_disjoint_paths(
+                        suppression_file,
+                        bundle_dir,
+                        first_label="suppression input",
+                        second_label="output",
+                    )
+                    suppression_file = str(suppression_path)
                 if bundle_dir.exists():
                     raise ValueError(f"output already exists: {bundle_dir}")
                 bundle_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -182,7 +197,7 @@ def main(argv: list[str] | None = None) -> int:
                         str(scan_output),
                         args.mode,
                         include_adapters=not args.no_adapters,
-                        suppression_file=args.suppressions,
+                        suppression_file=suppression_file,
                     )
                     review_summary = run_review(
                         str(scan_output / "findings.json"),

@@ -4,7 +4,7 @@ from collections import Counter
 from typing import Any
 
 from .review_packets import looks_placeholder_or_example, packet_text
-from .risk_model import Finding, ProjectProfile
+from .risk_model import SEVERITY_ORDER, Finding, ProjectProfile
 
 
 def select_findings(findings: list[Finding], include_p2: bool) -> tuple[list[Finding], int]:
@@ -139,11 +139,14 @@ def agent_review_decisions_json(summary_data: dict[str, object], decisions: list
         "generated_by": "vibespec-gate review",
         "summary": {
             "project_type": summary_data["project_type"],
+            "total_findings": summary_data["total_findings"],
             "reviewed_findings": summary_data["reviewed_findings"],
             "must_review_count": summary_data["must_review_count"],
             "agent_decision_count": summary_data["agent_decision_count"],
             "downgrade_candidate_count": summary_data["downgrade_candidate_count"],
             "suppression_candidate_count": summary_data["suppression_candidate_count"],
+            "invalid_severity_count": summary_data["invalid_severity_count"],
+            "input_severity_counts": summary_data["input_severity_counts"],
             "coverage": summary_data["coverage"],
         },
         "decisions": decisions,
@@ -165,6 +168,11 @@ def summary(
     top_reasons = Counter(v["reason"] for v in verdicts if v["verdict"] in {"false_positive", "should_downgrade", "needs_human_review"})
     next_step_counts = Counter(v["agent_next_step"] for v in verdicts)
     downgrade_count = sum(1 for v in verdicts if v["recommended_action"] == "downgrade")
+    active_findings = [finding for finding in findings if finding.gate_relevant and not finding.suppressed]
+    input_severity_counts = Counter(finding.severity for finding in active_findings)
+    invalid_severity_count = sum(
+        count for severity, count in input_severity_counts.items() if severity not in SEVERITY_ORDER
+    )
     return {
         "project_type": profile.project_type,
         "coverage": profile.coverage.to_dict(),
@@ -175,6 +183,8 @@ def summary(
         "agent_decision_count": len(verdicts),
         "downgrade_candidate_count": downgrade_count,
         "suppression_candidate_count": len(candidates),
+        "invalid_severity_count": invalid_severity_count,
+        "input_severity_counts": dict(input_severity_counts),
         "verdict_counts": dict(verdict_counts),
         "category_counts": dict(category_counts),
         "recommended_action_counts": dict(action_counts),
@@ -197,6 +207,7 @@ def summary_markdown(data: dict[str, object]) -> str:
         f"- Agent decision count: {data['agent_decision_count']}",
         f"- Downgrade candidate count: {data['downgrade_candidate_count']}",
         f"- Suppression candidate count: {data['suppression_candidate_count']}",
+        f"- Invalid severity count: {data['invalid_severity_count']}",
         f"- Gate impact summary: {data['gate_impact_summary']}",
         "",
         "## Evidence Coverage",

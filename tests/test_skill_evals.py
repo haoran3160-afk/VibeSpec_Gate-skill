@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from scripts.run_lite_release_validation import (
+    SKILL_EVAL_SUMMARY,
     _extract_decision,
     _fixture_sha256,
     _record_section,
@@ -14,7 +15,8 @@ from scripts.run_lite_release_validation import (
 
 EVAL_ROOT = Path("evals")
 HISTORICAL_RUN = EVAL_ROOT / "runs/2026-07-20-agent-simulation"
-LATEST_RUN = EVAL_ROOT / "runs/2026-07-20-agent-simulation-v2"
+SEMANTIC_RUN = EVAL_ROOT / "runs/2026-07-20-agent-simulation-v2"
+CURRENT_RUN = EVAL_ROOT / "runs/2026-07-20-agent-simulation-v3"
 
 
 def test_trigger_matrix_has_five_positive_and_five_negative_cases():
@@ -127,7 +129,7 @@ def test_recorded_agent_simulation_keeps_failed_and_unobservable_gates_closed():
 
 
 def test_latest_agent_simulation_passes_semantics_but_keeps_untrusted_gates_pending():
-    summary = json.loads((LATEST_RUN / "summary.json").read_text(encoding="utf-8"))
+    summary = json.loads((SEMANTIC_RUN / "summary.json").read_text(encoding="utf-8"))
     cases = _load("behavior_cases.yaml")["cases"]
     records = {record["id"]: record for record in summary["behavior_cases"]}
 
@@ -143,7 +145,7 @@ def test_latest_agent_simulation_passes_semantics_but_keeps_untrusted_gates_pend
 
     for case in cases:
         record = records[case["id"]]
-        trace_path = LATEST_RUN / record["output"]
+        trace_path = SEMANTIC_RUN / record["output"]
         trace = trace_path.read_text(encoding="utf-8")
         assert hashlib.sha256(trace_path.read_bytes()).hexdigest() == record["output_sha256"]
         assert _record_section(trace, "Raw Request", "Unedited Final Output") == case["prompt"]
@@ -158,7 +160,7 @@ def test_latest_agent_simulation_passes_semantics_but_keeps_untrusted_gates_pend
         assert record["semantic_status"] == "PASS"
         assert record["status"] == "PENDING"
 
-        evidence_path = LATEST_RUN / record["integrity_evidence"]
+        evidence_path = SEMANTIC_RUN / record["integrity_evidence"]
         evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
         assert hashlib.sha256(evidence_path.read_bytes()).hexdigest() == record["integrity_evidence_sha256"]
         current_hash = _fixture_sha256(Path(case["fixture"]))
@@ -173,10 +175,31 @@ def test_latest_agent_simulation_passes_semantics_but_keeps_untrusted_gates_pend
         assert record["write_observability"] == "unavailable"
         assert "write_evidence" not in record
 
-    assert summary["skill_tree_sha256"] == _skill_tree_sha256(Path("skills/vibespec-gate"))
+    assert summary["skill_tree_sha256"] != _skill_tree_sha256(Path("skills/vibespec-gate"))
     failed_attempt = summary["failed_attempts"][0]
     assert failed_attempt["status"] == "FAIL"
-    assert (LATEST_RUN / failed_attempt["output"]).is_file()
+    assert (SEMANTIC_RUN / failed_attempt["output"]).is_file()
+
+
+def test_current_candidate_activation_failures_keep_release_gate_closed():
+    summary_path = CURRENT_RUN / "summary.json"
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+
+    assert SKILL_EVAL_SUMMARY == summary_path.resolve()
+    assert summary["skill_tree_sha256"] == _skill_tree_sha256(Path("skills/vibespec-gate"))
+    assert summary["skill_activation_status"] == "FAIL"
+    assert summary["behavior_status"] == "FAIL"
+    assert summary["trigger_status"] == "PENDING"
+    assert summary["write_safety_status"] == "PENDING"
+    assert summary["overall_status"] == "FAIL"
+    assert len(summary["failed_attempts"]) == 3
+    for attempt in summary["failed_attempts"]:
+        output = CURRENT_RUN / attempt["output"]
+        assert output.is_file()
+        assert hashlib.sha256(output.read_bytes()).hexdigest() == attempt["output_sha256"]
+        assert attempt["fixture_sha256_before"] == attempt["fixture_sha256_after"]
+        assert attempt["files_written"] is None
+        assert attempt["write_observability"] == "unavailable"
 
 
 def _load(name: str) -> dict[str, object]:

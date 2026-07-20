@@ -12,7 +12,7 @@ VibeSpec Gate reviews the authorized scope for authentication, authorization, us
 
 Insufficient, incomplete, or truncated evidence cannot produce `PASS` or `PASS_WITH_WARNINGS`: confirmed blocking evidence still produces `BLOCK`; otherwise the result is `REVIEW`. `PASS` means only that no material risk was found within an explicitly stated, complete review scope. It is not proof of security.
 
-> The current version is a release candidate for assisted review and controlled use. It does not replace a professional penetration test, security certification, legal opinion, or compliance audit.
+> VibeSpec Gate provides decision support. It does not replace a professional penetration test, security certification, legal opinion, or compliance audit.
 
 ## Example Output
 
@@ -56,7 +56,7 @@ The recommended path is to ask `$skill-installer` to install the repository's si
 Use $skill-installer to install the Skill from https://github.com/haoran3160-afk/VibeSpec_Gate-skill/tree/master/skills/vibespec-gate.
 ```
 
-After installation, open a new Agent task. `$skill-installer` uses `$CODEX_HOME/skills/vibespec-gate` by default, normally `$HOME/.codex/skills/vibespec-gate`. Manual installs may instead use the user-level `$HOME/.agents/skills/vibespec-gate` or repository-level `.agents/skills/vibespec-gate`.
+After installation, restart Codex, then open a new Agent task. `$skill-installer` uses `$CODEX_HOME/skills/vibespec-gate` by default, normally `$HOME/.codex/skills/vibespec-gate`. Manual installs may instead use the user-level `$HOME/.agents/skills/vibespec-gate` or repository-level `.agents/skills/vibespec-gate`.
 
 For manual installation, copy the complete `skills/vibespec-gate/` directory, not only `SKILL.md`.
 
@@ -82,8 +82,6 @@ mkdir -p "$HOME/.agents/skills"
 cp -R skills/vibespec-gate "$HOME/.agents/skills/vibespec-gate"
 test -f "$HOME/.agents/skills/vibespec-gate/SKILL.md"
 ```
-
-You can also download [`vibespec-gate-lite.zip`](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/releases/download/v0.2.0-rc.1/vibespec-gate-lite.zip) and [`SHA256SUMS`](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/releases/download/v0.2.0-rc.1/SHA256SUMS) from the [`v0.2.0-rc.1` Release](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/releases/tag/v0.2.0-rc.1). Verify the checksum, extract the ZIP, and install its complete `vibespec-gate/` directory.
 
 ## 60-Second Review
 
@@ -141,10 +139,10 @@ py -3 -m vibespec_gate.cli lite-review D:\path\to\project --output D:\reviews\pr
 
 ## Validation And Boundaries
 
-- CI runs the complete tests, package verification, and archive verification on Ubuntu Python 3.10/3.12, Windows Python 3.12, and macOS Python 3.12.
-- Reviewable scenario records include explicit security-review requests, unrelated tasks, and eight launch-decision cases. [Review the validation records](evals/runs/2026-07-20-agent-simulation-v2/README.md).
-- These controlled Agent scenarios validate review output only. They do not prove that the host made no file writes or that the Skill activates automatically, and they are not independent user validation or a security-accuracy measurement.
-- Automated checks and scenario coverage cannot prove the absence of vulnerabilities or replace professional assessment.
+- CI continuously checks package integrity and supported platforms.
+- Review results cover only evidence available in the current task; missing, unreadable, or truncated evidence produces `REVIEW`.
+- Read-only review still depends on the Agent environment's permissions and auditable records; the Skill cannot independently prove that the filesystem was never modified.
+- Automated checks cannot prove the absence of vulnerabilities or replace professional assessment.
 
 ## Project Resources
 

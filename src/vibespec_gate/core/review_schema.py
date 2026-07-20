@@ -99,6 +99,12 @@ def validate_review_output_dir(output_dir: str | Path) -> dict[str, int]:
     _validate_summary_count(summary_text, "Agent decision count", len(decisions))
     _validate_summary_count(summary_text, "Downgrade candidate count", downgrade_count)
     _validate_summary_count(summary_text, "Suppression candidate count", len(candidates))
+    _validate_summary_count(summary_text, "Total findings", decision_output["summary"]["total_findings"])
+    _validate_summary_count(
+        summary_text,
+        "Invalid severity count",
+        decision_output["summary"]["invalid_severity_count"],
+    )
     text = (root / "review_packets.json").read_text(encoding="utf-8")
     if PROVIDER_SECRET_RE.search(text):
         raise SchemaValidationError("review_packets.json contains an unredacted provider-shaped secret")
@@ -304,6 +310,37 @@ def _validate_decision_output_summary(
         actual = summary.get(key)
         if actual != count:
             raise SchemaValidationError(f"agent_review_decisions.summary.{key} expected {count}, found {actual}")
+    total_findings = summary.get("total_findings")
+    if not isinstance(total_findings, int) or isinstance(total_findings, bool) or total_findings < 0:
+        raise SchemaValidationError("agent_review_decisions.summary.total_findings must be a non-negative integer")
+    input_severity_counts = summary.get("input_severity_counts")
+    if not isinstance(input_severity_counts, dict):
+        raise SchemaValidationError("agent_review_decisions.summary.input_severity_counts must be an object")
+    if any(
+        not isinstance(severity, str)
+        or not severity
+        or not isinstance(count, int)
+        or isinstance(count, bool)
+        or count < 0
+        for severity, count in input_severity_counts.items()
+    ):
+        raise SchemaValidationError("agent_review_decisions.summary.input_severity_counts is invalid")
+    if sum(input_severity_counts.values()) > total_findings:
+        raise SchemaValidationError("agent_review_decisions.summary.input_severity_counts exceeds total_findings")
+    invalid_severity_count = summary.get("invalid_severity_count")
+    if (
+        not isinstance(invalid_severity_count, int)
+        or isinstance(invalid_severity_count, bool)
+        or invalid_severity_count < 0
+    ):
+        raise SchemaValidationError("agent_review_decisions.summary.invalid_severity_count must be a non-negative integer")
+    expected_invalid_count = sum(
+        count for severity, count in input_severity_counts.items() if severity not in SEVERITIES
+    )
+    if invalid_severity_count != expected_invalid_count:
+        raise SchemaValidationError(
+            "agent_review_decisions.summary.invalid_severity_count does not match input_severity_counts"
+        )
 
 
 def _validate_coverage_matches_review_packet(

@@ -9,6 +9,9 @@ from .risk_model import ProjectProfile
 from .source_classifier import is_scannable_text_path, is_unsupported_security_source, should_ignore_path
 
 
+PROJECT_CONTEXT_CHAR_LIMIT = 20_000
+
+
 def iter_project_files(root: Path) -> list[Path]:
     files: list[Path] = []
     for path in root.rglob("*"):
@@ -25,7 +28,8 @@ def rel(path: Path, root: Path) -> str:
 
 def read_text(path: Path, max_chars: int = 200_000) -> str:
     try:
-        return path.read_text(encoding="utf-8", errors="replace")[:max_chars]
+        with path.open(encoding="utf-8", errors="replace") as handle:
+            return handle.read(max_chars)
     except OSError:
         return ""
 
@@ -69,13 +73,19 @@ def detect_profile(project_path: str, mode: str | None = None) -> ProjectProfile
     inspected_files = files[:200]
     combined_parts: list[str] = []
     scannable_text_by_rel: dict[str, str] = {}
+    content_truncated_rels: list[str] = []
     unreadable_count = 0
     for path in inspected_files:
         try:
-            text = path.read_text(encoding="utf-8", errors="replace")[:20_000].lower()
+            with path.open(encoding="utf-8", errors="replace") as handle:
+                sample = handle.read(PROJECT_CONTEXT_CHAR_LIMIT + 1)
+            text = sample[:PROJECT_CONTEXT_CHAR_LIMIT].lower()
             combined_parts.append(text)
             if is_scannable_text_path(path):
-                scannable_text_by_rel[rel(path, root)] = text
+                relative_path = rel(path, root)
+                scannable_text_by_rel[relative_path] = text
+                if len(sample) > PROJECT_CONTEXT_CHAR_LIMIT:
+                    content_truncated_rels.append(relative_path)
         except OSError:
             unreadable_count += 1
     combined = "\n".join(combined_parts)
@@ -122,6 +132,7 @@ def detect_profile(project_path: str, mode: str | None = None) -> ProjectProfile
         unsupported_source_rels=[
             rel(path, root) for path in inspected_files if is_unsupported_security_source(path)
         ],
+        content_truncated_rels=content_truncated_rels,
         unreadable_count=unreadable_count,
         project_type=project_type,
         technologies=sorted(tech),

@@ -2,7 +2,7 @@ import pytest
 
 from vibespec_gate.core.coverage import REVIEW_SURFACES, EvidenceCoverage, SurfaceCoverage, coverage_from_dict
 from vibespec_gate.core.gate_decision import decide_gate
-from vibespec_gate.core.risk_model import Finding
+from vibespec_gate.core.risk_model import Finding, finding_from_dict
 
 
 def test_gate_blocks_on_p0():
@@ -58,10 +58,20 @@ def test_gate_reviews_p0_with_unknown_source_metadata():
 
 
 def test_gate_reviews_finding_with_unknown_severity_metadata():
-    finding = Finding(id="VSG-X", title="x", severity="Critical", category="Secrets")
+    finding = finding_from_dict({"id": "VSG-X", "title": "x", "severity": "Critical", "category": "Secrets"})
 
     summary = decide_gate([finding], coverage=_coverage("complete"))
 
+    assert finding.severity == "Critical"
+    assert summary["decision"] == "REVIEW"
+
+
+def test_gate_reviews_loaded_finding_with_missing_severity_metadata():
+    finding = finding_from_dict({"id": "VSG-X", "title": "x", "category": "Secrets"})
+
+    summary = decide_gate([finding], coverage=_coverage("complete"))
+
+    assert finding.severity == "unknown"
     assert summary["decision"] == "REVIEW"
 
 

@@ -65,6 +65,39 @@ def test_build_lite_review_bundle_requires_coverage_before_pass(tmp_path):
     assert "Missing evidence" in launch
 
 
+def test_unknown_severity_cannot_pass_through_review_and_bundle(tmp_path):
+    summary, review_output = _write_unknown_severity_review(tmp_path)
+    bundle = tmp_path / "bundle"
+
+    result = build_lite_review_bundle(review_output, bundle)
+
+    assert summary["coverage"]["coverage_status"] == "complete"
+    assert summary["invalid_severity_count"] == 1
+    assert summary["reviewed_findings"] == 0
+    assert result["launch_decision"] == "REVIEW"
+    launch = (bundle / "launch_decision.md").read_text(encoding="utf-8")
+    assert "Findings with unknown severity: 1" in launch
+    assert "unknown severity metadata" in launch
+
+
+@pytest.mark.parametrize("mutation", ["missing", "mismatch"])
+def test_bundle_rejects_unverifiable_invalid_severity_count(tmp_path, mutation):
+    _, review_output = _write_unknown_severity_review(tmp_path)
+    decisions_path = review_output / "agent_review_decisions.json"
+    decisions = json.loads(decisions_path.read_text(encoding="utf-8"))
+    if mutation == "missing":
+        decisions["summary"].pop("invalid_severity_count")
+    else:
+        decisions["summary"]["invalid_severity_count"] = 0
+    decisions_path.write_text(json.dumps(decisions, indent=2), encoding="utf-8")
+    bundle = tmp_path / "bundle"
+
+    with pytest.raises(ValueError, match="invalid_severity_count"):
+        build_lite_review_bundle(review_output, bundle)
+
+    assert not bundle.exists()
+
+
 def test_lite_review_cli_builds_bundle(tmp_path):
     review_output = tmp_path / "review"
     bundle = tmp_path / "lite"
@@ -256,6 +289,29 @@ def test_lite_review_cli_rejects_project_output_overlap_before_writing(tmp_path,
 
 
 @pytest.mark.parametrize("relationship", ["equal", "inside", "contains"])
+def test_lite_review_cli_rejects_suppression_output_overlap_before_writing(tmp_path, relationship):
+    project = tmp_path / "project"
+    project.mkdir()
+    (project / "keep.txt").write_text("unchanged\n", encoding="utf-8")
+    if relationship == "contains":
+        output = tmp_path / "output"
+        output.mkdir()
+        suppression = output / "vibespec_gate.suppressions.json"
+        suppression.write_text("[]\n", encoding="utf-8")
+    else:
+        suppression = tmp_path / "suppression"
+        suppression.mkdir()
+        output = suppression if relationship == "equal" else suppression / "output"
+    before = _file_snapshot(tmp_path)
+
+    result = _run_lite_review(project, output, suppression)
+
+    assert result.returncode == 1
+    assert "must not overlap" in result.stdout
+    assert _file_snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize("relationship", ["equal", "inside", "contains"])
 def test_bundle_rejects_review_output_overlap_before_writing(tmp_path, relationship):
     if relationship == "contains":
         bundle = tmp_path / "bundle"
@@ -303,6 +359,28 @@ def _write_review_output(
         llm_path.write_text(json.dumps(llm_packet, indent=2), encoding="utf-8")
 
 
+def _write_unknown_severity_review(tmp_path: Path) -> tuple[dict[str, object], Path]:
+    project = Path("tests/fixtures/safe_demo_app").resolve()
+    findings = tmp_path / "findings.json"
+    findings.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "VSG-UNKNOWN-SEVERITY",
+                    "title": "Unrecognized severity metadata",
+                    "severity": "Critical",
+                    "category": "Config",
+                    "affected_files": ["app/api/profile/route.ts:1"],
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    review_output = tmp_path / "review"
+    summary = run_review(str(findings), str(project), str(review_output), include_p2=True)
+    return summary, review_output
+
+
 def _env() -> dict[str, str]:
     env = os.environ.copy()
     env["PYTHONPATH"] = "src"
@@ -310,10 +388,24 @@ def _env() -> dict[str, str]:
     return env
 
 
-def _run_lite_review(project: Path, output: Path | None = None) -> subprocess.CompletedProcess[str]:
+def _file_snapshot(root: Path) -> dict[str, tuple[str, bytes | None]]:
+    return {
+        path.relative_to(root).as_posix(): ("file", path.read_bytes()) if path.is_file() else ("dir", None)
+        for path in sorted(root.rglob("*"))
+        if path.is_file() or path.is_dir()
+    }
+
+
+def _run_lite_review(
+    project: Path,
+    output: Path | None = None,
+    suppression: Path | None = None,
+) -> subprocess.CompletedProcess[str]:
     command = [sys.executable, "-m", "vibespec_gate.cli", "lite-review", str(project), "--no-adapters"]
     if output is not None:
         command.extend(["--output", str(output)])
+    if suppression is not None:
+        command.extend(["--suppressions", str(suppression)])
     return subprocess.run(
         command,
         cwd=Path.cwd(),

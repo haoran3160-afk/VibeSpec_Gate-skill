@@ -168,8 +168,26 @@ def _check_skill_unit(skill_dir: Path, required_include: tuple[str, ...]) -> lis
 
     template_terms = {
         "assets/templates/launch-decision.md": ("Decision", "Coverage status", "Missing evidence", "Limitations", "Safety Boundary"),
-        "assets/templates/top-security-risks.md": ("Severity", "Evidence", "Launch impact", "Human confirmation"),
-        "assets/templates/agent-fix-plan.md": ("Human Confirmation Gate", "Allowed change scope", "Prohibited changes", "Verification"),
+        "assets/templates/top-security-risks.md": (
+            "Severity",
+            "Launch impact",
+            "Confidence",
+            "Affected files",
+            "Evidence",
+            "Why it matters",
+            "Technical reason",
+            "Recommended fix",
+            "Human confirmation",
+            "Missing evidence",
+        ),
+        "assets/templates/agent-fix-plan.md": (
+            "Human Confirmation Gate",
+            "Recommended fix",
+            "Allowed change scope",
+            "Prohibited changes",
+            "Human decision",
+            "Verification",
+        ),
         "assets/templates/retest-checklist.md": ("Coverage", "Commands Or Checks", "Expected Result"),
     }
     for relative_name, phrases in template_terms.items():

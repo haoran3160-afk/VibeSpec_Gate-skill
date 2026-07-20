@@ -33,3 +33,4 @@ vibespec_gate = ["templates/**/*.md", "templates/**/*.json"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+testpaths = ["tests"]

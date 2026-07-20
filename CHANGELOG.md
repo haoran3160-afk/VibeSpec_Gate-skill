@@ -8,6 +8,12 @@ All notable changes to VibeSpec Gate are documented here.
 - Made release validation fail closed when Skill activation, prompt, decision, fixture-hash, or write evidence is not independently verifiable.
 - Required canonical chat decision tokens and complete seven-surface coverage output from the Skill.
 - Added auditable, isolated Skill behavior simulations with scoped file-content integrity records while keeping unobservable write telemetry and trigger routing release-blocking.
+- Preserved unknown finding severity as fail-closed metadata across gate, review, and Lite bundle paths, and made security-relevant per-file truncation force `REVIEW`.
+- Rejected project, findings, previous-findings, and suppression overlap, including hard-linked aliases, across every file-writing CLI path.
+- Required affected files and bounded recommended fixes in packaged Skill templates.
+- Removed the older RC archive from current installation instructions until a matching candidate passes the current Skill gates.
+- Scoped pytest discovery to the maintained test suite so ignored validation artifacts cannot be collected as duplicate tests.
+- Bound release evaluation to the current activation audit and kept readiness closed when the Agent host did not load the attached Skill.
 
 ## 0.2.0rc1 - 2026-07-20
 

@@ -30,7 +30,7 @@ PRIMARY_OUTPUTS = (
     "agent_fix_plan.md",
     "retest_checklist.md",
 )
-SKILL_EVAL_SUMMARY = ROOT / "evals" / "runs" / "2026-07-20-agent-simulation-v2" / "summary.json"
+SKILL_EVAL_SUMMARY = ROOT / "evals" / "runs" / "2026-07-20-agent-simulation-v3" / "summary.json"
 TRIGGER_CASES = ROOT / "evals" / "trigger_cases.yaml"
 BEHAVIOR_CASES = ROOT / "evals" / "behavior_cases.yaml"
 

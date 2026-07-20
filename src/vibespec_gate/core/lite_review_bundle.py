@@ -38,14 +38,21 @@ def build_lite_review_bundle(review_output: Path, bundle_dir: Path | None = None
     decisions = _decisions(decisions_payload)
     summary = decisions_payload.get("summary", {}) if isinstance(decisions_payload, dict) else {}
     coverage = coverage_from_dict(summary.get("coverage"))
-    launch_decision = _launch_decision(decisions, coverage)
+    invalid_severity_count = _required_nonnegative_int(
+        summary.get("invalid_severity_count"),
+        "agent_review_decisions.summary.invalid_severity_count",
+    )
+    launch_decision = _launch_decision(decisions, coverage, invalid_severity_count=invalid_severity_count)
     bundle_dir.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="vibespec-gate-bundle-", dir=bundle_dir.parent) as temporary:
         staging = Path(temporary) / "bundle"
         staging.mkdir()
         evidence_dir = staging / "evidence"
         evidence_dir.mkdir()
-        _write(staging / "launch_decision.md", render_launch_decision(launch_decision, summary, decisions, coverage))
+        _write(
+            staging / "launch_decision.md",
+            render_launch_decision(launch_decision, summary, decisions, coverage, invalid_severity_count),
+        )
         _write(staging / "top_security_risks.md", render_top_security_risks(decisions))
         _write(staging / "agent_fix_plan.md", render_agent_fix_plan(decisions))
         _write(staging / "retest_checklist.md", render_retest_checklist(decisions))
@@ -72,6 +79,7 @@ def render_launch_decision(
     summary: dict[str, Any],
     decisions: list[dict[str, Any]],
     coverage: EvidenceCoverage,
+    invalid_severity_count: int = 0,
 ) -> str:
     blocking = [item for item in decisions if item.get("blocks_launch")]
     must_review = [item for item in decisions if item.get("must_review")]
@@ -82,7 +90,13 @@ def render_launch_decision(
         "",
         "## Can I launch?",
         "",
-        _decision_explanation(launch_decision, len(blocking), len(must_review), coverage),
+        _decision_explanation(
+            launch_decision,
+            len(blocking),
+            len(must_review),
+            coverage,
+            invalid_severity_count,
+        ),
         "",
         "## Review Snapshot",
         "",
@@ -90,6 +104,7 @@ def render_launch_decision(
         f"- Reviewed findings: {summary.get('reviewed_findings', len(decisions))}",
         f"- Launch-blocking findings: {len(blocking)}",
         f"- Human confirmation items: {len(must_review)}",
+        f"- Findings with unknown severity: {invalid_severity_count}",
         "",
         "## Evidence Coverage",
         "",
@@ -243,9 +258,16 @@ def _copy_evidence(review_output: Path, evidence_dir: Path) -> list[str]:
     return copied
 
 
-def _launch_decision(decisions: list[dict[str, Any]], coverage: EvidenceCoverage) -> str:
+def _launch_decision(
+    decisions: list[dict[str, Any]],
+    coverage: EvidenceCoverage,
+    *,
+    invalid_severity_count: int = 0,
+) -> str:
     if any(item.get("blocks_launch") for item in decisions):
         return "BLOCK"
+    if invalid_severity_count:
+        return "REVIEW"
     if any(item.get("must_review") for item in decisions):
         return "REVIEW"
     if not coverage.allows_pass():
@@ -260,10 +282,13 @@ def _decision_explanation(
     blocking_count: int,
     must_review_count: int,
     coverage: EvidenceCoverage,
+    invalid_severity_count: int = 0,
 ) -> str:
     if decision == "BLOCK":
         return f"Do not launch yet. {blocking_count} finding(s) currently block launch and need human confirmation before fixes."
     if decision == "REVIEW":
+        if invalid_severity_count:
+            return f"Do not treat this as launch-ready yet. {invalid_severity_count} finding(s) have unknown severity metadata."
         if not coverage.allows_pass():
             return "Do not treat this as launch-ready yet. Evidence coverage is incomplete and must be reviewed."
         return f"Do not treat this as launch-ready yet. {must_review_count} finding(s) need human review."
@@ -293,6 +318,12 @@ def _load_json(path: Path) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError(f"{path} must contain a JSON object")
     return data
+
+
+def _required_nonnegative_int(value: object, field: str) -> int:
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+        raise ValueError(f"{field} must be a non-negative integer")
+    return value
 
 
 def _write(path: Path, content: str) -> None:

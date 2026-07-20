@@ -33,8 +33,10 @@ Use this when the project has LLM tool calls, autonomous actions, shell/file/dat
 ## Rebuild Reports From Findings
 
 ```bash
-vibespec-gate report ./outputs/findings.json --output ./outputs
+vibespec-gate report ./outputs/findings.json --project ./my-project --output ./outputs-report
 ```
+
+Every file-writing command requires an output directory that is disjoint from every input path, including project, review, findings, previous-findings, and suppression inputs.
 
 ## Print The Gate Summary
 

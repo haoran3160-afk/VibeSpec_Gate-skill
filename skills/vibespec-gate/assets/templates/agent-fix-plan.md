@@ -8,6 +8,7 @@
 
 - Finding id: [id]
 - Files to inspect: [paths]
+- Recommended fix: [bounded change that addresses the evidence]
 - Allowed change scope: [narrow implementation boundary]
 - Prohibited changes: [permissions, validation, policy, production, and unrelated files that must not change]
 - Human decision: [product or security choice that cannot be inferred]
