@@ -75,6 +75,7 @@ def test_release_workflow_binds_tag_to_master_and_portable_checksum():
     assert 'verify_release_metadata.py --tag "${GITHUB_REF_NAME}"' in workflow
     assert "scripts/verify_skill_evals.py" in workflow
     assert "skill-creator/scripts/quick_validate.py" in workflow
+    assert "PyYAML==6.0.3" in workflow
     assert "smoke_install_skill.py --archive dist/vibespec-gate-lite.zip" in workflow
     assert "(cd dist && sha256sum vibespec-gate-lite.zip > SHA256SUMS)" in workflow
     assert "sha256sum dist/vibespec-gate-lite.zip" not in workflow
