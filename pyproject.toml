@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vibespec-gate"
-version = "0.2.0rc1"
+version = "0.2.0rc2"
 description = "Launch-blocking security review for vibe-coded products."
 readme = "README.md"
 requires-python = ">=3.10"

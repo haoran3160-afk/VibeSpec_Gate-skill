@@ -1,0 +1,20 @@
+{
+  "case_id": "behavior-runtime-secret",
+  "event_type": "host_skill_resource_trace",
+  "task_id": "019f8277-b8bd-7063-899f-89e5184674e0",
+  "host": "Codex CLI (codex-cli 0.125.0)",
+  "standard_skill_root": "C:/Users/lenovo/.agents/skills/vibespec-gate",
+  "selected_skills": [
+    "vibespec-gate"
+  ],
+  "skill_resources_read": [
+    "references/evidence-coverage.md",
+    "references/review-protocol.md"
+  ],
+  "user_skills_read": [
+    "vibespec-gate"
+  ],
+  "unexpected_user_skills_read": [],
+  "host_trace": "behavior/behavior-runtime-secret/host-trace.jsonl",
+  "host_trace_sha256": "daf1a74bfe9c282fc2274ad0f4e6c1f3346e54a5fc62d61a9af7902accf99f73"
+}

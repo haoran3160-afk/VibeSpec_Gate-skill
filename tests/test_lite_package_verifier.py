@@ -134,10 +134,9 @@ def test_readmes_have_user_facing_structure_and_current_install_contract():
         assert ".agents/skills/vibespec-gate" in text
         assert "skills/vibespec-gate" in text
         assert "/tree/master/skills/vibespec-gate" in text
-        assert "0.2.0rc1" in text
+        assert "0.2.0rc2" in text
         assert "PASS_WITH_WARNINGS" in text
-        assert "/releases/download/v0.2.0-rc.1/vibespec-gate-lite.zip" not in text
-        assert "/releases/download/v0.2.0-rc.1/SHA256SUMS" not in text
+        assert "/releases/download/" not in text
     assert "宿主路由" not in chinese
     assert "仍待可信验证" not in chinese
     assert "host-routing" not in english

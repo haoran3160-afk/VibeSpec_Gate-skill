@@ -3,7 +3,7 @@
 ## Current Stage
 
 ```text
-Stage: 0.2.0rc1 release-candidate hardening
+Stage: 0.2.0rc2 controlled release candidate
 Default package: prompt-only Agent-native Skill
 Optional overlay: Core-powered repository CLI
 Public GA: not claimed
@@ -11,8 +11,8 @@ Public GA: not claimed
 
 ## Near Term
 
-- Publish the `0.2.0rc1` commit and confirm the cross-platform GitHub CI is green.
-- Publish the verified Lite zip through the tag-gated GitHub Release workflow.
+- Monitor the `0.2.0rc2` package, activation contract, and cross-platform CI for regressions.
+- Keep the verified Lite zip and checksum reproducible through the tag-gated GitHub Release workflow.
 - Run controlled external pilot sessions with real users.
 - Collect real blind-session evidence; synthetic walkthroughs remain contract tests only.
 - Expand validation coverage across SaaS, Agent/MCP, Supabase/Firebase, Electron/Desktop, upload/logging, and low-risk projects.

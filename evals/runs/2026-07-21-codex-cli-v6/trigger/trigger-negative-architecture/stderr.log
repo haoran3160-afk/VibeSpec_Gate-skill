@@ -1,0 +1,9 @@
+Reading additional input from stdin...
+2026-07-21T02:15:26.215627Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt[0]: prompt must be at most 128 characters path=C:\Users\lenovo\.codex\.tmp\plugins\plugins\ngs-analysis\.codex-plugin/plugin.json
+2026-07-21T02:15:26.551871Z  WARN codex_core::shell_snapshot: Failed to create shell snapshot for powershell: Shell snapshot not supported yet for PowerShell
+2026-07-21T02:15:34.183657Z  WARN codex_core::plugins::manager: failed to warm featured plugin ids cache error=failed to send remote plugin sync request to https://chatgpt.com/backend-api/plugins/featured: error sending request for url (https://chatgpt.com/backend-api/plugins/featured?platform=codex)
+2026-07-21T02:16:17.648685Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt[0]: prompt must be at most 128 characters path=C:\Users\lenovo\.codex\.tmp\plugins\plugins\ngs-analysis\.codex-plugin/plugin.json
+2026-07-21T02:16:33.110240Z  WARN codex_core::session::turn: stream disconnected - retrying sampling request (1/5 in 187ms)...
+2026-07-21T02:16:50.048929Z ERROR codex_core::tools::router: error=`"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -Recurse -File -Include package.json,pyproject.toml,requirements.txt,go.mod,Cargo.toml,README*,AGENTS.md | Select-Object FullName'` rejected: blocked by policy
+2026-07-21T02:16:50.556972Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt[0]: prompt must be at most 128 characters path=C:\Users\lenovo\.codex\.tmp\plugins\plugins\ngs-analysis\.codex-plugin/plugin.json
+2026-07-21T02:16:59.788283Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt[0]: prompt must be at most 128 characters path=C:\Users\lenovo\.codex\.tmp\plugins\plugins\ngs-analysis\.codex-plugin/plugin.json

@@ -10,11 +10,11 @@ Run every case in a new task with a clean context. The executing Agent receives 
 2. `skills/vibespec-gate/` as the invoked Skill for behavior cases;
 3. the raw fixture named by the case.
 
-The Skill attachment includes its referenced protocol and evidence-coverage files. Do not provide expected decisions, required terms, forbidden decisions, prior findings, or scorer logic to the executing Agent. Trigger cases must keep the Skill installed at a standard user location and use normal host routing without explicitly attaching it; record host routing events rather than Agent self-reports.
+The Skill attachment includes its referenced protocol and evidence-coverage files. Do not provide expected decisions, required terms, forbidden decisions, prior findings, or scorer logic to the executing Agent. Trigger cases must keep the Skill installed at a standard user location and use normal host routing without explicitly attaching it. Disable known conflicting user Skills through an ephemeral host configuration, and fail the run if any non-candidate user Skill is read, so unrelated local instructions and content cannot affect or leak into the evidence. Record either a native routing event or the complete host command trace showing successful reads of both required Skill references from that standard installation, with returned content matching the candidate resources. Failed commands, path mentions, Agent self-reports, and reads from another user Skill are not activation evidence.
 
 ## Safety
 
-All repository and external project fixtures are read-only. Run behavior cases against isolated copies, record per-file default-stream content before execution, and compare it with the state immediately afterward. Also verify that each isolated copy initially matches the checked-in fixture. This comparison establishes only observed net file-path and content integrity; it cannot rule out transient write-and-restore activity, empty-directory changes, metadata changes, or alternate data streams. A passing no-write gate additionally requires operation-level write telemetry from the host. If that telemetry is unavailable, keep the safety status `PENDING`. Do not approve an output directory unless a case specifically evaluates file output. Never use a production target, live credential, or destructive test.
+All repository and external project fixtures are read-only. Run every case against an isolated copy; for behavior cases, record every file and directory before execution and compare that snapshot with the state immediately afterward. Also verify that each isolated copy initially matches the checked-in fixture. A passing no-write gate requires a host-enforced read-only sandbox plus the complete host event trace, with no file-change event, write command, or blocked write attempt in either matrix. If operation-level evidence is unavailable, keep the safety status `PENDING`. Do not approve an output directory unless a case specifically evaluates file output. Never use a production target, live credential, or destructive test.
 
 ## Raw Trace Record
 
@@ -30,7 +30,7 @@ Save one record per case with:
 
 Use `PASS`, `FAIL`, or `PENDING` for run status. Explicit Skill attachment can establish behavior execution, but it cannot establish automatic trigger routing. If the host cannot create a fresh task, expose routing events, or return a reviewable trace, record the affected matrix as `PENDING` with the limitation. Never substitute a prewritten sample or deterministic CLI output for an actual Skill run.
 
-Checked-in traces and event JSON cannot authenticate their own origin. Automated release readiness must receive a trusted provenance signal from outside the repository record and bind it to the recorded trace and evidence hashes. Without that signal, status remains `PENDING` even when the bundle is internally consistent.
+Checked-in traces and event JSON cannot authenticate their own origin. Automated release readiness must receive the externally observed SHA256 of `summary.json` through `VIBESPEC_TRUSTED_EVAL_SHA256`. The verifier accepts only the current trace schema and reconstructs every recorded trace and evidence binding, including the host task id, successful completion event, unedited final Agent message, successful Skill-resource reads, and no-write evidence. Never store the trusted value in the repository or derive it inside the release verifier; without the external value, readiness remains fail-closed even when the bundle is internally consistent.
 
 ## Scoring
 

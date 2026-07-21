@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import hmac
 import json
 import os
 import re
@@ -30,9 +31,29 @@ PRIMARY_OUTPUTS = (
     "agent_fix_plan.md",
     "retest_checklist.md",
 )
-SKILL_EVAL_SUMMARY = ROOT / "evals" / "runs" / "2026-07-20-agent-simulation-v3" / "summary.json"
+SKILL_EVAL_SUMMARY = ROOT / "evals" / "runs" / "2026-07-21-codex-cli-v6" / "summary.json"
 TRIGGER_CASES = ROOT / "evals" / "trigger_cases.yaml"
 BEHAVIOR_CASES = ROOT / "evals" / "behavior_cases.yaml"
+TRUSTED_EVAL_SHA256_ENV = "VIBESPEC_TRUSTED_EVAL_SHA256"
+REQUIRED_SKILL_RESOURCES = {
+    "references/review-protocol.md",
+    "references/evidence-coverage.md",
+}
+SKILL_EVAL_SCHEMA_VERSION = "1.5"
+HOST_SKILL_READ_COMMAND_PATTERN = re.compile(r"(?i)\b(?:get-content|cat)\b")
+HOST_WRITE_COMMAND_PATTERN = re.compile(
+    r"(?ix)(?:"
+    r"\bapply_patch\b|"
+    r"\b(?:set|add|clear)-content\b|\bout-file\b|\bnew-item\b|\bset-item\b|"
+    r"\bremove-item\b|\bcopy-item\b|\bmove-item\b|\brename-item\b|"
+    r"\b(?:compress|expand)-archive\b|\binvoke-webrequest\b[^\r\n]*\s-outfile\b|"
+    r"\b(?:touch|mkdir|rmdir|rm|cp|mv|install|truncate|tee|dd)\b|"
+    r"(?<![.\w-])(?:python(?:\d+(?:\.\d+)?)?(?:\.exe)?|py(?:\.exe)?|node(?:\.exe)?|ruby|perl|php)(?=\s|$|[\"'])|"
+    r"(?:system\.)?io\.file\]?::(?:write|append|create|delete|move|copy)|"
+    r"\bsed\s+-i\b|\bgit\s+(?:apply|checkout|reset|clean|commit|restore|switch|merge|rebase|cherry-pick|am)\b|"
+    r"(?:^|\s)(?:[012]?>{1,2}|&>)\s*[^&]"
+    r")"
+)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -547,7 +568,7 @@ def write_release_readiness_decision(
         f"Decision: {'READY_FOR_CONTROLLED_RC' if ready else 'NOT_RELEASE_READY'}",
         "",
         "This validation does not make VibeSpec Gate a professional security certification, penetration test, legal review, or compliance attestation.",
-        "Real-user controlled trial: PENDING. Agent evaluation does not count as real-user evidence.",
+        "Independent-user evidence is not claimed. Controlled RC evidence uses isolated host Agent tasks.",
         "",
         "## Gates",
         "",
@@ -583,12 +604,17 @@ def _skill_eval_passed(
     behavior_cases_path: Path = BEHAVIOR_CASES,
     fixture_root: Path = ROOT,
     trusted_provenance: bool = False,
+    trusted_summary_sha256: str | None = None,
 ) -> bool:
-    # Repository files can prove internal consistency, not that host events are authentic.
-    if not trusted_provenance:
-        return False
     if not path.exists():
         return False
+    # Repository files can prove internal consistency, not that host events are authentic.
+    trusted_digest = trusted_summary_sha256 or os.environ.get(TRUSTED_EVAL_SHA256_ENV, "")
+    if not trusted_provenance:
+        if not re.fullmatch(r"[0-9a-fA-F]{64}", trusted_digest):
+            return False
+        if not hmac.compare_digest(trusted_digest.lower(), hashlib.sha256(path.read_bytes()).hexdigest()):
+            return False
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         trigger_cases = json.loads(trigger_cases_path.read_text(encoding="utf-8")).get("cases")
@@ -597,6 +623,9 @@ def _skill_eval_passed(
         return False
     triggers = data.get("trigger_cases", [])
     behaviors = data.get("behavior_cases", [])
+    if data.get("schema_version") != SKILL_EVAL_SCHEMA_VERSION:
+        return False
+    full_host_trace = True
     if (
         data.get("overall_status") != "PASS"
         or data.get("trigger_status") != "PASS"
@@ -608,6 +637,16 @@ def _skill_eval_passed(
         or not isinstance(data.get("recorded_at_utc"), str)
         or not data["recorded_at_utc"].strip()
         or not re.fullmatch(r"[0-9a-f]{40}", str(data.get("skill_git_commit", "")))
+        or (
+            full_host_trace
+            and (
+                data.get("skill_activation_status") != "PASS"
+                or data.get("behavior_semantic_status") != "PASS"
+                or data.get("write_safety_status") != "PASS"
+                or data.get("user_skill_isolation_status") != "PASS"
+                or data.get("sandbox_mode") != "read-only"
+            )
+        )
     ):
         return False
     if not all(isinstance(items, list) for items in (triggers, behaviors, trigger_cases, behavior_cases)):
@@ -627,22 +666,20 @@ def _skill_eval_passed(
     for case in trigger_cases:
         item = trigger_records[str(case["id"])]
         trace = _recorded_output(run_root, item)
-        activation_event = _recorded_json(run_root, item, "activation_evidence")
-        selected_skills = activation_event.get("selected_skills", []) if activation_event else []
-        observed_activation = "vibespec-gate" in selected_skills
         if (
             item.get("status") != "PASS"
             or item.get("expected_trigger") is not case.get("expected_trigger")
-            or item.get("activation_source") != "host_event"
-            or not _record_binding_valid(run_root, item, data, "activation_evidence")
-            or not activation_event
-            or activation_event.get("case_id") != case.get("id")
-            or activation_event.get("event_type") != "skill_routing"
-            or activation_event.get("task_id") != item.get("task_id")
-            or activation_event.get("host") != data.get("host")
-            or not isinstance(selected_skills, list)
-            or item.get("activated") is not observed_activation
-            or observed_activation is not case.get("expected_trigger")
+            or not _activation_record_valid(
+                run_root,
+                item,
+                data,
+                skill_source=skill_source,
+                case_id=str(case.get("id", "")),
+                expected=bool(case.get("expected_trigger")),
+                full_host_trace=full_host_trace,
+            )
+            or (full_host_trace and not _full_host_trace_bindings_valid(run_root, item, data))
+            or (full_host_trace and not _host_trace_write_free(run_root, item))
             or trace is None
             or _record_section(trace, "Raw Request", "Unedited Final Output") != str(case.get("prompt", "")).strip()
         ):
@@ -654,6 +691,18 @@ def _skill_eval_passed(
         write_event = _recorded_json(run_root, item, "write_evidence")
         integrity_event = _recorded_json(run_root, item, "integrity_evidence")
         if trace is None or item.get("status") != "PASS":
+            return False
+        if not _activation_record_valid(
+            run_root,
+            item,
+            data,
+            skill_source=skill_source,
+            case_id=str(case.get("id", "")),
+            expected=True,
+            full_host_trace=full_host_trace,
+        ):
+            return False
+        if full_host_trace and not _full_host_trace_bindings_valid(run_root, item, data):
             return False
         if not _record_binding_valid(run_root, item, data, "write_evidence"):
             return False
@@ -687,6 +736,16 @@ def _skill_eval_passed(
             or write_event.get("task_id") != item.get("task_id")
             or write_event.get("host") != data.get("host")
             or write_event.get("writes") != []
+            or (
+                full_host_trace
+                and (
+                    write_event.get("write_attempts") != []
+                    or write_event.get("sandbox_mode") != "read-only"
+                    or write_event.get("host_trace") != item.get("host_trace")
+                    or write_event.get("host_trace_sha256") != item.get("host_trace_sha256")
+                    or not _host_trace_write_free(run_root, item)
+                )
+            )
             or integrity_event.get("case_id") != case.get("id")
             or integrity_event.get("event_type") != "isolated_content_integrity_snapshot"
             or integrity_event.get("scope") != "isolated_case_root"
@@ -694,12 +753,17 @@ def _skill_eval_passed(
             or integrity_event.get("net_created_paths") != []
             or integrity_event.get("net_modified_paths") != []
             or integrity_event.get("net_deleted_paths") != []
+            or (
+                full_host_trace
+                and integrity_event.get("file_sha256_before") != integrity_event.get("file_sha256_after")
+            )
             or item.get("fixture_sha256_before") != current_hash
             or item.get("fixture_sha256_after") != current_hash
             or integrity_event.get("fixture_sha256_before") != current_hash
             or integrity_event.get("fixture_sha256_after") != current_hash
             or item.get("files_written") != []
-            or item.get("write_observability") != "host_filesystem_write_trace"
+            or item.get("write_observability")
+            not in {"host_filesystem_write_trace", "host_read_only_sandbox_and_event_trace"}
         ):
             return False
 
@@ -707,6 +771,226 @@ def _skill_eval_passed(
     if data.get("skill_tree_sha256") != _skill_tree_sha256(skill_dir):
         return False
     return True
+
+
+def _activation_record_valid(
+    run_root: Path,
+    item: dict[str, Any],
+    data: dict[str, Any],
+    *,
+    skill_source: Path,
+    case_id: str,
+    expected: bool,
+    full_host_trace: bool,
+) -> bool:
+    activation_event = _recorded_json(run_root, item, "activation_evidence")
+    if not activation_event or not _record_binding_valid(run_root, item, data, "activation_evidence"):
+        return False
+    selected_skills = activation_event.get("selected_skills", [])
+    if not isinstance(selected_skills, list):
+        return False
+    observed_activation = "vibespec-gate" in selected_skills
+    event_type = activation_event.get("event_type")
+    source = item.get("activation_source")
+    if (event_type, source) not in {
+        ("skill_routing", "host_event"),
+        ("host_skill_resource_trace", "host_skill_resource_trace"),
+    }:
+        return False
+    if (
+        activation_event.get("case_id") != case_id
+        or activation_event.get("task_id") != item.get("task_id")
+        or activation_event.get("host") != data.get("host")
+        or item.get("activated") is not observed_activation
+        or observed_activation is not expected
+    ):
+        return False
+    if not full_host_trace:
+        return True
+    resources = activation_event.get("skill_resources_read")
+    reconstructed = _host_trace_skill_resources(
+        run_root,
+        item,
+        activation_event,
+        skill_source,
+    )
+    reconstructed_user_skills = _host_trace_user_skill_names(
+        run_root,
+        item,
+        activation_event,
+    )
+    expected_resources = REQUIRED_SKILL_RESOURCES if expected else set()
+    expected_user_skills = {"vibespec-gate"} if expected else set()
+    return (
+        isinstance(resources, list)
+        and set(resources) == expected_resources
+        and reconstructed == expected_resources
+        and activation_event.get("user_skills_read") == sorted(expected_user_skills)
+        and activation_event.get("unexpected_user_skills_read") == []
+        and item.get("user_skills_read") == sorted(expected_user_skills)
+        and item.get("unexpected_user_skills_read") == []
+        and item.get("user_skill_isolation_status") == "PASS"
+        and reconstructed_user_skills == expected_user_skills
+        and activation_event.get("host_trace") == item.get("host_trace")
+        and activation_event.get("host_trace_sha256") == item.get("host_trace_sha256")
+    )
+
+
+def _full_host_trace_bindings_valid(
+    run_root: Path,
+    item: dict[str, Any],
+    data: dict[str, Any],
+) -> bool:
+    return (
+        all(
+            _record_binding_valid(run_root, item, data, field)
+            for field in ("host_trace", "stderr")
+        )
+        and _host_trace_execution_valid(run_root, item)
+    )
+
+
+def _host_trace_skill_resources(
+    run_root: Path,
+    item: dict[str, Any],
+    activation_event: dict[str, Any],
+    skill_source: Path,
+) -> set[str]:
+    events = _recorded_jsonl(run_root, item.get("host_trace"))
+    skill_root = _normalize_windows_command(str(activation_event.get("standard_skill_root", ""))).lower()
+    if not events or not skill_root:
+        return set()
+    resources: set[str] = set()
+    for event in events:
+        event_item = event.get("item")
+        if (
+            not isinstance(event_item, dict)
+            or event_item.get("type") != "command_execution"
+            or event_item.get("status") != "completed"
+            or event_item.get("exit_code") != 0
+        ):
+            continue
+        command = _normalize_windows_command(str(event_item.get("command", ""))).lower()
+        if skill_root not in command or not HOST_SKILL_READ_COMMAND_PATTERN.search(command):
+            continue
+        for resource in REQUIRED_SKILL_RESOURCES:
+            normalized_resource = resource.replace("/", "\\").lower()
+            expected_path = f"{skill_root}\\{normalized_resource}"
+            source_path = skill_source / resource
+            if (
+                expected_path in command
+                and source_path.is_file()
+                and _normalized_host_text(event_item.get("aggregated_output"))
+                == _normalized_host_text(source_path.read_text(encoding="utf-8"))
+            ):
+                resources.add(resource)
+    return resources
+
+
+def _host_trace_execution_valid(run_root: Path, item: dict[str, Any]) -> bool:
+    events = _recorded_jsonl(run_root, item.get("host_trace"))
+    if (
+        not events
+        or item.get("returncode") != 0
+        or item.get("timed_out") is not False
+        or events[-1].get("type") != "turn.completed"
+        or any(event.get("type") == "turn.failed" for event in events)
+    ):
+        return False
+    thread_ids = [
+        event.get("thread_id")
+        for event in events
+        if event.get("type") == "thread.started"
+    ]
+    final_messages = [
+        event_item.get("text")
+        for event in events
+        if event.get("type") == "item.completed"
+        and isinstance((event_item := event.get("item")), dict)
+        and event_item.get("type") == "agent_message"
+        and isinstance(event_item.get("text"), str)
+    ]
+    trace = _recorded_output(run_root, item)
+    return (
+        thread_ids == [item.get("task_id")]
+        and bool(final_messages)
+        and trace is not None
+        and _record_section(trace, "Unedited Final Output") == final_messages[-1].strip()
+    )
+
+
+def _host_trace_user_skill_names(
+    run_root: Path,
+    item: dict[str, Any],
+    activation_event: dict[str, Any],
+) -> set[str]:
+    events = _recorded_jsonl(run_root, item.get("host_trace"))
+    skill_root = _normalize_windows_command(
+        str(activation_event.get("standard_skill_root", ""))
+    ).lower()
+    if not events or "\\" not in skill_root:
+        return set()
+    user_skills_root = skill_root.rsplit("\\", 1)[0]
+    prefix = f"{user_skills_root}\\"
+    names: set[str] = set()
+    for event in events:
+        event_item = event.get("item")
+        if not isinstance(event_item, dict) or event_item.get("type") != "command_execution":
+            continue
+        command = _normalize_windows_command(str(event_item.get("command", ""))).lower()
+        offset = 0
+        while (index := command.find(prefix, offset)) >= 0:
+            remainder = command[index + len(prefix) :]
+            name = remainder.split("\\", 1)[0].strip("'\"")
+            if name:
+                names.add(name)
+            offset = index + len(prefix)
+    return names
+
+
+def _normalized_host_text(value: Any) -> str:
+    return str(value).replace("\r\n", "\n").rstrip("\n") if isinstance(value, str) else ""
+
+
+def _host_trace_write_free(run_root: Path, item: dict[str, Any]) -> bool:
+    events = _recorded_jsonl(run_root, item.get("host_trace"))
+    if not events:
+        return False
+    for event in events:
+        event_item = event.get("item")
+        if not isinstance(event_item, dict):
+            continue
+        item_type = event_item.get("type")
+        if item_type in {"file_change", "apply_patch"}:
+            return False
+        if item_type == "command_execution" and HOST_WRITE_COMMAND_PATTERN.search(
+            str(event_item.get("command", ""))
+        ):
+            return False
+    return True
+
+
+def _recorded_jsonl(run_root: Path, value: Any) -> list[dict[str, Any]]:
+    path = _recorded_path(run_root, value)
+    if path is None:
+        return []
+    events: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            return []
+        if not isinstance(event, dict):
+            return []
+        events.append(event)
+    return events
+
+
+def _normalize_windows_command(value: str) -> str:
+    normalized = value.replace("/", "\\")
+    while "\\\\" in normalized:
+        normalized = normalized.replace("\\\\", "\\")
+    return normalized
 
 
 def _records_by_id(items: list[Any]) -> dict[str, dict[str, Any]] | None:

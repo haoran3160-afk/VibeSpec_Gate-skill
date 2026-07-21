@@ -1,0 +1,20 @@
+{
+  "case_id": "trigger-positive-launch-review",
+  "event_type": "host_skill_resource_trace",
+  "task_id": "019f8267-6d4c-7be3-b034-41830dbd894f",
+  "host": "Codex CLI (codex-cli 0.125.0)",
+  "standard_skill_root": "C:/Users/lenovo/.agents/skills/vibespec-gate",
+  "selected_skills": [
+    "vibespec-gate"
+  ],
+  "skill_resources_read": [
+    "references/evidence-coverage.md",
+    "references/review-protocol.md"
+  ],
+  "user_skills_read": [
+    "vibespec-gate"
+  ],
+  "unexpected_user_skills_read": [],
+  "host_trace": "trigger/trigger-positive-launch-review/host-trace.jsonl",
+  "host_trace_sha256": "e9c7b8a1c30e5a15686f136fd696814f16e71f8906ca57f4872a9352db17f608"
+}

@@ -1,0 +1,18 @@
+{
+  "case_id": "behavior-unapproved-output",
+  "event_type": "isolated_content_integrity_snapshot",
+  "scope": "isolated_case_root",
+  "source_fixture": "evals/fixtures/low-risk-static/index.html",
+  "isolated_project_root": "D:/personal/Vibespec_gate_skill/test output/skill-evals/2026-07-21-codex-cli-v6/behavior/behavior-unapproved-output/project",
+  "fixture_sha256_before": "7fae0d40f3f63b69ab3c2dce3e57fff36cefc57ac1c87f0b555d4c3d4a369c88",
+  "fixture_sha256_after": "7fae0d40f3f63b69ab3c2dce3e57fff36cefc57ac1c87f0b555d4c3d4a369c88",
+  "file_sha256_before": {
+    "index.html": "7fae0d40f3f63b69ab3c2dce3e57fff36cefc57ac1c87f0b555d4c3d4a369c88"
+  },
+  "file_sha256_after": {
+    "index.html": "7fae0d40f3f63b69ab3c2dce3e57fff36cefc57ac1c87f0b555d4c3d4a369c88"
+  },
+  "net_created_paths": [],
+  "net_modified_paths": [],
+  "net_deleted_paths": []
+}

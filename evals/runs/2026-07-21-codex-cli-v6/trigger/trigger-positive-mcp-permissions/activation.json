@@ -1,0 +1,20 @@
+{
+  "case_id": "trigger-positive-mcp-permissions",
+  "event_type": "host_skill_resource_trace",
+  "task_id": "019f826a-46b4-7240-829d-2185dde2ecd3",
+  "host": "Codex CLI (codex-cli 0.125.0)",
+  "standard_skill_root": "C:/Users/lenovo/.agents/skills/vibespec-gate",
+  "selected_skills": [
+    "vibespec-gate"
+  ],
+  "skill_resources_read": [
+    "references/evidence-coverage.md",
+    "references/review-protocol.md"
+  ],
+  "user_skills_read": [
+    "vibespec-gate"
+  ],
+  "unexpected_user_skills_read": [],
+  "host_trace": "trigger/trigger-positive-mcp-permissions/host-trace.jsonl",
+  "host_trace_sha256": "421e2b12b55b7aa42f032c7c259e8e2b97d1d2f2cb12d1c60353124d8d592cf1"
+}

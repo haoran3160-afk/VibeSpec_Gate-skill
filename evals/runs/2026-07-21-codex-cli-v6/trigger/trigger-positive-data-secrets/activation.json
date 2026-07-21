@@ -1,0 +1,20 @@
+{
+  "case_id": "trigger-positive-data-secrets",
+  "event_type": "host_skill_resource_trace",
+  "task_id": "019f826c-9f15-7cd0-b4a7-872082e098c8",
+  "host": "Codex CLI (codex-cli 0.125.0)",
+  "standard_skill_root": "C:/Users/lenovo/.agents/skills/vibespec-gate",
+  "selected_skills": [
+    "vibespec-gate"
+  ],
+  "skill_resources_read": [
+    "references/evidence-coverage.md",
+    "references/review-protocol.md"
+  ],
+  "user_skills_read": [
+    "vibespec-gate"
+  ],
+  "unexpected_user_skills_read": [],
+  "host_trace": "trigger/trigger-positive-data-secrets/host-trace.jsonl",
+  "host_trace_sha256": "711230739b332c4de22352237688eead62439a7d4855da70ee559a2446575f93"
+}

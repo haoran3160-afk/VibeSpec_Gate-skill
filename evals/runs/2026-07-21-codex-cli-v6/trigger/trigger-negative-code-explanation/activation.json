@@ -1,0 +1,13 @@
+{
+  "case_id": "trigger-negative-code-explanation",
+  "event_type": "host_skill_resource_trace",
+  "task_id": "019f8270-9c63-7072-a38c-62157f5d76c6",
+  "host": "Codex CLI (codex-cli 0.125.0)",
+  "standard_skill_root": "C:/Users/lenovo/.agents/skills/vibespec-gate",
+  "selected_skills": [],
+  "skill_resources_read": [],
+  "user_skills_read": [],
+  "unexpected_user_skills_read": [],
+  "host_trace": "trigger/trigger-negative-code-explanation/host-trace.jsonl",
+  "host_trace_sha256": "399f326b4c217051eca0076ba7bd4aebd93d8c54552e99646e6ac4954365de59"
+}

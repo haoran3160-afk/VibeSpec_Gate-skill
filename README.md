@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/actions/workflows/ci.yml/badge.svg)](https://github.com/haoran3160-afk/VibeSpec_Gate-skill/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.2.0rc1-orange.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.2.0rc2-orange.svg)](CHANGELOG.md)
 
 **审查 Vibe Coding 产品的上线阻断风险，生成有证据、可确认、可复测的修复任务。**
 

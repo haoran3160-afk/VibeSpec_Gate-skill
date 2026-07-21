@@ -19,6 +19,7 @@ py -3 scripts\verify_lite_package.py .\dist\lite_package
 To run the full Lite release validation sprint and save evidence:
 
 ```powershell
+$env:VIBESPEC_TRUSTED_EVAL_SHA256 = "<externally-recorded-summary-sha256>"
 py -3 scripts\run_lite_release_validation.py
 ```
 
@@ -96,8 +97,11 @@ evidence/
 For release candidates, run the full repository verifier from the source repository, not from the Lite package:
 
 ```powershell
+$env:VIBESPEC_TRUSTED_EVAL_SHA256 = "<externally-recorded-summary-sha256>"
 py -3 scripts\verify_release.py
 ```
+
+The value must be the evaluation summary digest recorded outside the repository. See `docs/maintainers/release_verification.md` for the black-box run and provenance procedure.
 
 ## Future Automation
 

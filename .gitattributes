@@ -5,3 +5,4 @@ evals/runs/** whitespace=-trailing-space
 evals/fixtures/** text eol=lf
 evals/runs/2026-07-20-agent-simulation-v2/** text eol=lf
 evals/runs/2026-07-20-agent-simulation-v3/** text eol=lf
+evals/runs/2026-07-21-codex-cli-v6/** text eol=lf

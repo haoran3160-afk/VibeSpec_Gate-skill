@@ -71,7 +71,7 @@ def test_release_readiness_decision_requires_cli_when_not_skipped(tmp_path, monk
     assert ready is True
     assert "Decision: READY_FOR_CONTROLLED_RC" in decision
     assert "prewritten examples are not counted" in decision
-    assert "Real-user controlled trial: PENDING" in decision
+    assert "Independent-user evidence is not claimed" in decision
     assert "professional security certification" in decision
 
 
@@ -96,7 +96,7 @@ def test_release_readiness_decision_fails_when_skill_eval_is_not_observable(tmp_
     assert "FAIL: Fresh-task Skill trigger and behavior evaluations pass" in decision
 
 
-def test_skill_eval_readiness_reconstructs_cases_traces_hashes_and_skill_tree(tmp_path):
+def test_skill_eval_readiness_rejects_legacy_schema_even_when_trusted(tmp_path):
     host = "test-host"
     executed_at = "2026-07-20T00:00:00+00:00"
     skill = tmp_path / "skill"
@@ -163,6 +163,19 @@ def test_skill_eval_readiness_reconstructs_cases_traces_hashes_and_skill_tree(tm
         output_sha256 = hashlib.sha256((run_root / output).read_bytes()).hexdigest()
         write_evidence = f"evidence/behavior-{index}.json"
         task_id = f"task-behavior-{index}"
+        activation_evidence = f"evidence/behavior-{index}-activation.json"
+        (run_root / activation_evidence).write_text(
+            json.dumps(
+                {
+                    "case_id": f"behavior-{index}",
+                    "event_type": "skill_routing",
+                    "task_id": task_id,
+                    "host": host,
+                    "selected_skills": ["vibespec-gate"],
+                }
+            ),
+            encoding="utf-8",
+        )
         (run_root / write_evidence).write_text(
             json.dumps(
                 {
@@ -207,6 +220,12 @@ def test_skill_eval_readiness_reconstructs_cases_traces_hashes_and_skill_tree(tm
             {
                 "id": f"behavior-{index}",
                 "status": "PASS",
+                "activated": True,
+                "activation_source": "host_event",
+                "activation_evidence": activation_evidence,
+                "activation_evidence_sha256": hashlib.sha256(
+                    (run_root / activation_evidence).read_bytes()
+                ).hexdigest(),
                 "fixture_sha256_before": fixture_hash,
                 "fixture_sha256_after": fixture_hash,
                 "files_written": [],
@@ -243,13 +262,14 @@ def test_skill_eval_readiness_reconstructs_cases_traces_hashes_and_skill_tree(tm
     behavior_cases_path.write_text(json.dumps({"cases": behavior_cases}), encoding="utf-8")
 
     def passed() -> bool:
+        digest = hashlib.sha256(summary_path.read_bytes()).hexdigest()
         return _skill_eval_passed(
             summary_path,
             skill,
             trigger_cases_path=trigger_cases_path,
             behavior_cases_path=behavior_cases_path,
             fixture_root=tmp_path,
-            trusted_provenance=True,
+            trusted_summary_sha256=digest,
         )
 
     assert not _skill_eval_passed(
@@ -259,12 +279,6 @@ def test_skill_eval_readiness_reconstructs_cases_traces_hashes_and_skill_tree(tm
         behavior_cases_path=behavior_cases_path,
         fixture_root=tmp_path,
     )
-    assert passed()
-    (skill / "SKILL.md").write_bytes(b"candidate\r\n")
-    assert passed()
-
-    summary["trigger_cases"][0]["activated"] = False
-    summary_path.write_text(json.dumps(summary), encoding="utf-8")
     assert not passed()
 
 
@@ -306,5 +320,6 @@ def test_extract_decision_accepts_documented_markdown_variants(rendered, expecte
     assert release_validation._extract_decision(rendered) == expected
 
 
-def test_checked_in_pending_skill_evals_fail_release_gate():
+def test_checked_in_skill_evals_fail_closed_without_external_digest(monkeypatch):
+    monkeypatch.delenv("VIBESPEC_TRUSTED_EVAL_SHA256", raising=False)
     assert verify_skill_evals_main() == 1

@@ -1,0 +1,12 @@
+{
+  "case_id": "behavior-complete-low-risk",
+  "event_type": "host_filesystem_write_trace",
+  "scope": "isolated_case_root",
+  "task_id": "019f827d-754b-7023-b1d6-28bcd3fa8590",
+  "host": "Codex CLI (codex-cli 0.125.0)",
+  "sandbox_mode": "read-only",
+  "host_trace": "behavior/behavior-complete-low-risk/host-trace.jsonl",
+  "host_trace_sha256": "8c747d05ed154ff0ce056531022dfa68b8eac7b8664632d23645296f948b0871",
+  "writes": [],
+  "write_attempts": []
+}

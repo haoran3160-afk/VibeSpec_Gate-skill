@@ -1,0 +1,20 @@
+{
+  "case_id": "trigger-positive-electron-boundary",
+  "event_type": "host_skill_resource_trace",
+  "task_id": "019f826c-050b-7343-81dc-5889aa866f3b",
+  "host": "Codex CLI (codex-cli 0.125.0)",
+  "standard_skill_root": "C:/Users/lenovo/.agents/skills/vibespec-gate",
+  "selected_skills": [
+    "vibespec-gate"
+  ],
+  "skill_resources_read": [
+    "references/evidence-coverage.md",
+    "references/review-protocol.md"
+  ],
+  "user_skills_read": [
+    "vibespec-gate"
+  ],
+  "unexpected_user_skills_read": [],
+  "host_trace": "trigger/trigger-positive-electron-boundary/host-trace.jsonl",
+  "host_trace_sha256": "337e68d3149f12518b714897e02cdbe016231c67c4ee899c460406a25dc5359e"
+}

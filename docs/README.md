@@ -18,7 +18,7 @@ This documentation is organized by user path.
 ## Design And Release Records
 
 - [Current Skill and product optimization plan](design/lite_skill_next_optimization_plan.md): canonical execution plan for decision integrity, Skill evaluation, packaging, README, and release.
-- [Current `0.2.0rc1` Lite package manifest](design/lite_skill_package_manifest.md)
+- [Current `0.2.0rc2` Lite package manifest](design/lite_skill_package_manifest.md)
 - [Lite release validation plan](design/lite_skill_release_validation_plan.md)
 - [Lite RC hardening plan](design/lite_skill_rc_hardening_plan.md)
 - [Model invocation strategy](design/model_invocation_strategy.md)

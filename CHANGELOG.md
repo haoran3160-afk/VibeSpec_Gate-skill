@@ -4,16 +4,21 @@ All notable changes to VibeSpec Gate are documented here.
 
 ## Unreleased
 
+## 0.2.0rc2 - 2026-07-20
+
+- Verified five explicit and five negative Skill-routing cases in fresh Codex tasks from the standard user installation.
+- Verified eight launch-review behavior cases with canonical decisions, complete chat contracts, host-enforced read-only sandboxes, and unchanged fixture hashes.
 - Prevented manifest-only or misclassified projects from receiving complete evidence coverage.
 - Made release validation fail closed when Skill activation, prompt, decision, fixture-hash, or write evidence is not independently verifiable.
 - Required canonical chat decision tokens and complete seven-surface coverage output from the Skill.
-- Added auditable, isolated Skill behavior simulations with scoped file-content integrity records while keeping unobservable write telemetry and trigger routing release-blocking.
+- Added a repeatable black-box runner that isolates non-candidate user Skills and records complete host traces, stderr, final output, Skill-resource reads, write events, and file/directory snapshots.
 - Preserved unknown finding severity as fail-closed metadata across gate, review, and Lite bundle paths, and made security-relevant per-file truncation force `REVIEW`.
 - Rejected project, findings, previous-findings, and suppression overlap, including hard-linked aliases, across every file-writing CLI path.
 - Required affected files and bounded recommended fixes in packaged Skill templates.
-- Removed the older RC archive from current installation instructions until a matching candidate passes the current Skill gates.
+- Kept installer and source-copy instructions as the primary installation paths instead of linking an older RC archive.
 - Scoped pytest discovery to the maintained test suite so ignored validation artifacts cannot be collected as duplicate tests.
-- Bound release evaluation to the current activation audit and kept readiness closed when the Agent host did not load the attached Skill.
+- Bound release readiness to an externally supplied SHA256 for the complete host-evaluation summary; repository records alone remain fail-closed.
+- Reconstructed task identity, final Agent output, successful Skill-resource reads, completion state, and no-write traces before accepting black-box evidence.
 
 ## 0.2.0rc1 - 2026-07-20
 

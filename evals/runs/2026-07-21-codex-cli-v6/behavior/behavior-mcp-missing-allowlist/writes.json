@@ -1,0 +1,12 @@
+{
+  "case_id": "behavior-mcp-missing-allowlist",
+  "event_type": "host_filesystem_write_trace",
+  "scope": "isolated_case_root",
+  "task_id": "019f827b-67a4-7e22-aae9-9d4d28a1af23",
+  "host": "Codex CLI (codex-cli 0.125.0)",
+  "sandbox_mode": "read-only",
+  "host_trace": "behavior/behavior-mcp-missing-allowlist/host-trace.jsonl",
+  "host_trace_sha256": "e559813350223d94a668063059ae212d2683f655728d44c0df03e37bd4da827b",
+  "writes": [],
+  "write_attempts": []
+}

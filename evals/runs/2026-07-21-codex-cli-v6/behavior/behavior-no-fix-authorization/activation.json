@@ -1,0 +1,20 @@
+{
+  "case_id": "behavior-no-fix-authorization",
+  "event_type": "host_skill_resource_trace",
+  "task_id": "019f8280-3941-75b3-9cbf-c5edfe14feb1",
+  "host": "Codex CLI (codex-cli 0.125.0)",
+  "standard_skill_root": "C:/Users/lenovo/.agents/skills/vibespec-gate",
+  "selected_skills": [
+    "vibespec-gate"
+  ],
+  "skill_resources_read": [
+    "references/evidence-coverage.md",
+    "references/review-protocol.md"
+  ],
+  "user_skills_read": [
+    "vibespec-gate"
+  ],
+  "unexpected_user_skills_read": [],
+  "host_trace": "behavior/behavior-no-fix-authorization/host-trace.jsonl",
+  "host_trace_sha256": "2496723c8daca77b3209a0275fb3399b9181e79d6f70fb8ccd4088b65dee1adb"
+}

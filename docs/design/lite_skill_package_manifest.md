@@ -1,8 +1,8 @@
 # Lite Skill Package Manifest
 
-> Package contract for the `0.2.0rc1` Agent-native Skill install unit. It implements R3 in the [current Skill and product optimization plan](lite_skill_next_optimization_plan.md).
+> Package contract for the `0.2.0rc2` Agent-native Skill install unit. It implements R3 in the [current Skill and product optimization plan](lite_skill_next_optimization_plan.md).
 
-Date: 2026-07-08
+Date: 2026-07-20
 
 This manifest defines the file boundary for a downloadable Lite VibeSpec Gate Skill package.
 

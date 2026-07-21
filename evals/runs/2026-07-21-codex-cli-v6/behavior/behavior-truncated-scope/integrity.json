@@ -1,0 +1,18 @@
+{
+  "case_id": "behavior-truncated-scope",
+  "event_type": "isolated_content_integrity_snapshot",
+  "scope": "isolated_case_root",
+  "source_fixture": "evals/fixtures/truncated-project.fixture.json",
+  "isolated_project_root": "D:/personal/Vibespec_gate_skill/test output/skill-evals/2026-07-21-codex-cli-v6/behavior/behavior-truncated-scope/project",
+  "fixture_sha256_before": "331298f4e3bd827fb201b244515d9f1823d196783d92e6816cdd327cced38752",
+  "fixture_sha256_after": "331298f4e3bd827fb201b244515d9f1823d196783d92e6816cdd327cced38752",
+  "file_sha256_before": {
+    "truncated-project.fixture.json": "331298f4e3bd827fb201b244515d9f1823d196783d92e6816cdd327cced38752"
+  },
+  "file_sha256_after": {
+    "truncated-project.fixture.json": "331298f4e3bd827fb201b244515d9f1823d196783d92e6816cdd327cced38752"
+  },
+  "net_created_paths": [],
+  "net_modified_paths": [],
+  "net_deleted_paths": []
+}

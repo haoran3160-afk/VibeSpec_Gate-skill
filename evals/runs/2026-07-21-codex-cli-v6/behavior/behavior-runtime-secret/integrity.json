@@ -1,0 +1,18 @@
+{
+  "case_id": "behavior-runtime-secret",
+  "event_type": "isolated_content_integrity_snapshot",
+  "scope": "isolated_case_root",
+  "source_fixture": "evals/fixtures/runtime-secret/app.py",
+  "isolated_project_root": "D:/personal/Vibespec_gate_skill/test output/skill-evals/2026-07-21-codex-cli-v6/behavior/behavior-runtime-secret/project",
+  "fixture_sha256_before": "7e5999359ae5647da33f1ee4810b9e6043481dc224fc3be21b8e75d1fd98d3ed",
+  "fixture_sha256_after": "7e5999359ae5647da33f1ee4810b9e6043481dc224fc3be21b8e75d1fd98d3ed",
+  "file_sha256_before": {
+    "app.py": "7e5999359ae5647da33f1ee4810b9e6043481dc224fc3be21b8e75d1fd98d3ed"
+  },
+  "file_sha256_after": {
+    "app.py": "7e5999359ae5647da33f1ee4810b9e6043481dc224fc3be21b8e75d1fd98d3ed"
+  },
+  "net_created_paths": [],
+  "net_modified_paths": [],
+  "net_deleted_paths": []
+}

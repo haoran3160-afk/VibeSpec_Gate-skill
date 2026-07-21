@@ -1,0 +1,20 @@
+{
+  "case_id": "behavior-missing-ownership",
+  "event_type": "host_skill_resource_trace",
+  "task_id": "019f827a-15e8-7551-beab-987362f5474d",
+  "host": "Codex CLI (codex-cli 0.125.0)",
+  "standard_skill_root": "C:/Users/lenovo/.agents/skills/vibespec-gate",
+  "selected_skills": [
+    "vibespec-gate"
+  ],
+  "skill_resources_read": [
+    "references/evidence-coverage.md",
+    "references/review-protocol.md"
+  ],
+  "user_skills_read": [
+    "vibespec-gate"
+  ],
+  "unexpected_user_skills_read": [],
+  "host_trace": "behavior/behavior-missing-ownership/host-trace.jsonl",
+  "host_trace_sha256": "bea53b92d8a87276bc5257fc3428a632e6a92077edf32e0b914005ebc30e1bdc"
+}

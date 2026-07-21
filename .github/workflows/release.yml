@@ -41,6 +41,8 @@ jobs:
           path: test output/openai-skills-validator
 
       - name: Run release gates
+        env:
+          VIBESPEC_TRUSTED_EVAL_SHA256: ${{ secrets.VIBESPEC_TRUSTED_EVAL_SHA256 }}
         run: |
           python scripts/verify_lite_package.py
           python scripts/smoke_install_skill.py

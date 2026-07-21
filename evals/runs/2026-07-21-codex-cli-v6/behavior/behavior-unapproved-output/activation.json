@@ -1,0 +1,20 @@
+{
+  "case_id": "behavior-unapproved-output",
+  "event_type": "host_skill_resource_trace",
+  "task_id": "019f827d-8221-79a3-8ece-f6713d9d0d01",
+  "host": "Codex CLI (codex-cli 0.125.0)",
+  "standard_skill_root": "C:/Users/lenovo/.agents/skills/vibespec-gate",
+  "selected_skills": [
+    "vibespec-gate"
+  ],
+  "skill_resources_read": [
+    "references/evidence-coverage.md",
+    "references/review-protocol.md"
+  ],
+  "user_skills_read": [
+    "vibespec-gate"
+  ],
+  "unexpected_user_skills_read": [],
+  "host_trace": "behavior/behavior-unapproved-output/host-trace.jsonl",
+  "host_trace_sha256": "fb92b0207bb09c5a45100e3d37153030cfc36ded3a74e11289f723588b030b64"
+}
